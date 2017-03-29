@@ -7,7 +7,9 @@ class Ship {
 	int endPosition;
 	string name;
 public:
-
+	string getName() {
+		return name;
+	}
 
 private:
 
