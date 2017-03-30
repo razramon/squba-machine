@@ -1,22 +1,37 @@
 #include <iostream>
-
+#include "Ship.h"
 using namespace std;
 
 class Ship {
+private:
+	char letter;
 	int startPosition;
 	int endPosition;
-	string name;
+	int numberOfPoints;
+	
 public:
-	string getName() {
-		return name;
+	char getName() {
+		return letter;
 	}
-
-private:
-
-
-
-
-
-
-
+	void setName(char l) {
+		letter = l;
+	}
+	int getStartPosition() {
+		return startPosition;
+	}
+	void setStartPosition(int sp) {
+		startPosition = sp;
+	}
+	int getEndPosition() {
+		return endPosition;
+	}
+	void setEndPosition(int ep) {
+		endPosition = ep;
+	}
+	int getNumberOfPoints() {
+		return numberOfPoints;
+	}
+	void setNumberOfPoints(int nop) {
+		numberOfPoints = nop;
+	}
 };

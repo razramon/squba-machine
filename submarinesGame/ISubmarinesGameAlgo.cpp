@@ -1,5 +1,7 @@
 #include "ISubmarinesGameAlgo.h"
+#include <iostream>
 
+using namespace std;
 
 class ISubmarinesGameAlgo {
 public:
