@@ -149,6 +149,7 @@
     <ClInclude Include="ISubmarinesGameAlgo.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ISubmarinesGameAlgo.cpp" />
     <ClCompile Include="Ship.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
