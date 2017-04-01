@@ -10,10 +10,10 @@ private:
 	int numberOfPoints;
 	
 public:
-	char getName() {
+	char getLetter() {
 		return letter;
 	}
-	void setName(char l) {
+	void setLetter(char l) {
 		letter = l;
 	}
 	int getStartPosition() {

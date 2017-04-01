@@ -6,8 +6,8 @@ private:
 	int endPosition;
 	int numberOfPoints;
 public:
-	char getName();
-	void setName(char l);
+	char getLetter();
+	void setLetter(char l);
 	int getStartPosition();
 	void setStartPosition(int sp);
 	int getEndPosition();
