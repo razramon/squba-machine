@@ -2,7 +2,7 @@
 #include "Ship.h"
 using namespace std;
 
-class Ship {
+class Ship{
 private:
 	char letter;
 	int numberOfPoints;
