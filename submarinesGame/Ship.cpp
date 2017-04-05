@@ -8,7 +8,9 @@ Ship::Ship(char letter, int numberOfPoints)
 	this->letter = letter;
 	this->numberOfPoints = numberOfPoints;
 }
-
+Ship::Ship()
+{
+}
 Ship::~Ship()
 {
 }
