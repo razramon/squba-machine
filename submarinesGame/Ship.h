@@ -6,6 +6,7 @@ private:
 	int numberOfPoints;
 public:
 	Ship(char letter, int numberOfPoints);
+	Ship();
 	~Ship();
 	char getLetter();
 	void setLetter(char l);
