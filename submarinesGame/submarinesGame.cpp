@@ -2,58 +2,61 @@
 #include "Ship.h"
 #include "Sizes.h"
 #include <iostream>
-#include <exception>
+#include "Exception.h"
+#include "Macros.h"
 
 //returns true if the path exists && it's a DIRECTORY
-//bool doesPathExist(const char* path)
-//{
-//	DWORD dirAttr = GetFileAttributesA(path);
-//	if (dirAttr == INVALID_FILE_ATTRIBUTES)
-//	{
-//		throw GetLastError(); //change thisto create a new exception
-//	}
-//	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
-//}
-//
-////checks if the path exists and  that the 3 files are there - NOT FINISHED YET!
-//bool isValidPath(const char* path)
-//{
-//	bool doesExist;
-//	try
-//	{
-//		doesExist = doesPathExist(path);
-//		if (doesExist)
-//		{
-//			std::cout << "path is a directory!!" << std::endl;
-//			return true;
-//		}
-//		else
-//		{
-//			std::cout << "path exists, but it's not a directory!!" << std::endl;
-//			return false;
-//		}
-//
-//	}
-//	catch (std::exception& e) {
-//		std::cout << "Exception accured: " << e.what() << std::endl;
-//		return false;
-//	}
-//
-//	char* attackFileA = NULL;
-//	char* attackFileB = NULL;
-//	char* boardFile = NULL;
-//
-//
-//	while()
-//	{
-//		
-//	}
-//}
+bool doesPathExist(const char* path)
+{
+	DWORD dirAttr = GetFileAttributesA(path);
+	if (dirAttr == INVALID_FILE_ATTRIBUTES)
+	{
+		std::string s = exceptionInfo(WRONG_PATH, path);
+		Exception* e = new Exception(s);
+		throw &e; 
+	}
+	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
+}
+
+//checks if the path exists and  that the 3 files are there - NOT FINISHED YET!
+bool isValidPath(const char* path)
+{
+	bool doesExist;
+	try
+	{
+		doesExist = doesPathExist(path);
+		if (doesExist)
+		{
+			std::cout << "path is a directory!!" << std::endl;
+			return true;
+		}
+		else
+		{
+			std::cout << "path exists, but it's not a directory!!" << std::endl;
+			return false;
+		}
+
+	}
+	catch (std::exception& e) {
+		std::cout << "Exception accured: " << e.what() << std::endl;
+		return false;
+	}
+
+	//char* attackFileA = NULL;
+	//char* attackFileB = NULL;
+	//char* boardFile = NULL;
+
+
+	//while()
+	//{
+	//	
+	//}
+}
 
 int main(int argc, char* argv[])
 {
-
-	//std::cout <<"and the path is: "<< isValidPath(argv[1]) << std::endl;
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);//for memory leaks! :)
+	std::cout <<"and the path is: "<< isValidPath(argv[1]) << std::endl;
 	return 0;
 }
 

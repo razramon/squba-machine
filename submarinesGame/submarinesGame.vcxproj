@@ -146,12 +146,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Exception.h" />
     <ClInclude Include="ISubmarinesGameAlgo.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Sizes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Exception.cpp" />
     <ClCompile Include="ISubmarinesGameAlgo.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
