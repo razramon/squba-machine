@@ -6,15 +6,12 @@
 Exception::Exception(const char* msgInfo)
 {
 	size_t len = strlen(msgInfo);
-	std::cout << "msgInfo is: " << msgInfo << std::endl;
-	std::cout << "msgInfo length is: " << len << std::endl;
 	msg = new char[len + 1];
 	strcpy_s(msg, len+1, msgInfo);
 }
 
-Exception::Exception(std::string msgInfo)
+Exception::Exception(std::string msgInfo):Exception::Exception(msgInfo.c_str())
 {
-	new Exception(msgInfo.c_str());
 }
 
 Exception::~Exception()

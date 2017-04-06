@@ -2,60 +2,134 @@
 #include "Ship.h"
 #include "Sizes.h"
 #include <iostream>
-#include <exception>
+#include "Exception.h"
+#include "Macros.h"
+#include <vector>
+
 
 using namespace std;
-CONST char DEFAULT_LETTER='a';
+static const char DEFAULT_LETTER='a';
+static const std::string ATTACK_A_SUFF = ".attack_a";
+static const std::string ATTACK_B_SUFF = ".attack_b";
+static const std::string BOARD_SUFF = ".sboard";
+
 //returns true if the path exists && it's a DIRECTORY
-//bool doesPathExist(const char* path)
-//{
-//	DWORD dirAttr = GetFileAttributesA(path);
-//	if (dirAttr == INVALID_FILE_ATTRIBUTES)
-//	{
-//		throw GetLastError(); //change thisto create a new exception
-//	}
-//	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
-//}
-//
-////checks if the path exists and  that the 3 files are there - NOT FINISHED YET!
-//bool isValidPath(const char* path)
-//{
-//	bool doesExist;
-//	try
-//	{
-//		doesExist = doesPathExist(path);
-//		if (doesExist)
-//		{
-//			std::cout << "path is a directory!!" << std::endl;
-//			return true;
-//		}
-//		else
-//		{
-//			std::cout << "path exists, but it's not a directory!!" << std::endl;
-//			return false;
-//		}
-//
-//	}
-//	catch (std::exception& e) {
-//		std::cout << "Exception accured: " << e.what() << std::endl;
-//		return false;
-//	}
-//
-//	char* attackFileA = NULL;
-//	char* attackFileB = NULL;
-//	char* boardFile = NULL;
-//
-//
-//	while()
-//	{
-//		
-//	}
-//}
+static bool doesPathExist(const char* path)
+{
+	DWORD dirAttr = GetFileAttributesA(path);
+
+	if (dirAttr == INVALID_FILE_ATTRIBUTES)
+	{
+		throw Exception(exceptionInfo(WRONG_PATH,path)); //change thisto create a new exception
+	} 
+	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
+}
+
+static bool endsWith(const std::string& fileName, const std::string& suffix)
+{
+	if (fileName.length() < suffix.length())
+	{
+		return false;
+	}
+	if (suffix.length() == 0) return true; //if suffix is the empty string returns true
+	size_t fln = fileName.length();
+	size_t sln = suffix.length();
+	for (int i = 0 ; i < sln; ++i)
+	{
+		if (suffix.at(i)!=fileName.at(fln-sln+i))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+/* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF, 
+ * if it does && the according attackFileA/attackFileB/boardFile is NOT initiallized,
+ * initializes it.
+ * USER OF THIS FUNCTION HAS TO DELETE WHAT'S CREATED IN IT!!
+ *  */
+static void checkFileName(const std::string& fileName, char** boardFile, char** attackFileA, char** attackFileB)
+{
+	if (endsWith(fileName, ATTACK_A_SUFF) && *attackFileA==nullptr)
+	{
+		*attackFileA = new char[fileName.length() + 1];
+		strcpy_s(*attackFileA, fileName.length() + 1 , fileName.c_str());
+	} else if (endsWith(fileName, ATTACK_B_SUFF) && *attackFileB == nullptr)
+	{
+		*attackFileB = new char[fileName.length() + 1];
+		strcpy_s(*attackFileB, fileName.length() + 1, fileName.c_str());
+	} else if(endsWith(fileName, BOARD_SUFF) && *boardFile == nullptr)
+	{
+		*boardFile = new char[fileName.length() + 1];
+		strcpy_s(*boardFile, fileName.length() + 1, fileName.c_str());
+	}
+}
+
+
+//checks if the path exists and that the 3 files are there, if they are - updates their names
+static bool isValidPath(const char* path, char* boardFile, char* attackFileA, char* attackFileB)
+{
+	bool doesExist;
+	try
+	{
+		doesExist = doesPathExist(path);
+	} catch (std::exception& e) {
+		std::cout << e.what() << std::endl;
+		return false;
+	}
+	if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
+	{
+		std::cout << Exception(exceptionInfo(WRONG_PATH, path)).what() << std::endl;
+		return false;
+	}
+
+
+
+
+	return false;
+}
+
+static std::string workingDirectory() {
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+	string::size_type pos = string(buffer).find_last_of("\\/");
+	return string(buffer).substr(0, pos);
+}
+
 
 int main(int argc, char* argv[])
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);//for memory leaks! :)
-	//std::cout <<"and the path is: "<< isValidPath(argv[1]) << std::endl;
+
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
+
+	std::string path;
+	if (argc==1)
+	{
+		path = workingDirectory();
+	} else
+	{
+		path = argv[1];
+	}
+
+	std::cout << "path is: " << path << std::endl;
+	
+	std::cout << "answer is: " << isValidPath(path.c_str(), nullptr, nullptr, nullptr) << std::endl;
+
+	/*
+	char* boardFilePtr = nullptr;
+	char* attackFileAPtr = nullptr;
+	char* attackFileBPtr = nullptr;
+	std::string filen = "filey.attack_b";
+	checkFileName(filen, &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+
+	std::cout << "boardFilePtr is: " << ((boardFilePtr==nullptr)? "nullptr": boardFilePtr) << std::endl;
+	std::cout << "attackFileAPtr is: " << ((attackFileAPtr == nullptr) ? "nullptr" : attackFileAPtr) << std::endl;
+	std::cout << "attackFileBPtr is: " << ((attackFileBPtr == nullptr) ? "nullptr" : attackFileBPtr) << std::endl;
+	if (boardFilePtr !=nullptr) delete boardFilePtr; //clear memory
+	if (attackFileAPtr != nullptr) delete attackFileAPtr; //clear memory
+	if (attackFileBPtr != nullptr) delete attackFileBPtr; //clear memory
+	*/
 	return 0;
 }
 bool isShip(char c)
@@ -270,6 +344,6 @@ bool checkBoard(char ** board)
 
 
 
-
+	return false;//meital - added by me just to check main!
 
 }
