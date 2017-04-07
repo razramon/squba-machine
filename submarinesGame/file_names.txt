@@ -1,0 +1,2 @@
+good_board_0.sboard
+good_board_1.sboard

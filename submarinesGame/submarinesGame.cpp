@@ -83,39 +83,38 @@ static bool isValidPath(const char* path, char* boardFile, char* attackFileA, ch
 	try
 	{
 		doesExist = doesPathExist(path);
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-		return false;
+	} catch (std::exception& e) { //a 
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 	if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
 	{
-		std::cout << Exception(exceptionInfo(WRONG_PATH, path)).what() << std::endl;
-		return false;
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
 	//creating a file conataining all files in "path" 
 	std::string command = string(path);
-	command.insert(0, "dir ");
-	command.append("/b /a-d > file_names.txt");
+	command.insert(0, "dir \"");
+	command.append("\" /b /a-d > file_names.txt");
 	std::cout << "command is: " << command << std::endl;
 	system(command.c_str());
 
-	//reads all file names from the file created
-	std::string fn = workingDirectory();
-	fn.append("\\file_names.txt");
-	std::ifstream file(fn.c_str());
+	std::ifstream file("file_names.txt");
 	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	std::string line;
 	try
 	{
-		while (getline(file, line))
+		while (std::getline(file, line))
 		{
 			checkFileName(line, &boardFile, &attackFileA, &attackFileB);
 		}
 	} catch (std::ifstream::failure e)
 	{
-		std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
-		return false;
+		if (!file.eof())
+		{
+			std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
+			return false;
+		}  //otherwise, the exception caught is because the file has ended and it's OK!
+		
 	}
 
 	//making sure everything's initiallized
@@ -191,11 +190,19 @@ int main(int argc, char* argv[])
 	char* attackFileAPtr = nullptr;
 	char* attackFileBPtr = nullptr;
 
+	bool pathIsValid = false;
 	std::cout << "path is: " << path << std::endl;
+	try
+	{
+		pathIsValid = isValidPath(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	} catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 0;
+	}
 	
-	bool pathIsValid = isValidPath(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
 
-	std::cout << "answer is: " << pathIsValid << std::endl;
+	//std::cout << "answer is: " << pathIsValid << std::endl;
 
 	if(!pathIsValid)
 	{
