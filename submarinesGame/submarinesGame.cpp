@@ -5,12 +5,12 @@
 #include "Exception.h"
 #include "Macros.h"
 #include <vector>
-
+#include <fstream>
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
-static const std::string ATTACK_A_SUFF = ".attack_a";
-static const std::string ATTACK_B_SUFF = ".attack_b";
+static const std::string ATTACK_A_SUFF = ".attack-a";
+static const std::string ATTACK_B_SUFF = ".attack-b";
 static const std::string BOARD_SUFF = ".sboard";
 
 //returns true if the path exists && it's a DIRECTORY
@@ -42,6 +42,15 @@ static bool endsWith(const std::string& fileName, const std::string& suffix)
 		}
 	}
 	return true;
+}
+
+//returns a path to (this) working directory
+//NEEDS A SMALL FIX!!!
+static std::string workingDirectory() {
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+	string::size_type pos = string(buffer).find_last_of("\\/");
+	return string(buffer).substr(0, pos);
 }
 
 /* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF, 
@@ -84,19 +93,82 @@ static bool isValidPath(const char* path, char* boardFile, char* attackFileA, ch
 		return false;
 	}
 
+	//creating a file conataining all files in "path" 
+	std::string command = string(path);
+	command.insert(0, "dir ");
+	command.append("/b /a-d > file_names.txt");
+	std::cout << "command is: " << command << std::endl;
+	system(command.c_str());
 
+	//reads all file names from the file created
+	std::string fn = workingDirectory();
+	fn.append("\\file_names.txt");
+	std::ifstream file(fn.c_str());
+	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	std::string line;
+	try
+	{
+		while (getline(file, line))
+		{
+			checkFileName(line, &boardFile, &attackFileA, &attackFileB);
+		}
+	} catch (std::ifstream::failure e)
+	{
+		std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
+		return false;
+	}
 
-
-	return false;
+	//making sure everything's initiallized
+	if (boardFile == nullptr || attackFileA == nullptr || attackFileB == nullptr) {
+		return false;
+	}
+	
+	return true;
 }
 
-static std::string workingDirectory() {
-	char buffer[MAX_PATH];
-	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
-	string::size_type pos = string(buffer).find_last_of("\\/");
-	return string(buffer).substr(0, pos);
+/*
+ *Used when cruitiall files are missing, frees memory of files who where found,
+ *Prints relevant errors to the screen
+ */
+static void printNotFoundFileErrors(const char* path,char* boardFile, char* attackFileA, char* attackFileB)
+{
+	if (boardFile == nullptr) {
+		std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+		if (attackFileA != nullptr)
+		{
+			delete attackFileA; //clear memory
+		} else
+		{
+			std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
+		}
+		if (attackFileB != nullptr)
+		{
+			delete attackFileB; //clear memory
+		} else
+		{
+			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+		}
+		return;
+	}
+	if (attackFileA == nullptr) {
+		delete boardFile; //clear memory, if got here it's not nullptr
+		std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
+		if (attackFileB != nullptr)
+		{
+			delete attackFileB; //clear memory
+		}
+		else
+		{
+			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+		}
+		return;
+	}
+	if (attackFileB == nullptr) {
+		delete boardFile; //clear memory, if got here it's not nullptr
+		delete attackFileA; //clear memory,  if got here it's not nullptr
+		std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+	}
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -112,14 +184,25 @@ int main(int argc, char* argv[])
 		path = argv[1];
 	}
 
-	std::cout << "path is: " << path << std::endl;
-	
-	std::cout << "answer is: " << isValidPath(path.c_str(), nullptr, nullptr, nullptr) << std::endl;
+	//char* pathToCheck = new char[MAX_PATH];
+	//std::cout << "_pgmptr is: " << _get_pgmptr(&pathToCheck) << std::endl;
 
-	/*
 	char* boardFilePtr = nullptr;
 	char* attackFileAPtr = nullptr;
 	char* attackFileBPtr = nullptr;
+
+	std::cout << "path is: " << path << std::endl;
+	
+	bool pathIsValid = isValidPath(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+
+	std::cout << "answer is: " << pathIsValid << std::endl;
+
+	if(!pathIsValid)
+	{
+		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	}
+
+	/*
 	std::string filen = "filey.attack_b";
 	checkFileName(filen, &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
 
