@@ -106,6 +106,10 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	system(command.c_str());
 
 	std::ifstream file("file_names.txt");
+	if (!file) {
+		std::cout << "Error: could not read file_names.txt." << std::endl;
+		return false;
+	}
 	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	std::string line;
 	try
@@ -175,47 +179,171 @@ static void printNotFoundFileErrors(const char* path,char* boardFile, char* atta
 	}
 }
 
+/*
+ * Returns the current stream position,
+ * Updates the current line into "line".
+ */
+std::istream& getAllKindsOfLine(std::istream& inputStream, std::string& line)
+{
+	line.clear();
+	try
+	{
+		std::istream::sentry se(inputStream, true);
+		std::streambuf* sb = inputStream.rdbuf();
+		int c;
+		while (true) {
+			c = sb->std::streambuf::sbumpc();
+			switch (c) {
+			case '\n':
+				return inputStream;
+			case '\r':
+				if (sb->std::streambuf::sgetc() == '\n')
+				{
+					sb->std::streambuf::sbumpc();
+				}
+				return inputStream;
+			case EOF:
+				if (line.empty()) //last line of the file has no line terminator
+				{
+					inputStream.setstate(std::ios::eofbit);
+				}
+				return inputStream;
+			default:
+				line += static_cast<char>(c);
+			}
+		}
+
+	} catch (std::exception& e)
+	{
+		throw Exception("Error: failed reading line.");
+	}
+}
+
+/*
+ *Frees memory of allocated board
+ */
+static void deleteBoard(char** board)
+{
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		delete[] board[i];
+	}
+	delete[] board;
+}
+
+/*
+ * This Function returns a refference to a 2D-array of chars, representing the game board
+ * BOARD HAS TO BE DELETED USING "deleteBoard" FUNCTION!
+ */
+static char** getBoardFromFile(const char* boardFile){
+	
+	char** board = new char*[BOARD_LENGTH];
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		board[i] = new char[BOARD_LENGTH];
+	}
+		
+	std::string line;
+	
+	//opening boardfile:
+	std::ifstream bfile(boardFile);
+	if (!bfile) {
+		throw Exception("Error: failed opening board file.");
+	}
+	for (int row = 0; row < BOARD_LENGTH; ++row)
+	{
+		//reads 1 line from the file:
+		try
+		{
+			getAllKindsOfLine(bfile, line);
+		} catch (std::exception& e)
+		{
+			deleteBoard(board);
+			if (bfile.eof())
+			{
+				throw Exception("Error: board file is too small");
+			}
+			throw Exception("Error: failed reading from board file.");
+		}
+		if (line.length()!= BOARD_LENGTH)
+		{
+			deleteBoard(board);
+			std::string er("Error: board file in not of right format: line ");
+			er.append(std::to_string(row));
+			er.append(" is too small");
+			const char* erC = er.c_str();
+			throw Exception(erC);
+		}
+		for (int col = 0; col < BOARD_LENGTH; ++col)
+		{
+			board[row][col] = line.at(col);
+		}
+		
+	}
+	return board;
+}
+
+
 int main(int argc, char* argv[])
 {
 
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
 
-	std::string path;
-	if (argc==1)
-	{
-		path = workingDirectory();
-	} else
-	{
-		path = argv[1];
-	}
+	char** board= getBoardFromFile("good_board_0.sboard");
 
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
+	/*
+	//prints board:
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		for (int j = 0; j < BOARD_LENGTH; ++j)
+		{
+			std::cout << board[i][j] << "\t";
+		}
+		std::cout << std::endl;
+	}*/
 
-	bool pathIsValid = false;
-	std::cout << "path is: " << path << std::endl;
-	try
-	{
-		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-		return 0;
-	}
+	deleteBoard(board);
 
-	if(!pathIsValid)
-	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-	}
+	//std::string path;
+	//if (argc==1)
+	//{
+	//	path = workingDirectory();
+	//} else
+	//{
+	//	path = argv[1];
+	//}
+
+	//char* boardFilePtr = nullptr;
+	//char* attackFileAPtr = nullptr;
+	//char* attackFileBPtr = nullptr;
+
+	//bool pathIsValid = false;
+	//std::cout << "path is: " << path << std::endl;
+	//try
+	//{
+	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	//} catch (std::exception& e)
+	//{
+	//	std::cout << e.what() << std::endl;
+	//	return 0;
+	//}
+
+	//if(!pathIsValid)
+	//{
+	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	//}
 
 	return 0;
 }
+
+
 bool isShip(char c)
 {
 	c = tolower(c);
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
+
+
 int pointsOfShip(char c)
 {
 	c = tolower(c);
