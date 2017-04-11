@@ -430,3 +430,21 @@ bool checkBoard(char ** board)
 	return false;//meital - added by me just to check main!
 
 }
+
+bool isHit(int row, int col, Player player)
+{
+	for()
+
+
+}
+
+void game()
+{
+	int isHit = 0;
+	int playerPlaying = 0;
+
+	
+
+
+
+}

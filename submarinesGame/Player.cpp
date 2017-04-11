@@ -9,6 +9,4 @@ class Player {
 	int playerNum;
 	int totalNumberOfPoints;
 
-public:
-	
 };
