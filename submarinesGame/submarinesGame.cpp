@@ -4,7 +4,6 @@
 #include <iostream>
 #include "Exception.h"
 #include "Macros.h"
-#include <vector>
 #include <fstream>
 
 using namespace std;
@@ -13,11 +12,12 @@ static const std::string ATTACK_A_SUFF = ".attack-a";
 static const std::string ATTACK_B_SUFF = ".attack-b";
 static const std::string BOARD_SUFF = ".sboard";
 
-//returns true if the path exists && it's a DIRECTORY
+/*
+ *Returns true if path exists && it's a directory
+ */
 static bool doesPathExist(const char* path)
 {
 	DWORD dirAttr = GetFileAttributesA(path);
-
 	if (dirAttr == INVALID_FILE_ATTRIBUTES)
 	{
 		throw Exception(exceptionInfo(WRONG_PATH,path)); //change thisto create a new exception
@@ -25,6 +25,9 @@ static bool doesPathExist(const char* path)
 	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
 
+/*
+ *Returns true if "filename" ends with "suffix"  
+ */
 static bool endsWith(const std::string& fileName, const std::string& suffix)
 {
 	if (fileName.length() < suffix.length())
@@ -44,8 +47,10 @@ static bool endsWith(const std::string& fileName, const std::string& suffix)
 	return true;
 }
 
-//returns a path to (this) working directory
-//NEEDS A SMALL FIX!!!
+/*
+ *Returns a path to (this) working directory
+ */
+//TODO: NEEDS A SMALL FIX - wait for amir's answer:http://moodle.tau.ac.il/mod/forum/discuss.php?d=49474
 static std::string workingDirectory() {
 	char buffer[MAX_PATH];
 	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
@@ -56,7 +61,7 @@ static std::string workingDirectory() {
 /* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF, 
  * if it does && the according attackFileA/attackFileB/boardFile is NOT initiallized,
  * initializes it.
- * USER OF THIS FUNCTION HAS TO DELETE WHAT'S CREATED IN IT!!
+ * USER OF THIS FUNCTION HAVE TO FREE MEMORY THAT HAS BEEN ALLOCATED IN IT!!
  *  */
 static void checkFileName(const std::string& fileName, char** boardFile, char** attackFileA, char** attackFileB)
 {
@@ -76,50 +81,54 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
 }
 
 
-//checks if the path exists and that the 3 files are there, if they are - updates their names
-static bool isValidPath(const char* path, char* boardFile, char* attackFileA, char* attackFileB)
+/*Checks if the path exists,
+ *that the 3 files are there, 
+ *And if they are - updates their names */
+static bool isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
 {
 	bool doesExist;
 	try
 	{
 		doesExist = doesPathExist(path);
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-		return false;
+	} catch (std::exception& e) { //a 
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 	if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
 	{
-		std::cout << Exception(exceptionInfo(WRONG_PATH, path)).what() << std::endl;
-		return false;
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
 	//creating a file conataining all files in "path" 
 	std::string command = string(path);
-	command.insert(0, "dir ");
-	command.append("/b /a-d > file_names.txt");
+	command.insert(0, "dir \"");
+	command.append("\" /b /a-d > file_names.txt");
 	std::cout << "command is: " << command << std::endl;
 	system(command.c_str());
 
-	//reads all file names from the file created
-	std::string fn = workingDirectory();
-	fn.append("\\file_names.txt");
-	std::ifstream file(fn.c_str());
+	std::ifstream file("file_names.txt");
+	if (!file) {
+		std::cout << "Error: could not read file_names.txt." << std::endl;
+		return false;
+	}
 	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	std::string line;
 	try
 	{
-		while (getline(file, line))
+		while (std::getline(file, line))
 		{
-			checkFileName(line, &boardFile, &attackFileA, &attackFileB);
+			checkFileName(line, boardFile, attackFileA, attackFileB);
 		}
 	} catch (std::ifstream::failure e)
 	{
-		std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
-		return false;
+		if (!file.eof())
+		{
+			std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
+			return false;
+		}  //otherwise, the exception caught is because the file has ended and it's OK!
 	}
 
 	//making sure everything's initiallized
-	if (boardFile == nullptr || attackFileA == nullptr || attackFileB == nullptr) {
+	if (*boardFile == nullptr || *attackFileA == nullptr || *attackFileB == nullptr) {
 		return false;
 	}
 	
@@ -127,7 +136,7 @@ static bool isValidPath(const char* path, char* boardFile, char* attackFileA, ch
 }
 
 /*
- *Used when cruitiall files are missing, frees memory of files who where found,
+ *Used when crucial files are missing, frees memory of files who where found,
  *Prints relevant errors to the screen
  */
 static void printNotFoundFileErrors(const char* path,char* boardFile, char* attackFileA, char* attackFileB)
@@ -170,56 +179,171 @@ static void printNotFoundFileErrors(const char* path,char* boardFile, char* atta
 	}
 }
 
+/*
+ * Returns the current stream position,
+ * Updates the current line into "line".
+ */
+std::istream& getAllKindsOfLine(std::istream& inputStream, std::string& line)
+{
+	line.clear();
+	try
+	{
+		std::istream::sentry se(inputStream, true);
+		std::streambuf* sb = inputStream.rdbuf();
+		int c;
+		while (true) {
+			c = sb->std::streambuf::sbumpc();
+			switch (c) {
+			case '\n':
+				return inputStream;
+			case '\r':
+				if (sb->std::streambuf::sgetc() == '\n')
+				{
+					sb->std::streambuf::sbumpc();
+				}
+				return inputStream;
+			case EOF:
+				if (line.empty()) //last line of the file has no line terminator
+				{
+					inputStream.setstate(std::ios::eofbit);
+				}
+				return inputStream;
+			default:
+				line += static_cast<char>(c);
+			}
+		}
+
+	} catch (std::exception& e)
+	{
+		throw Exception("Error: failed reading line.");
+	}
+}
+
+/*
+ *Frees memory of allocated board
+ */
+static void deleteBoard(char** board)
+{
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		delete[] board[i];
+	}
+	delete[] board;
+}
+
+/*
+ * This Function returns a refference to a 2D-array of chars, representing the game board
+ * BOARD HAS TO BE DELETED USING "deleteBoard" FUNCTION!
+ */
+static char** getBoardFromFile(const char* boardFile){
+	
+	char** board = new char*[BOARD_LENGTH];
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		board[i] = new char[BOARD_LENGTH];
+	}
+		
+	std::string line;
+	
+	//opening boardfile:
+	std::ifstream bfile(boardFile);
+	if (!bfile) {
+		throw Exception("Error: failed opening board file.");
+	}
+	for (int row = 0; row < BOARD_LENGTH; ++row)
+	{
+		//reads 1 line from the file:
+		try
+		{
+			getAllKindsOfLine(bfile, line);
+		} catch (std::exception& e)
+		{
+			deleteBoard(board);
+			if (bfile.eof())
+			{
+				throw Exception("Error: board file is too small");
+			}
+			throw Exception("Error: failed reading from board file.");
+		}
+		if (line.length()!= BOARD_LENGTH)
+		{
+			deleteBoard(board);
+			std::string er("Error: board file in not of right format: line ");
+			er.append(std::to_string(row));
+			er.append(" is too small");
+			const char* erC = er.c_str();
+			throw Exception(erC);
+		}
+		for (int col = 0; col < BOARD_LENGTH; ++col)
+		{
+			board[row][col] = line.at(col);
+		}
+		
+	}
+	return board;
+}
+
+
 int main(int argc, char* argv[])
 {
 
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
 
-	std::string path;
-	if (argc==1)
-	{
-		path = workingDirectory();
-	} else
-	{
-		path = argv[1];
-	}
-
-	//char* pathToCheck = new char[MAX_PATH];
-	//std::cout << "_pgmptr is: " << _get_pgmptr(&pathToCheck) << std::endl;
-
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
-
-	std::cout << "path is: " << path << std::endl;
-	
-	bool pathIsValid = isValidPath(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-
-	std::cout << "answer is: " << pathIsValid << std::endl;
-
-	if(!pathIsValid)
-	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-	}
+	char** board= getBoardFromFile("good_board_0.sboard");
 
 	/*
-	std::string filen = "filey.attack_b";
-	checkFileName(filen, &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	//prints board:
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		for (int j = 0; j < BOARD_LENGTH; ++j)
+		{
+			std::cout << board[i][j] << "\t";
+		}
+		std::cout << std::endl;
+	}*/
 
-	std::cout << "boardFilePtr is: " << ((boardFilePtr==nullptr)? "nullptr": boardFilePtr) << std::endl;
-	std::cout << "attackFileAPtr is: " << ((attackFileAPtr == nullptr) ? "nullptr" : attackFileAPtr) << std::endl;
-	std::cout << "attackFileBPtr is: " << ((attackFileBPtr == nullptr) ? "nullptr" : attackFileBPtr) << std::endl;
-	if (boardFilePtr !=nullptr) delete boardFilePtr; //clear memory
-	if (attackFileAPtr != nullptr) delete attackFileAPtr; //clear memory
-	if (attackFileBPtr != nullptr) delete attackFileBPtr; //clear memory
-	*/
+	deleteBoard(board);
+
+	//std::string path;
+	//if (argc==1)
+	//{
+	//	path = workingDirectory();
+	//} else
+	//{
+	//	path = argv[1];
+	//}
+
+	//char* boardFilePtr = nullptr;
+	//char* attackFileAPtr = nullptr;
+	//char* attackFileBPtr = nullptr;
+
+	//bool pathIsValid = false;
+	//std::cout << "path is: " << path << std::endl;
+	//try
+	//{
+	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	//} catch (std::exception& e)
+	//{
+	//	std::cout << e.what() << std::endl;
+	//	return 0;
+	//}
+
+	//if(!pathIsValid)
+	//{
+	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	//}
+
 	return 0;
 }
+
+
 bool isShip(char c)
 {
 	c = tolower(c);
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
+
+
 int pointsOfShip(char c)
 {
 	c = tolower(c);

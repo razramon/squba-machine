@@ -13,5 +13,5 @@
 #define D_POINTS 8
 
 // Board size
-#define BOARD_LENGTH 11
+#define BOARD_LENGTH 10
 #define NUMBER_SHIPS 5
