@@ -332,14 +332,20 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 		{
 			//TODO::
 		}
-
+		
+		// Getting each number, deleting spaces and turning to integer
 		string row = delSpaces(line.substr(0, line.find(",")));
 		string col = delSpaces(line.substr(line.find(",") + 1, line.length()));
 		pair<int, int> attack;
 
-		//TODO- check ranges
 		attack.first = stoi(row);
 		attack.second = stoi(col);
+
+		// Check if in range
+		if(attack.first > 10 || attack.first < 1 || attack.second > 10 || attack.second < 1)
+		{
+			continue;
+		}
 		attacks.push_back(attack);
 
 	}
