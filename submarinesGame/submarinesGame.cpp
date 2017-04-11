@@ -5,6 +5,8 @@
 #include "Exception.h"
 #include "Macros.h"
 #include <fstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -301,6 +303,51 @@ static char** getBoardFromFile(const char* boardFile){
 	return board;
 }
 
+string delSpaces(string &str)
+{
+	std::string::iterator end_pos = std::remove(str.begin(), str.end(), ' ');
+	str.erase(end_pos, str.end());
+	return str;
+}
+
+vector<pair<int, int>> getAttackFile(const char* attackFile)
+{
+	vector<pair<int, int>> attacks;
+
+	//opening attackFile:
+	std::ifstream bfile(attackFile);
+	if (!bfile) {
+		throw Exception("Error: failed opening attack file.");
+	}
+	string line;
+	while(!bfile.eof())
+	{
+		try
+		{
+			getAllKindsOfLine(bfile, line);
+			if (line == "")
+				break;
+		}
+		catch (std::exception& e)
+		{
+
+		}
+
+		string row = delSpaces(line.substr(0, line.find(",")));
+		string col = delSpaces(line.substr(line.find(",") + 1, line.length()));
+		pair<int, int> attack;
+
+		//TODO- check ranges
+		attack.first = stoi(row);
+		attack.second = stoi(col);
+		attacks.push_back(attack);
+
+	}
+
+	return attacks;
+
+	
+}
 
 int main(int argc, char* argv[])
 {
@@ -343,7 +390,11 @@ int main(int argc, char* argv[])
 
 	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
 	char** board = getBoardFromFile(fullPathToBoard.c_str());
-	
+	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
+	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
+	vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
+	vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
+
 	//prints board:
 	for (int i = 0; i < BOARD_LENGTH; ++i)
 	{

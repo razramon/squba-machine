@@ -2,6 +2,7 @@
 #include "Ship.h"
 #include "Sizes.h"
 #include "ISubmarinesGameAlgo.h"
+#include <vector>
 
 using namespace std;
 
@@ -10,9 +11,13 @@ class Player {
 	Ship ships[NUMBER_SHIPS];
 	int playerNum;
 	int totalNumberOfPoints;
+	int rowIndexInFile;
+	char* pathToAttackFile;
+	vector<pair<int,int>> attacks;
+
 public:
 	
-	void setBoard(const char** board, int numRows, int numCols)
+	void Player::setBoard(const char** board, int numRows, int numCols)
 	{
 		// Looping over all the ships of the player
 		for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
@@ -26,7 +31,7 @@ public:
 			}
 		}
 	}
-	bool isHit(int row, int col)
+	bool Player::isHit(int row, int col)
 	{
 		// Looping over all the ships of the player
 		for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
@@ -44,11 +49,21 @@ public:
 
 		return false;
 	}
-
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result)
+	void Player::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 	{
 		
 
+	}
+	std::pair<int, int> Player::attack()
+	{
+		std::pair <int, int> attack;
+
+
+
+		attack.first = 0;
+		attack.second = 1;
+
+		return attack;
 	}
 };
 
