@@ -302,74 +302,6 @@ static char** getBoardFromFile(const char* boardFile){
 }
 
 
-int main(int argc, char* argv[])
-{
-
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
-
-	/*char** board= getBoardFromFile("good_board_0.sboard");
-
-	deleteBoard(board);*/
-
-	std::string path;
-	if (argc==1)
-	{
-		path = workingDirectory();
-	} else
-	{
-		path = argv[1];
-	}
-
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
-
-	bool pathIsValid = false;
-	//std::cout << "path is: " << path << std::endl;
-	try
-	{
-		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-		return 0;
-	}
-
-	if(!pathIsValid)
-	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-	}
-
-
-	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	char** board = getBoardFromFile(fullPathToBoard.c_str());
-	
-	//prints board:
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "\t";
-		}
-		std::cout << std::endl;
-	}
-
-
-
-	deleteBoard(board);
-
-	if (pathIsValid)
-	{
-		delete[] boardFilePtr;
-		delete[] attackFileAPtr;
-		delete[] attackFileBPtr;
-	}
-
-	return 0;
-}
-
-
-
 void createShip(Ship * ship, char c)
 {
 	int shipPoints = 0;
@@ -425,6 +357,50 @@ void printBoard(Ship *ships)
 	}
 }
 
+
+bool checkShipNeighbours(char ** board, int currentRow,int currentCol,int numRows,int numCols)
+{
+	int lowerRowBound = max(currentRow - 1, 0);
+	int upperRowBound = min(currentRow + 1, numRows-1);
+	int lowerColBound = max(currentCol - 1, 0);
+	int upperColBound = min(currentCol + 1, numCols- 1);
+
+	for (int i = lowerRowBound; i <= upperRowBound; ++i)
+	{
+		for (int j = lowerColBound; j <= upperColBound; ++j)
+		{
+			if ((i!= currentRow)||(j!=currentCol))
+			{
+				if (Ship::isShip(board[i][j]) && (board[i][j]!=board[currentRow][currentCol])){
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/*
+ *Returns TRUE if there ARE adjacent ships.
+ */
+bool checkAdj(char ** board, int numRows, int numCols)
+{
+	for (int row = 0; row < numRows; row++)
+	{
+		for (int col = 0; col < numCols; col++)
+		{
+			if (Ship::isShip(board[row][col]))
+			{
+				if (checkShipNeighbours(board, row, col, numRows, numCols))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void setBoard(char ** board, int numRows, int numCols)
 {
 	Ship shipA[NUMBER_SHIPS];
@@ -432,12 +408,12 @@ void setBoard(char ** board, int numRows, int numCols)
 	int indexShipA = 0;
 	int indexShipB = 0;
 	int indexInShip = 0;
-	for(int indexRow = 0; indexRow < numRows; indexRow++)
+	for (int indexRow = 0; indexRow < numRows; indexRow++)
 	{
-		for(int indexColumn = 0; indexColumn < numCols; indexColumn++)
+		for (int indexColumn = 0; indexColumn < numCols; indexColumn++)
 		{
 			char letter = board[indexRow][indexColumn];
-			if(Ship::isShip(letter))
+			if (Ship::isShip(letter))
 			{
 				if (islower(letter))
 				{
@@ -452,21 +428,28 @@ void setBoard(char ** board, int numRows, int numCols)
 
 				int indexInShip = 1;
 				int indexShip = indexColumn++;
-				
-				// Searching column for the rest of the ship
-				while (board[indexRow][indexShip] == letter)
-				{
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
-				}
 
-				indexShip = indexRow++;
+				if (board[indexRow][indexShip] == letter)
+				{
+					// Searching column for the rest of the ship
+					while (board[indexRow][indexShip] == letter)
+					{
+						if (islower(letter))
+							shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
+						else
+							shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
+						indexInShip++;
+					}
+				} else
+				{
+					
+				}
+			
+
+				indexShip = indexRow + 1;//meital: changed from ++, check it..
 				// Searching row for the rest of the ship
 				while (board[indexShip][indexColumn] == letter)
-				{	
+				{
 					if (islower(letter))
 						shipB[indexShipB].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
 					else
@@ -477,7 +460,7 @@ void setBoard(char ** board, int numRows, int numCols)
 					indexShipB++;
 				else
 					indexShipA++;
-				
+
 			}
 		}
 	}
@@ -500,7 +483,7 @@ bool checkBoard(char ** board)
 			char letter = board[indexRow][indexColumn];
 			if (Ship::isShip(letter))
 			{
-				if (islower(letter))
+				if (islower(letter))//B's letters are small letters
 				{
 					createShip((&shipB[indexShipB]), letter);
 					shipB[indexShipB].position[0] = new int[3]{ indexRow, indexColumn, 0 };
@@ -511,11 +494,13 @@ bool checkBoard(char ** board)
 					shipA[indexShipA].position[0] = new int[3]{ indexRow, indexColumn, 0 };
 				}
 
+				//int shipSize = 
 				int indexInShip = 1;
-				int indexShip = indexColumn++;
+				int indexShip = indexColumn+1;
 
 				// Searching column for the rest of the ship
-				while (board[indexRow][indexShip] == letter)
+				if(board[indexRow][indexShip] == letter)
+				while (board[indexRow][indexShip] == letter)//never ending loop, fix it..
 				{
 					if (islower(letter))
 						shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
@@ -543,12 +528,97 @@ bool checkBoard(char ** board)
 		}
 	}
 
-
-
 	return false;//meital - added by me just to check main!
 
 }
 
+int main(int argc, char* argv[])
+{
+
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
+
+
+	char b0[5] = { ' ',' ',' ',' ',' ' };
+	char b1[5] = { ' ','P','P','P',' ' };
+	char b2[5] = { ' ',' ',' ',' ','P' };
+	char b3[5] = { ' ',' ',' ',' ',' ' };
+	char b4[5] = { 'm',' ',' ',' ',' ' };
+	char* b[5] = { b0, b1,b2,b3,b4 };
+
+	std::cout << "Matrix is: " << std::endl;
+	for (int i = 0; i < 5; ++i)
+	{
+		for (int j = 0; j < 5; ++j)
+		{
+			std::cout << b[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << (checkAdj(b, 5, 5) ? "true " : "false ") <<std::endl;
+
+	///*char** board= getBoardFromFile("good_board_0.sboard");
+
+	//deleteBoard(board);*/
+
+	//std::string path;
+	//if (argc==1)
+	//{
+	//	path = workingDirectory();
+	//} else
+	//{
+	//	path = argv[1];
+	//}
+
+	//char* boardFilePtr = nullptr;
+	//char* attackFileAPtr = nullptr;
+	//char* attackFileBPtr = nullptr;
+
+	//bool pathIsValid = false;
+	////std::cout << "path is: " << path << std::endl;
+	//try
+	//{
+	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	//} catch (std::exception& e)
+	//{
+	//	std::cout << e.what() << std::endl;
+	//	return 0;
+	//}
+
+	//if(!pathIsValid)
+	//{
+	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	//}
+
+
+	//std::string fullPathToBoard = path +"\\"+ boardFilePtr;
+	//char** board = getBoardFromFile(fullPathToBoard.c_str());
+	//
+	////prints board:
+	//for (int i = 0; i < BOARD_LENGTH; ++i)
+	//{
+	//	for (int j = 0; j < BOARD_LENGTH; ++j)
+	//	{
+	//		std::cout << board[i][j] << "\t";
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	//bool isBoardOK = checkBoard(board);
+	//std::cout << "is board ok? " << (isBoardOK ? "yes!" : "no") << std::endl;
+	//deleteBoard(board);
+
+	//if (pathIsValid)
+	//{
+	//	delete[] boardFilePtr;
+	//	delete[] attackFileAPtr;
+	//	delete[] attackFileBPtr;
+	//}
+
+
+
+	return 0;
+}
 
 void game()
 {
