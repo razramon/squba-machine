@@ -337,52 +337,14 @@ int main(int argc, char* argv[])
 }
 
 
-bool isShip(char c)
-{
-	c = tolower(c);
-	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
-}
 
-
-int pointsOfShip(char c)
-{
-	c = tolower(c);
-	switch (c)
-	{
-	case 'b': return B_POINTS;
-
-	case 'p': return P_POINTS;
-
-	case 'm': return M_POINTS;
-
-	case 'd': return D_POINTS;
-
-	default: return -1;
-	}
-}
-int sizeOfShip(char c)
-{
-	c = tolower(c);
-	switch (c)
-	{
-	case 'b': return B_SIZE;
-
-	case 'p': return P_SIZE;
-
-	case 'm': return M_SIZE;
-
-	case 'd': return D_SIZE;
-
-	default: return -1;
-	}
-}
 void createShip(Ship * ship, char c)
 {
 	int shipPoints = 0;
-	if ((shipPoints = pointsOfShip(c)) != -1)
+	if ((shipPoints = Ship::pointsOfShip(c)) != -1)
 	{
 		int shipSize = 0;
-		if ((shipSize = sizeOfShip(c)) != -1)
+		if ((shipSize = Ship::sizeOfShip(c)) != -1)
 		{
 			(*ship).setLetter(c);
 			(*ship).setNumberOfPoints(shipPoints);
@@ -443,7 +405,7 @@ void setBoard(char ** board, int numRows, int numCols)
 		for(int indexColumn = 0; indexColumn < numCols; indexColumn++)
 		{
 			char letter = board[indexRow][indexColumn];
-			if(isShip(letter))
+			if(Ship::isShip(letter))
 			{
 				if (islower(letter))
 				{
@@ -504,7 +466,7 @@ bool checkBoard(char ** board)
 		for (int indexColumn = 0; indexColumn < BOARD_LENGTH - 1; indexColumn++)
 		{
 			char letter = board[indexRow][indexColumn];
-			if (isShip(letter))
+			if (Ship::isShip(letter))
 			{
 				if (islower(letter))
 				{
@@ -555,12 +517,6 @@ bool checkBoard(char ** board)
 
 }
 
-bool isHit(int row, int col, Player player)
-{
-	for()
-
-
-}
 
 void game()
 {

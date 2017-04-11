@@ -149,6 +149,7 @@
     <ClInclude Include="Exception.h" />
     <ClInclude Include="ISubmarinesGameAlgo.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Sizes.h" />
   </ItemGroup>
