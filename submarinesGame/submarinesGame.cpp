@@ -51,6 +51,7 @@ static bool endsWith(const std::string& fileName, const std::string& suffix)
  *Returns a path to (this) working directory
  */
 //TODO: NEEDS A SMALL FIX - wait for amir's answer:http://moodle.tau.ac.il/mod/forum/discuss.php?d=49474
+//http://moodle.tau.ac.il/mod/forum/discuss.php?d=47695#p73943
 static std::string workingDirectory() {
 	char buffer[MAX_PATH];
 	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
@@ -80,6 +81,20 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
 	}
 }
 
+///*
+// * Returns path s.t. it won't contain the last 2 directories
+// * in the passed path.
+// * NOT FINISHED: because it's relevant to check if it's \ or /...
+// */
+//std::string getPath(std::string path)
+//{
+//	std::string str = path;
+//	for (int i = 0; i < 2; ++i)
+//	{
+//		str = str.
+//	}
+//}
+
 
 /*Checks if the path exists,
  *that the 3 files are there, 
@@ -102,7 +117,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	std::string command = string(path);
 	command.insert(0, "dir \"");
 	command.append("\" /b /a-d > file_names.txt");
-	std::cout << "command is: " << command << std::endl;
+//	std::cout << "command is: " << command << std::endl;
 	system(command.c_str());
 
 	std::ifstream file("file_names.txt");
@@ -132,6 +147,9 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 		return false;
 	}
 	
+	//deletes the file we've created
+	file.close();
+	system("del file_names.txt");
 	return true;
 }
 
@@ -289,9 +307,43 @@ int main(int argc, char* argv[])
 
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
 
-	char** board= getBoardFromFile("good_board_0.sboard");
+	/*char** board= getBoardFromFile("good_board_0.sboard");
 
-	/*
+	deleteBoard(board);*/
+
+	std::string path;
+	if (argc==1)
+	{
+		path = workingDirectory();
+	} else
+	{
+		path = argv[1];
+	}
+
+	char* boardFilePtr = nullptr;
+	char* attackFileAPtr = nullptr;
+	char* attackFileBPtr = nullptr;
+
+	bool pathIsValid = false;
+	//std::cout << "path is: " << path << std::endl;
+	try
+	{
+		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	} catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 0;
+	}
+
+	if(!pathIsValid)
+	{
+		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	}
+
+
+	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
+	char** board = getBoardFromFile(fullPathToBoard.c_str());
+	
 	//prints board:
 	for (int i = 0; i < BOARD_LENGTH; ++i)
 	{
@@ -300,38 +352,18 @@ int main(int argc, char* argv[])
 			std::cout << board[i][j] << "\t";
 		}
 		std::cout << std::endl;
-	}*/
+	}
+
+
 
 	deleteBoard(board);
 
-	//std::string path;
-	//if (argc==1)
-	//{
-	//	path = workingDirectory();
-	//} else
-	//{
-	//	path = argv[1];
-	//}
-
-	//char* boardFilePtr = nullptr;
-	//char* attackFileAPtr = nullptr;
-	//char* attackFileBPtr = nullptr;
-
-	//bool pathIsValid = false;
-	//std::cout << "path is: " << path << std::endl;
-	//try
-	//{
-	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	//} catch (std::exception& e)
-	//{
-	//	std::cout << e.what() << std::endl;
-	//	return 0;
-	//}
-
-	//if(!pathIsValid)
-	//{
-	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-	//}
+	if (pathIsValid)
+	{
+		delete[] boardFilePtr;
+		delete[] attackFileAPtr;
+		delete[] attackFileBPtr;
+	}
 
 	return 0;
 }
