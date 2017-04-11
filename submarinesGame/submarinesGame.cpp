@@ -5,6 +5,7 @@
 #include "Exception.h"
 #include "Macros.h"
 #include <fstream>
+#include <vector>
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -401,10 +402,10 @@ bool checkAdj(char ** board, int numRows, int numCols)
 	return false;
 }
 
-void setBoard(char ** board, int numRows, int numCols)
+std::pair<std::vector<Ship>, std::vector<Ship>> setBoard(char ** board, int numRows, int numCols)
 {
-	Ship shipA[NUMBER_SHIPS];
-	Ship shipB[NUMBER_SHIPS];
+	std::vector<Ship> shipsA;
+	std::vector<Ship> shipsB;
 	int indexShipA = 0;
 	int indexShipB = 0;
 	int indexInShip = 0;
@@ -494,20 +495,27 @@ bool checkBoard(char ** board)
 					shipA[indexShipA].position[0] = new int[3]{ indexRow, indexColumn, 0 };
 				}
 
-				//int shipSize = 
-				int indexInShip = 1;
-				int indexShip = indexColumn+1;
-
-				// Searching column for the rest of the ship
-				if(board[indexRow][indexShip] == letter)
-				while (board[indexRow][indexShip] == letter)//never ending loop, fix it..
+				int shipSize = Ship::sizeOfShip(letter);
+				if (shipSize==1)
 				{
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
+					continue;
 				}
+				int indexInShip = 1;
+				
+				// Searching column for the rest of the ship
+				if (board[indexRow][indexColumn + 1] == letter) {//TODO::make sure no-overflow
+					int indexShip = indexColumn + 1;
+					while (board[indexRow][indexShip] == letter && indexShip < BOARD_LENGTH )
+					{
+						if (islower(letter))
+							shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
+						else
+							shipA[indexShipA].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
+						indexInShip++;
+						indexShip++;
+					}
+				}
+			
 
 				indexShip = indexRow++;
 				// Searching row for the rest of the ship
