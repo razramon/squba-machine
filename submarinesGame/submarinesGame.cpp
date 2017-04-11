@@ -330,7 +330,7 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 		}
 		catch (std::exception& e)
 		{
-
+			//TODO::
 		}
 
 		string row = delSpaces(line.substr(0, line.find(",")));
