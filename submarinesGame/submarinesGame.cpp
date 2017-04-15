@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include "Player.h"
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -325,13 +326,14 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 		try
 		{
 			getAllKindsOfLine(bfile, line);
-			if (line == "")
-				break;
+			if (line == "" || line.find(",") == std::string::npos || line.find_first_of(",") != line.find_last_of(","))
+				continue;;
 		}
 		catch (std::exception& e)
 		{
 
 		}
+
 		
 		// Getting each number, deleting spaces and turning to integer
 		string row = delSpaces(line.substr(0, line.find(",")));
@@ -607,13 +609,56 @@ bool checkBoard(char ** board)
 }
 
 
-void game()
+void game(Player* playerA, Player* playerB)
 {
-	int isHit = 0;
+	int isHitA = 0;
+	int isHitB = 0;
 	int playerPlaying = 0;
 
-	
+	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
+	{
+		pair<int, int> attack;
+		AttackResult result = AttackResult::Miss;
 
+		// Inside player A and there are attacks left
+		if(playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
+			attack = (*playerA).attack();
+		// Inside player B and there are attacks left
+		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
+			attack = (*playerB).attack();
 
+		isHitA = playerA->isHit(attack.first, attack.second);
+		isHitB = playerB->isHit(attack.first, attack.second);
+
+		// Sink
+		if (isHitA == 2 || isHitB == 2)
+		{
+			result = AttackResult::Sink;
+			if((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
+			{
+				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+			}
+			
+		}
+		// Hit 
+		else if (isHitA == 1 || isHitB == 1)
+		{
+			result = AttackResult::Hit;
+			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
+			{
+				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+			}
+		}
+		// Miss
+		else
+		{
+			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+		}
+
+		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+		
+
+	}
 
 }

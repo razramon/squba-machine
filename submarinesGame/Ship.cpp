@@ -8,7 +8,7 @@ Ship::Ship(char letter, int numberOfPoints)
 {
 	this->letter = letter;
 	this->numberOfPoints = numberOfPoints;
-	this->position = new int*[NUMBER_SHIPS];
+	this->position = new int*[sizeOfShip(letter)];
 }
 Ship::Ship()
 {
@@ -73,3 +73,12 @@ int Ship::sizeOfShip(char c)
 	}
 }
 
+bool Ship::isSunk()
+{
+	for(int i = 0; i < sizeOfShip(this->getLetter()); i++)
+	{
+		if (this->position[i][2] == 0)
+			return false;
+	}
+	return true;
+}
