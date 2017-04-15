@@ -634,6 +634,7 @@ void game(Player* playerA, Player* playerB)
 		if (isHitA == 2 || isHitB == 2)
 		{
 			result = AttackResult::Sink;
+			// Self sink and change playerPlaying to the other
 			if((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
 			{
 				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
@@ -644,6 +645,7 @@ void game(Player* playerA, Player* playerB)
 		else if (isHitA == 1 || isHitB == 1)
 		{
 			result = AttackResult::Hit;
+			// Self hit and change playerPlaying to the other
 			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
 			{
 				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
@@ -652,9 +654,11 @@ void game(Player* playerA, Player* playerB)
 		// Miss
 		else
 		{
+			// Change playerPlaying
 			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
 		}
 
+		// Notify players on the result
 		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
 		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
 		
