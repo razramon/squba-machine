@@ -37,6 +37,7 @@ public:
 		char letterHit = ' ';
 		int indexHitShip = 0;
 		bool hit = false;
+		int hitBefore = 0;
 
 		// Looping over all the ships of the player
 		for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
@@ -47,6 +48,7 @@ public:
 				// If there is a match, return true - there is a hit
 				if (ships[indexShip].position[pos][0] == row && ships[indexShip].position[pos][1] == col)
 				{
+					hitBefore = ships[indexShip].position[pos][2];
 					hit = true;
 					indexHitShip = indexShip;
 					letterHit = ships[indexShip].getLetter();
@@ -57,9 +59,12 @@ public:
 			if (hit)
 				break;
 		}
-
+		
+		// If was hit
+		if (hitBefore != 0)
+			return 3;
 		// If there is a hit and all the ship was hit - sink
-		if (hit && numberOfHitInShip == Ship::sizeOfShip(letterHit) - 1 && !ships[indexHitShip].isSunk())
+		else if (hit && numberOfHitInShip == Ship::sizeOfShip(letterHit) - 1 && !ships[indexHitShip].isSunk())
 			return 2;
 		// Check if there was atleast a hit
 		else if (hit)
@@ -70,8 +75,35 @@ public:
 	}
 	void Player::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 	{
-		
-
+		switch (result)
+		{
+			case AttackResult::Miss:
+				break;
+			case AttackResult::Hit:
+				break;
+			case AttackResult::Sink:
+				break;
+			default:
+				break;
+			
+		}
+		char letterSink = ' ';
+		// Looping over all the ships of the player
+		for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
+		{
+			// Looping over the position of each ship
+			for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
+			{
+				// If there is a match
+				if (ships[indexShip].position[pos][0] == row && ships[indexShip].position[pos][1] == col)
+				{
+					// Changing to hit
+					ships[indexShip].position[pos][2] = 1;
+					if(result == AttackResult::Sink && this->isHit(row,col) != 3)
+						totalNumberOfPoints += ships[indexShip].getNumberOfPoints();
+				}
+			}
+		}
 	}
 	std::pair<int, int> Player::attack()
 	{

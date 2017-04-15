@@ -630,8 +630,16 @@ void game(Player* playerA, Player* playerB)
 		isHitA = playerA->isHit(attack.first, attack.second);
 		isHitB = playerB->isHit(attack.first, attack.second);
 
+		// Hit before
+		if (isHitA == 3 || isHitB == 3)
+		{
+			// Send hit, change playerPlaying
+			result = AttackResult::Hit;
+			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+
+		}
 		// Sink
-		if (isHitA == 2 || isHitB == 2)
+		else if (isHitA == 2 || isHitB == 2)
 		{
 			result = AttackResult::Sink;
 			// Self sink and change playerPlaying to the other
