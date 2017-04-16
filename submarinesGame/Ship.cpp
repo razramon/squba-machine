@@ -4,17 +4,23 @@
 
 using namespace std;
 	
-Ship::Ship(char letter, int numberOfPoints)
+Ship::Ship(char letter)
 {
 	this->letter = letter;
-	this->numberOfPoints = numberOfPoints;
-	this->position = new int*[NUMBER_SHIPS];
+	this->numberOfPoints = Ship::pointsOfShip(letter);
+	this->position = new int*[Ship::sizeOfShip(letter)];
 }
+
 Ship::Ship()
 {
 }
 Ship::~Ship()
 {
+	for (int i = 0; i < Ship::sizeOfShip(this->letter);++i)
+	{
+		delete[] this->position[i];
+	}
+	delete[] this->position;
 }
 char Ship::getLetter() {
 	return letter;
