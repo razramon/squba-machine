@@ -614,7 +614,7 @@ void game(Player* playerA, Player* playerB)
 	int isHitA = 0;
 	int isHitB = 0;
 	int playerPlaying = 0;
-
+	//TODO: add points checker for the players
 	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
 	{
 		pair<int, int> attack;
