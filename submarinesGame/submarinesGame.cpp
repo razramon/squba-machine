@@ -814,10 +814,11 @@ void game(Player* playerA, Player* playerB)
 		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
 		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
 	}
+}
 
 
-		int main(int argc, char* argv[])
-		{
+int main(int argc, char* argv[])
+{
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
 
 

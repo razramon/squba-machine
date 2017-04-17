@@ -4,10 +4,10 @@
 
 using namespace std;
 	
-Ship::Ship(char letter, int numberOfPoints)
+Ship::Ship(char letter)
 {
 	this->letter = letter;
-	this->numberOfPoints = numberOfPoints;
+	this->numberOfPoints = pointsOfShip(letter);
 	this->position = new int*[sizeOfShip(letter)];
 }
 Ship::Ship()
