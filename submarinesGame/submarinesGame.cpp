@@ -52,9 +52,8 @@ static bool endsWith(const std::string& fileName, const std::string& suffix)
 
 /*
  *Returns a path to (this) working directory
+ *http://moodle.tau.ac.il/mod/forum/discuss.php?d=47695#p73943
  */
-//TODO: NEEDS A SMALL FIX - wait for amir's answer:http://moodle.tau.ac.il/mod/forum/discuss.php?d=49474
-//http://moodle.tau.ac.il/mod/forum/discuss.php?d=47695#p73943
 static std::string workingDirectory() {
 	char buffer[MAX_PATH];
 	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
@@ -466,7 +465,7 @@ void printBoard(Ship *ships)
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
 void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
-	char letter, int& numShipsForCurrPlayer, std::vector<Ship>& shipsOfPlayer,
+	char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
 	bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes)
 {
 	if ((currRow >= numRows) || (currCol >= numCols)) //never supposed to get here,just to check ourselves
@@ -505,16 +504,15 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 		}
 		//If gets here,shipCells == Ship::sizeOfShip(letter):
 
-		if (((col < numCols - 1) && board[currRow][col] != letter) || (col == numCols - 1)) //Makes sure the ship is of right size (not too large)
+		if (((col <= numCols - 1) && board[currRow][col] != letter) || (col == numCols)) //Makes sure the ship is of right size (not too large)
 		{
 			Ship* ship =new Ship(letter);
-			shipsOfPlayer.push_back(*ship);
+			shipsOfPlayer.push_back(ship);
 			for (int i = 0; i < shipCells; ++i)
 			{
-				shipsOfPlayer[numShipsForCurrPlayer].position[i] = new int[3]{ currRow, currCol + i, 0 };
+				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, currRow, currCol + i, 0);
 			}
 			numShipsForCurrPlayer++;
-			delete ship;//because push_back creates a copy of Ship
 		}
 		else //wrong size - ship's too big
 		{
@@ -552,16 +550,15 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 			return;
 		}
 		//If gets here,shipCells == Ship::sizeOfShip(letter):
-		if (((row < numRows - 1) && board[row][currCol] != letter) || (row == numRows - 1)) //Makes sure the ship is of right size (not too large)
+		if (((row <= numRows - 1) && board[row][currCol] != letter) || (row == numRows)) //Makes sure the ship is of right size (not too large)
 		{
 			Ship* ship = new Ship(letter);
-			shipsOfPlayer.push_back(*ship);
+			shipsOfPlayer.push_back(ship);
 			for (int i = 0; i < shipCells; ++i)
 			{
-				shipsOfPlayer[numShipsForCurrPlayer].position[i] = new int[3]{ currRow + i, currCol, 0 };
+				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i,currRow + i, currCol, 0);
 			}
 			numShipsForCurrPlayer++;
-			delete ship;//because push_back creates a copy of Ship
 		}
 		else //wrong size - ship's too big
 		{
@@ -589,10 +586,9 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 		else
 		{
 			Ship* ship = new Ship(letter);
-			shipsOfPlayer.push_back(*ship);
-			shipsOfPlayer[numShipsForCurrPlayer].position[0] = new int[3]{ currRow, currCol, 0 };
+			shipsOfPlayer.push_back(ship);
+			(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(0, currRow, currCol, 0);
 			numShipsForCurrPlayer++;
-			delete ship;//because push_back creates a copy of Ship
 		}
 	}
 }
@@ -663,20 +659,19 @@ bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& b
 	return res;
 }
 
-
-std::pair <std::vector<Ship>,std::vector<Ship>>* checkBoard(char ** board, int numRows, int numCols)
+std::pair <std::vector<Ship*>,std::vector<Ship*>>* checkBoard(char ** board, int numRows, int numCols)
 {
-	std::vector<Ship> shipsA;
-	std::vector<Ship> shipsB;
-	std::vector<std::pair<int, int>*> badLetterIndexes_B;
-	std::vector<std::pair<int, int>*> badLetterIndexes_b;
-	std::vector<std::pair<int, int>*> badLetterIndexes_P;
-	std::vector<std::pair<int, int>*> badLetterIndexes_p;
-	std::vector<std::pair<int, int>*> badLetterIndexes_M;
-	std::vector<std::pair<int, int>*> badLetterIndexes_m;
-	std::vector<std::pair<int, int>*> badLetterIndexes_D;
-	std::vector<std::pair<int, int>*> badLetterIndexes_d;
-	std::vector<std::pair<int, int>*>* badLetterIndexes = &badLetterIndexes_B;//Initialized to an arbitrary "badLetterIndex" in order to prevent error.
+	std::vector<Ship*> shipsA;
+	std::vector<Ship*> shipsB;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_B = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_b = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_P = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_p = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_M = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_m = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_D = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes_d = new std::vector<std::pair<int, int>*>;
+	std::vector<std::pair<int, int>*>* badLetterIndexes = badLetterIndexes_B;//Initialized to an arbitrary "badLetterIndex" in order to prevent error.
 	std::set<char>  wrongSizeShapeShips;
 
 	int indexShipA = 0;
@@ -691,21 +686,21 @@ std::pair <std::vector<Ship>,std::vector<Ship>>* checkBoard(char ** board, int n
 			letter = board[row][col];
 			switch (letter)
 			{
-			case 'B':badLetterIndexes = &badLetterIndexes_B;
+			case 'B':badLetterIndexes = badLetterIndexes_B;
 				break;
-			case 'b':badLetterIndexes = &badLetterIndexes_b;
+			case 'b':badLetterIndexes = badLetterIndexes_b;
 				break;
-			case 'P':badLetterIndexes = &badLetterIndexes_P;
+			case 'P':badLetterIndexes = badLetterIndexes_P;
 				break;
-			case 'p':badLetterIndexes = &badLetterIndexes_p;
+			case 'p':badLetterIndexes = badLetterIndexes_p;
 				break;
-			case 'M':badLetterIndexes = &badLetterIndexes_M;
+			case 'M':badLetterIndexes = badLetterIndexes_M;
 				break;
-			case 'm':badLetterIndexes = &badLetterIndexes_m;
+			case 'm':badLetterIndexes = badLetterIndexes_m;
 				break;
-			case 'D':badLetterIndexes = &badLetterIndexes_D;
+			case 'D':badLetterIndexes = badLetterIndexes_D;
 				break;
-			case 'd':badLetterIndexes = &badLetterIndexes_d;
+			case 'd':badLetterIndexes = badLetterIndexes_d;
 				break;
 			default: //TODO:: throw exception or something, never supposed to get here anyway
 				break;
@@ -749,7 +744,17 @@ std::pair <std::vector<Ship>,std::vector<Ship>>* checkBoard(char ** board, int n
 			}
 		}
 	}
-	std::pair<std::vector<Ship>, std::vector<Ship>>* ret = new std::pair<std::vector<Ship>, std::vector<Ship>>(shipsA, shipsB);
+	
+	delete badLetterIndexes_B;
+	delete badLetterIndexes_b;
+	delete badLetterIndexes_P;
+	delete badLetterIndexes_p;
+	delete badLetterIndexes_M;
+	delete badLetterIndexes_m;
+	delete badLetterIndexes_D;
+	delete badLetterIndexes_d;
+
+	std::pair<std::vector<Ship*>, std::vector<Ship*>>* ret = new std::pair<std::vector<Ship*>, std::vector<Ship*>>(shipsA, shipsB);
 	return ret;
 }
 
@@ -824,9 +829,9 @@ int main(int argc, char* argv[])
 
 	char b0[5] = { ' ','P','P','P',' ' };
 	char b1[5] = { ' ',' ','P','P',' ' };
-	char b2[5] = { ' ','d',' ',' ',' ' };
-	char b3[5] = { ' ',' ',' ',' ',' ' };
-	char b4[5] = { ' ',' ',' ',' ',' ' };
+	char b2[5] = { 'M','d',' ',' ',' ' };
+	char b3[5] = { 'M',' ',' ',' ','B' };
+	char b4[5] = { 'M',' ',' ',' ',' ' };
 	char* b[5] = { b0, b1,b2,b3,b4 };
 
 	//prints board:
@@ -839,7 +844,7 @@ int main(int argc, char* argv[])
 		std::cout << std::endl;
 	}
 
-	std::pair<std::vector<Ship>, std::vector<Ship>>* playersShips = checkBoard(b, 5, 5);
+	std::pair<std::vector<Ship*>, std::vector<Ship*>>* playersShips = checkBoard(b, 5, 5);
 
 	//prints board:
 	std::cout << "********PRINTING BOARD AFTER CHANGE********" << std::endl;
@@ -930,6 +935,22 @@ int main(int argc, char* argv[])
 	//	delete[] attackFileAPtr;
 	//	delete[] attackFileBPtr;
 	//}
+	std::cout << "Player A's ships are:" << std::endl;
+	for (int i = 0; i < (*playersShips).first.size(); ++i)
+	{
+		std::cout << "ship of type: " << (*((*playersShips).first.at(i))).getLetter() <<
+			"\n in position: " << std::endl;
+		int** pos = (*((*playersShips).first.at(i))).getPosition();
+		for (int k = 0; k < (*((*playersShips).first.at(i))).getShipSize(); ++k)
+		{
+			std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+		}
+		std::cout << std::endl;
+	}
 	
+	//deletes ships to free allocated space(?)
+	(*playersShips).first.clear();
+	(*playersShips).second.clear();
+	delete playersShips;
 	return 0;
 }

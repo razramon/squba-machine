@@ -7,14 +7,23 @@ using namespace std;
 Ship::Ship(char letter)
 {
 	this->letter = letter;
-	this->numberOfPoints = pointsOfShip(letter);
+	this->numberOfPoints = Ship::pointsOfShip(letter);
 	this->position = new int*[sizeOfShip(letter)];
+	for (int i = 0; i < sizeOfShip(letter); ++i)
+	{
+		position[i] = new int[3];
+	}
 }
 Ship::Ship()
 {
 }
 Ship::~Ship()
 {
+	for(int i = 0; i < this->getShipSize(); ++i)
+	{
+		delete position[i];
+	}
+	delete[] position;
 }
 char Ship::getLetter() {
 	return letter;
@@ -81,4 +90,22 @@ bool Ship::isSunk()
 			return false;
 	}
 	return true;
+}
+
+int** Ship::getPosition()
+{
+	return position;
+}
+int Ship::getShipSize()
+{
+	return Ship::sizeOfShip(letter);
+}
+
+void Ship::setPosition(int pos, int row, int col, int state)
+{
+	if (pos < 0 || pos >= this->getShipSize() || row < 0 || col < 0) return;
+	
+	this->position[pos][0] = row;
+	this->position[pos][1] = col;
+	this->position[pos][2] = state;	
 }
