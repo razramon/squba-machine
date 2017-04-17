@@ -8,7 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
-
+#include "Player.h"
 using namespace std;
 static const char DEFAULT_LETTER='a';
 static const std::string ATTACK_A_SUFF = ".attack-a";
@@ -23,7 +23,7 @@ static bool doesPathExist(const char* path)
 	DWORD dirAttr = GetFileAttributesA(path);
 	if (dirAttr == INVALID_FILE_ATTRIBUTES)
 	{
-		throw Exception(exceptionInfo(WRONG_PATH,path));
+		throw Exception(exceptionInfo(WRONG_PATH,path)); //change thisto create a new exception
 	} 
 	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
@@ -325,14 +325,15 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 		try
 		{
 			getAllKindsOfLine(bfile, line);
-			if (line == "")
-				break;
+			if (line == "" || line.find(",") == std::string::npos || line.find_first_of(",") != line.find_last_of(","))
+				continue;;
 		}
 		catch (std::exception& e)
 		{
 			//TODO:: print the relevant messege. this one is temporary
 			std::cout << e.what() << std::endl;
 		}
+
 		
 		// Getting each number, deleting spaces and turning to integer
 		string row = delSpaces(line.substr(0, line.find(",")));
@@ -834,9 +835,71 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 }
 
 
+void game(Player* playerA, Player* playerB)
+{
+	int isHitA = 0;
+	int isHitB = 0;
+	int playerPlaying = 0;
+	//TODO: add points checker for the players
+	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
+	{
+		pair<int, int> attack;
+		AttackResult result = AttackResult::Miss;
+		// Inside player A and there are attacks left
+		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
+			attack = (*playerA).attack();
+		// Inside player B and there are attacks left
+		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
+			attack = (*playerB).attack();
+
+		isHitA = playerA->isHit(attack.first, attack.second);
+		isHitB = playerB->isHit(attack.first, attack.second);
+
+		// Hit before
+		if (isHitA == 3 || isHitB == 3)
+		{
+			// Send hit, change playerPlaying
+			result = AttackResult::Hit;
+			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+
+		}
+		// Sink
+		else if (isHitA == 2 || isHitB == 2)
+		{
+			result = AttackResult::Sink;
+			// Self sink and change playerPlaying to the other
+			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
+			{
+				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+			}
+
+		}
+		// Hit 
+		else if (isHitA == 1 || isHitB == 1)
+		{
+			result = AttackResult::Hit;
+			// Self hit and change playerPlaying to the other
+			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
+			{
+				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+			}
+		}
+		// Miss
+		else
+		{
+			// Change playerPlaying
+			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+		}
+
+		// Notify players on the result
+		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+	}
+}
+
+
 int main(int argc, char* argv[])
 {
-
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
 
 	//int numShipsForCurrPlayer = 0;
