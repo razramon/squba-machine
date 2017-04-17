@@ -7,8 +7,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <set>
 #include "Player.h"
-
 using namespace std;
 static const char DEFAULT_LETTER='a';
 static const std::string ATTACK_A_SUFF = ".attack-a";
@@ -108,7 +108,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	try
 	{
 		doesExist = doesPathExist(path);
-	} catch (std::exception& e) { //a 
+	} catch (std::exception& e) {  
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 	if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
@@ -331,7 +331,8 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 		}
 		catch (std::exception& e)
 		{
-
+			//TODO:: print the relevant messege. this one is temporary
+			std::cout << e.what() << std::endl;
 		}
 
 		
@@ -357,97 +358,66 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 	
 }
 
-int main(int argc, char* argv[])
+/*
+*Returns true if there IS an adjacent (SAME kind of) ship.
+*TO BE USED ONLY AFTER USING "checkNeighbourShips1".
+*/
+bool checkNeighbourShips2(char ** board, int currentRow, int currentCol, int numRows, int numCols)
 {
 
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
-
-	/*char** board= getBoardFromFile("good_board_0.sboard");
-
-	deleteBoard(board);*/
-
-	std::string path;
-	if (argc==1)
+	if ((currentRow - 1 >= 0) && (currentCol - 1 >= 0))
 	{
-		path = workingDirectory();
-	} else
-	{
-		path = argv[1];
+		if (board[currentRow - 1][currentCol - 1] == board[currentRow][currentCol])
+			return true;
 	}
 
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
-
-	bool pathIsValid = false;
-	//std::cout << "path is: " << path << std::endl;
-	try
+	if ((currentRow - 1 >= 0) && (currentCol + 1 < numCols))
 	{
-		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-		return 0;
+		if (board[currentRow - 1][currentCol + 1] == board[currentRow][currentCol])
+			return true;
 	}
 
-	if(!pathIsValid)
+	if ((currentRow + 1 < numRows) && (currentCol - 1 >= 0))
 	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+		if (board[currentRow + 1][currentCol - 1] == board[currentRow][currentCol])
+			return true;
 	}
 
-
-	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	char** board = getBoardFromFile(fullPathToBoard.c_str());
-	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-	vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
-	vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
-
-	//prints board:
-	for (int i = 0; i < BOARD_LENGTH; ++i)
+	if ((currentRow + 1 < numRows) && (currentCol + 1 < numCols))
 	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "\t";
-		}
-		std::cout << std::endl;
+		if (board[currentRow + 1][currentCol + 1] == board[currentRow][currentCol])
+			return true;
 	}
 
-
-
-	deleteBoard(board);
-
-	if (pathIsValid)
-	{
-		delete[] boardFilePtr;
-		delete[] attackFileAPtr;
-		delete[] attackFileBPtr;
-	}
-
-	return 0;
+	return false;
 }
 
-
-
-void createShip(Ship * ship, char c)
+/*
+*Returns true if there IS an adjacent (different) ship.
+*/
+bool checkNeighbourShips1(char ** board, int currentRow, int currentCol, int numRows, int numCols)
 {
-	int shipPoints = 0;
-	if ((shipPoints = Ship::pointsOfShip(c)) != -1)
+	int lowerRowBound = max(currentRow - 1, 0);
+	int upperRowBound = min(currentRow + 1, numRows - 1);
+	int lowerColBound = max(currentCol - 1, 0);
+	int upperColBound = min(currentCol + 1, numCols - 1);
+
+	for (int i = lowerRowBound; i <= upperRowBound; ++i)
 	{
-		int shipSize = 0;
-		if ((shipSize = Ship::sizeOfShip(c)) != -1)
+		for (int j = lowerColBound; j <= upperColBound; ++j)
 		{
-			(*ship).setLetter(c);
-			(*ship).setNumberOfPoints(shipPoints);
-			(*ship).position = new int*[shipSize];
-			for (int i = 0; i < shipSize; i++)
+			if ((i != currentRow) || (j != currentCol))
 			{
-				(*ship).position[i] = new int[3];
+				if (Ship::isShip(board[i][j]) && (board[i][j] != board[currentRow][currentCol])) {
+					return true;
+				}
 			}
-
 		}
 	}
+	return false;
 }
+
+
 void printBoard(Ship *ships)
 {
 	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
@@ -484,128 +454,303 @@ void printBoard(Ship *ships)
 	}
 }
 
-void setBoard(char ** board, int numRows, int numCols)
+/*
+* Gets a letter and the first index of the ship on the board:
+* If there's sequence that might represent a valid ship - creates it
+* Changes all ships (valid/invalid) letters to the default letter
+* Updates values of:
+*		numShipsForCurrPlayer - (+1) if a ship was added
+*		wrongSizeOrShape - to "true" if the current letter is from a deformed ship
+*		shipsOfPlayer - adds a ship to the players' ships (if ship might be valid)
+*		badLetterIndexes - if it's not a ship, adds the Letters "bad" indexes to a list
+*		board - updates each visited cell to the DEFAULT_LETTER
+*/
+void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
+	char letter, int& numShipsForCurrPlayer, std::vector<Ship>& shipsOfPlayer,
+	bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes)
 {
-	Ship shipA[NUMBER_SHIPS];
-	Ship shipB[NUMBER_SHIPS];
-	int indexShipA = 0;
-	int indexShipB = 0;
-	int indexInShip = 0;
-	for(int indexRow = 0; indexRow < numRows; indexRow++)
+	if ((currRow >= numRows) || (currCol >= numCols)) //never supposed to get here,just to check ourselves
 	{
-		for(int indexColumn = 0; indexColumn < numCols; indexColumn++)
+		std::cout << "Error: wrong index was passed to function:\"checkShipBorders\", index: (" << currRow <<
+			"," << currCol << ")" << std::endl;
+		return;
+	}
+
+	if (board[currRow][currCol] != letter) //never supposed to get here
+		return;
+
+	int shipCells = 1;
+	int row = currRow;
+	int col = currCol;
+	board[currRow][currCol] = DEFAULT_LETTER;
+	//check for ship cells on next columns:
+	if ((currCol < numCols - 1) && (board[currRow][currCol + 1]) == letter)
+	{
+		col++;
+		while (shipCells < Ship::sizeOfShip(letter) && (col <= numCols - 1) && (board[currRow][col]) == letter)
 		{
-			char letter = board[indexRow][indexColumn];
-			if(Ship::isShip(letter))
+			board[currRow][col] = DEFAULT_LETTER;
+			shipCells++;
+			col++;
+		}
+
+		if (shipCells < Ship::sizeOfShip(letter)) //ship has a wrong size (too small)
+		{
+			wrongSizeOrShape = true;
+			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes" letter appearences into the list
 			{
-				if (islower(letter))
-				{
-					createShip((&shipB[indexShipB]), letter);
-					shipB[indexShipB].position[0] = new int[3]{ indexRow, indexColumn, 0 };
-				}
-				else
-				{
-					createShip((&shipA[indexShipA]), letter);
-					shipA[indexShipA].position[0] = new int[3]{ indexRow, indexColumn, 0 };
-				}
+				badLetterIndexes.push_back(&std::pair<int, int>(currRow, currCol + i));
+			}
+			return;
+		}
+		//If gets here,shipCells == Ship::sizeOfShip(letter):
 
-				int indexInShip = 1;
-				int indexShip = indexColumn++;
-				
-				// Searching column for the rest of the ship
-				while (board[indexRow][indexShip] == letter)
-				{
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
-				}
+		if (((col < numCols - 1) && board[currRow][col] != letter) || (col == numCols - 1)) //Makes sure the ship is of right size (not too large)
+		{
+			Ship* ship =new Ship(letter);
+			shipsOfPlayer.push_back(*ship);
+			for (int i = 0; i < shipCells; ++i)
+			{
+				shipsOfPlayer[numShipsForCurrPlayer].position[i] = new int[3]{ currRow, currCol + i, 0 };
+			}
+			numShipsForCurrPlayer++;
+			delete ship;//because push_back creates a copy of Ship
+		}
+		else //wrong size - ship's too big
+		{
+			while ((col <= numCols - 1) && (board[currRow][col]) == letter) //turns all letters to the default one
+			{
+				badLetterIndexes.push_back(&std::pair<int, int>(currRow, col));
+				board[currRow][col] = DEFAULT_LETTER;
+				col++;
+			}
+			wrongSizeOrShape = true;
+			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes"
+			{
+				badLetterIndexes.push_back(&std::pair<int, int>(currRow, currCol + i));
+			}
+		}
+		// Searching rows for the rest of the ship
+	}
+	else if ((row < numRows - 1) && (board[row + 1][currCol]) == letter)
+	{
+		row++;
+		while (shipCells < Ship::sizeOfShip(letter) && (row <= numRows - 1) && (board[row][currCol]) == letter)
+		{
+			board[row][currCol] = DEFAULT_LETTER;
+			shipCells++;
+			row++;
+		}
 
-				indexShip = indexRow++;
-				// Searching row for the rest of the ship
-				while (board[indexShip][indexColumn] == letter)
-				{	
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
-				}
-				if (islower(letter))
-					indexShipB++;
-				else
-					indexShipA++;
-				
+		if (shipCells < Ship::sizeOfShip(letter)) //ship has a wrong size (too small)
+		{
+			wrongSizeOrShape = true;
+			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes" letter appearences into the list
+			{
+				badLetterIndexes.push_back(&std::pair<int, int>(currRow + i, currCol));
+			}
+			return;
+		}
+		//If gets here,shipCells == Ship::sizeOfShip(letter):
+		if (((row < numRows - 1) && board[row][currCol] != letter) || (row == numRows - 1)) //Makes sure the ship is of right size (not too large)
+		{
+			Ship* ship = new Ship(letter);
+			shipsOfPlayer.push_back(*ship);
+			for (int i = 0; i < shipCells; ++i)
+			{
+				shipsOfPlayer[numShipsForCurrPlayer].position[i] = new int[3]{ currRow + i, currCol, 0 };
+			}
+			numShipsForCurrPlayer++;
+			delete ship;//because push_back creates a copy of Ship
+		}
+		else //wrong size - ship's too big
+		{
+			while ((row <= numRows - 1) && (board[row][currCol]) == letter) //turns all letter to the default one
+			{
+				badLetterIndexes.push_back(&std::pair<int, int>(row, currCol));
+				board[row][currCol] = DEFAULT_LETTER;
+				row++;
+			}
+			wrongSizeOrShape = true;
+			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes"
+			{
+				badLetterIndexes.push_back(&std::pair<int, int>(currRow + i, currCol));
 			}
 		}
 	}
-	printBoard(shipA);
-	printBoard(shipB);
-
+	else // Ship has only one (the current) cell
+	{
+		if (Ship::sizeOfShip(letter) != 1)
+		{
+			badLetterIndexes.push_back(&std::pair<int, int>(currRow, col));
+			wrongSizeOrShape = true;
+			return;
+		}
+		else
+		{
+			Ship* ship = new Ship(letter);
+			shipsOfPlayer.push_back(*ship);
+			shipsOfPlayer[numShipsForCurrPlayer].position[0] = new int[3]{ currRow, currCol, 0 };
+			numShipsForCurrPlayer++;
+			delete ship;//because push_back creates a copy of Ship
+		}
+	}
 }
 
-bool checkBoard(char ** board)
+/*
+ * Returns true if ship is next to another ship/"bad index" of the same letter (==wrong shape)
+ * @Params:
+ *		badLetterIndexes - a vector containing all indexes in which the letter appeard in, and weren't valid
+ *		ship - the ship we're checking
+ *		letter - the ship's letter
+ */
+bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& badLetterIndexes, std::vector<Ship>& shipsOfPlayer)
 {
-	Ship shipA[NUMBER_SHIPS];
-	Ship shipB[NUMBER_SHIPS];
+	bool res = false;
+	int** pos = (*ship).getPosition();
+	int row = -1;
+	int col = -1;
+	for (int i = 0; i < (*ship).getShipSize(); ++i)
+	{
+		row = pos[i][0];
+		col = pos[i][1];
+		for (int k = 0; k <  badLetterIndexes.size(); ++k)
+		{
+			if (((row == (*badLetterIndexes.at(k)).first)&&( col-1 == (*badLetterIndexes.at(k)).second || col + 1 == (*badLetterIndexes.at(k)).second))
+				|| ((col == (*badLetterIndexes.at(k)).second)&&(row - 1 == (*badLetterIndexes.at(k)).first || col + 1 == (*badLetterIndexes.at(k)).first)))
+			{
+				res = true;
+				break;
+			}
+		}
+		if (res) break;
+	}
+	
+	if(!res) //now check in "valid" ships
+	{
+		for (int i = 0; i < shipsOfPlayer.size(); ++i)
+		{
+			if (!(pos[0][0]==shipsOfPlayer.at(i).getPosition()[0][0] && pos[0][1] == shipsOfPlayer.at(i).getPosition()[0][1])) //makes sure it's NOT the same ship
+			{
+				Ship* shipToCompare = &shipsOfPlayer.at(i);
+				for (int j = 0; j < (*ship).getShipSize(); ++j)
+				{
+					row = pos[j][0];
+					col = pos[j][1];
+					for (int k = 0; k < (*shipToCompare).getShipSize(); ++k)
+					{
+						if (((row == (*shipToCompare).getPosition()[k][0]) && (col - 1 == (*shipToCompare).getPosition()[k][1] || col + 1 == (*shipToCompare).getPosition()[k][1]))
+							|| ((col == (*shipToCompare).getPosition()[k][1]) && (row - 1 == (*shipToCompare).getPosition()[k][0] || col + 1 == (*shipToCompare).getPosition()[k][0])))
+						{
+							res = true;
+							break;
+						}
+					}
+					if (res) break;
+				}
+			}
+			if(res)	break;
+		}
+	}
+	if (res)
+	{
+		for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
+		{
+			std::pair<int, int> badindex(pos[i][0], pos[i][1]);
+			badLetterIndexes.push_back(&badindex);
+		}
+	}
+	return res;
+}
+
+
+std::pair <std::vector<Ship>,std::vector<Ship>>* checkBoard(char ** board, int numRows, int numCols)
+{
+	std::vector<Ship> shipsA;
+	std::vector<Ship> shipsB;
+	std::vector<std::pair<int, int>*> badLetterIndexes_B;
+	std::vector<std::pair<int, int>*> badLetterIndexes_b;
+	std::vector<std::pair<int, int>*> badLetterIndexes_P;
+	std::vector<std::pair<int, int>*> badLetterIndexes_p;
+	std::vector<std::pair<int, int>*> badLetterIndexes_M;
+	std::vector<std::pair<int, int>*> badLetterIndexes_m;
+	std::vector<std::pair<int, int>*> badLetterIndexes_D;
+	std::vector<std::pair<int, int>*> badLetterIndexes_d;
+	std::vector<std::pair<int, int>*>* badLetterIndexes = &badLetterIndexes_B;//Initialized to an arbitrary "badLetterIndex" in order to prevent error.
+	std::set<char>  wrongSizeShapeShips;
+
 	int indexShipA = 0;
 	int indexShipB = 0;
-	int indexInShip = 0;
-	for (int indexRow = 0; indexRow < BOARD_LENGTH - 1; indexRow++)
-	{
-		for (int indexColumn = 0; indexColumn < BOARD_LENGTH - 1; indexColumn++)
-		{
-			char letter = board[indexRow][indexColumn];
-			if (Ship::isShip(letter))
+
+	bool wrongSizeOrShape;
+	bool adjacentShips = false;
+	char letter = '`';
+	for (int row = 0; row < numRows; row++) {
+		for (int col = 0; col < numCols; col++) {
+			wrongSizeOrShape = false;
+			letter = board[row][col];
+			switch (letter)
 			{
-				if (islower(letter))
+			case 'B':badLetterIndexes = &badLetterIndexes_B;
+				break;
+			case 'b':badLetterIndexes = &badLetterIndexes_b;
+				break;
+			case 'P':badLetterIndexes = &badLetterIndexes_P;
+				break;
+			case 'p':badLetterIndexes = &badLetterIndexes_p;
+				break;
+			case 'M':badLetterIndexes = &badLetterIndexes_M;
+				break;
+			case 'm':badLetterIndexes = &badLetterIndexes_m;
+				break;
+			case 'D':badLetterIndexes = &badLetterIndexes_D;
+				break;
+			case 'd':badLetterIndexes = &badLetterIndexes_d;
+				break;
+			default: //TODO:: throw exception or something, never supposed to get here anyway
+				break;
+			}
+			if (Ship::isShip(letter)) {
+				if (islower(letter))//letter is "player B"'s letter (small letters)
 				{
-					createShip((&shipB[indexShipB]), letter);
-					shipB[indexShipB].position[0] = new int[3]{ indexRow, indexColumn, 0 };
-				}
-				else
+					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipB, shipsB, wrongSizeOrShape, *badLetterIndexes);
+				} else //"player A"'s letter
 				{
-					createShip((&shipA[indexShipA]), letter);
-					shipA[indexShipA].position[0] = new int[3]{ indexRow, indexColumn, 0 };
+					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipA, shipsA, wrongSizeOrShape, *badLetterIndexes);
 				}
-
-				int indexInShip = 1;
-				int indexShip = indexColumn++;
-
-				// Searching column for the rest of the ship
-				while (board[indexRow][indexShip] == letter)
+				if (wrongSizeOrShape)
 				{
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexRow, indexShip, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
+					wrongSizeShapeShips.insert(letter);
 				}
-
-				indexShip = indexRow++;
-				// Searching row for the rest of the ship
-				while (board[indexShip][indexColumn] == letter)
-				{
-					if (islower(letter))
-						shipB[indexShipB].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					else
-						shipA[indexShipA].position[indexInShip] = new int[3]{ indexShip, indexColumn, 0 };
-					indexInShip++;
-				}
-				if (islower(letter))
-					indexShipB++;
-				else
-					indexShipA++;
-
 			}
 		}
 	}
+	//check for wrong size or shape(in near columns/rows)
+	
+	
+	
+	//TODO:: add here all neighbour checks: for:
+	//2. adjacent ships
 
-
-
-	return false;//meital - added by me just to check main!
-
+	if (wrongSizeShapeShips.size() > 0)
+	{
+		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
+		{
+			if (!islower(*i))
+			{
+				std::cout << "Wrong size or shape for ship " << *i << " for player A" << std::endl;
+			}
+		}
+		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
+		{
+			if (islower(*i))
+			{
+				std::cout << "Wrong size or shape for ship " << *i << " for player B" << std::endl;
+			}
+		}
+	}
+	std::pair<std::vector<Ship>, std::vector<Ship>>* ret = new std::pair<std::vector<Ship>, std::vector<Ship>>(shipsA, shipsB);
+	return ret;
 }
 
 
@@ -619,9 +764,8 @@ void game(Player* playerA, Player* playerB)
 	{
 		pair<int, int> attack;
 		AttackResult result = AttackResult::Miss;
-
 		// Inside player A and there are attacks left
-		if(playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
+		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
 			attack = (*playerA).attack();
 		// Inside player B and there are attacks left
 		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
@@ -643,11 +787,11 @@ void game(Player* playerA, Player* playerB)
 		{
 			result = AttackResult::Sink;
 			// Self sink and change playerPlaying to the other
-			if((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
+			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
 			{
 				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
 			}
-			
+
 		}
 		// Hit 
 		else if (isHitA == 1 || isHitB == 1)
@@ -669,8 +813,122 @@ void game(Player* playerA, Player* playerB)
 		// Notify players on the result
 		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
 		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
-		
-
 	}
 
+
+		int main(int argc, char* argv[])
+		{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
+
+
+	char b0[5] = { ' ','P','P','P',' ' };
+	char b1[5] = { ' ',' ','P','P',' ' };
+	char b2[5] = { ' ','d',' ',' ',' ' };
+	char b3[5] = { ' ',' ',' ',' ',' ' };
+	char b4[5] = { ' ',' ',' ',' ',' ' };
+	char* b[5] = { b0, b1,b2,b3,b4 };
+
+	//prints board:
+	for (int i = 0; i < 5; ++i)
+	{
+		for (int j = 0; j < 5; ++j)
+		{
+			std::cout << b[i][j] << "\t";
+		}
+		std::cout << std::endl;
+	}
+
+	std::pair<std::vector<Ship>, std::vector<Ship>>* playersShips = checkBoard(b, 5, 5);
+
+	//prints board:
+	std::cout << "********PRINTING BOARD AFTER CHANGE********" << std::endl;
+	for (int i = 0; i < 5; ++i)
+	{
+		for (int j = 0; j < 5; ++j)
+		{
+			std::cout << b[i][j] << "\t";
+		}
+		std::cout << std::endl;
+	}
+	//int numShipsForCurrPlayer = 0;
+	//std::vector<Ship> shipsOfPlayer;
+	//bool wrongSizeOrShape = false;
+	//std::vector<std::pair<int, int>*> badLetterIndexes;
+	//checkShipBorders(b, 5, 5, 2, 4, 'P', numShipsForCurrPlayer, shipsOfPlayer, wrongSizeOrShape, badLetterIndexes);
+
+
+	//std::cout << "numShipsForCurrPlayer is: " << numShipsForCurrPlayer << std::endl;
+	//std::cout << "shipsOfPlayer size is: " << shipsOfPlayer.size() << std::endl;
+	//std::cout << "wrongSizeOrShape is: " << (wrongSizeOrShape ? "true":"false") << std::endl;
+	//for (int i = 0; i < badLetterIndexes.size(); ++i)
+	//{
+	//	std::cout << "badLetterIndexes in index: " << i << " is: " << (*(badLetterIndexes[i])).first << "," << (*badLetterIndexes[i]).second << std::endl;
+	//}
+	//shipsOfPlayer.clear();
+
+
+
+	///*char** board= getBoardFromFile("good_board_0.sboard");
+
+	//deleteBoard(board);*/
+
+	//std::string path;
+	//if (argc==1)
+	//{
+	//	path = workingDirectory();
+	//} else
+	//{
+	//	path = argv[1];
+	//}
+
+	//char* boardFilePtr = nullptr;
+	//char* attackFileAPtr = nullptr;
+	//char* attackFileBPtr = nullptr;
+
+	//bool pathIsValid = false;
+	////std::cout << "path is: " << path << std::endl;
+	//try
+	//{
+	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	//} catch (std::exception& e)
+	//{
+	//	std::cout << e.what() << std::endl;
+	//}
+
+	//if(!pathIsValid)
+	//{
+	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+	//	return 1;
+	//}
+
+
+	//std::string fullPathToBoard = path +"\\"+ boardFilePtr;
+	//char** board = getBoardFromFile(fullPathToBoard.c_str());
+	//std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
+	//std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
+	//vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
+	//vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
+
+	////prints board:
+	//for (int i = 0; i < BOARD_LENGTH; ++i)
+	//{
+	//	for (int j = 0; j < BOARD_LENGTH; ++j)
+	//	{
+	//		std::cout << board[i][j] << "\t";
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+
+
+	//deleteBoard(board);
+
+	//if (pathIsValid)
+	//{
+	//	delete[] boardFilePtr;
+	//	delete[] attackFileAPtr;
+	//	delete[] attackFileBPtr;
+	//}
+	
+	return 0;
 }
