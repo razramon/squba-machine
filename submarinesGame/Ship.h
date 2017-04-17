@@ -16,4 +16,6 @@ public:
 	static int pointsOfShip(char c);
 	static int sizeOfShip(char c);
 	int ** position; // Array of size of the ship, has 3 properties: 1. row ; 2. column ; 3. is hit - 1 for hit, 0 otherwise
+	int** getPosition();
+	int getShipSize();
 };

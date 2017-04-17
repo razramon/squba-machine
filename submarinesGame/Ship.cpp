@@ -79,3 +79,12 @@ int Ship::sizeOfShip(char c)
 	}
 }
 
+int** Ship::getPosition()
+{
+	return position;
+}
+
+int Ship::getShipSize()
+{
+	return Ship::sizeOfShip(letter);
+}
