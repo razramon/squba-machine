@@ -255,36 +255,58 @@ static char** getBoardFromFile(const char* boardFile){
 	if (!bfile) {
 		throw Exception("Error: failed opening board file.");
 	}
-	for (int row = 0; row < BOARD_LENGTH; ++row)
+	int row = 0;
+	while (row < BOARD_LENGTH)
 	{
 		//reads 1 line from the file:
+		line.clear();
 		try
 		{
 			getAllKindsOfLine(bfile, line);
-		} catch (std::exception& e)
+		}
+		catch (std::exception& e)
 		{
-			deleteBoard(board);
 			if (bfile.eof())
 			{
-				throw Exception("Error: board file is too small");
+				break;
 			}
-			throw Exception("Error: failed reading from board file.");
+			else
+			{
+				deleteBoard(board);
+				throw Exception("Error: failed reading from board file.");
+			}
 		}
-		if (line.length()!= BOARD_LENGTH)
+		if (line.length() < BOARD_LENGTH)
 		{
-			deleteBoard(board);
-			std::string er("Error: board file in not of right format: line ");
-			er.append(std::to_string(row));
-			er.append(" is too small");
-			const char* erC = er.c_str();
-			throw Exception(erC);
-		}
-		for (int col = 0; col < BOARD_LENGTH; ++col)
+			for (int col = 0; col < line.length(); ++col)
+			{
+				board[row][col] = line.at(col);
+			}
+			for (int col = line.length(); col < BOARD_LENGTH; ++col)
+			{
+				board[row][col] = ' ';
+			}
+		} else
 		{
-			board[row][col] = line.at(col);
+			for (int col = 0; col < BOARD_LENGTH; ++col)
+			{
+				board[row][col] = line.at(col);
+			}
 		}
-		
+		++row;
 	}
+
+	if (row < BOARD_LENGTH)
+	{
+		for (int i = row; i < BOARD_LENGTH; ++i)
+		{
+			for (int j = 0; j < BOARD_LENGTH; ++j)
+			{
+				board[i][j] = ' ';
+			}
+		}
+	}
+
 	return board;
 }
 

@@ -33,6 +33,7 @@ int Player::isHit(int row, int col)
 	// Looping over all the ships of the player
 	for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
 	{
+		numberOfHitInShip = 0;
 		// Looping over the position of each ship
 		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
 		{
