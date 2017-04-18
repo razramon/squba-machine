@@ -19,7 +19,9 @@ public:
 	char* pathToAttackFile;
 	std::vector<std::pair<int,int>> attacks;
 
-	bool isHit(int row, int col);
-
+	int isHit(int row, int col);
+	void setBoard(const char** board, int numRows, int numCols);
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result);
+	std::pair<int, int> attack();
 };
 
