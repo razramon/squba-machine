@@ -109,3 +109,13 @@ void Ship::setPosition(int pos, int row, int col, int state)
 	this->position[pos][1] = col;
 	this->position[pos][2] = state;	
 }
+
+void Ship::printShipInfo()
+{
+	std::cout << "This is ship: " << letter << " of player " << (islower(letter) ? "B" : "A") << std::endl;
+	for (int k = 0; k < Ship::sizeOfShip(letter) - 1; ++k)
+	{
+		std::cout << "(" << position[k][0] << "," << position[k][1] << ")  ,  ";
+	}
+	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")" << std::endl;
+}

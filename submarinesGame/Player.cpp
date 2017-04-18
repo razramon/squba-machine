@@ -1,3 +1,4 @@
+#include "Player.h"
 #include <iostream>
 #include "Ship.h"
 #include "Sizes.h"
@@ -42,7 +43,6 @@ int Player::isHit(int row, int col)
 	for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
 	{
 		numberOfHitInShip = 0;
-
 		// Looping over the position of each ship
 		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
 		{
@@ -100,7 +100,7 @@ void Player::notifyOnAttackResult(int player, int row, int col, AttackResult res
 			{
 				// Changing to hit
 				ships[indexShip].position[pos][2] = 1;
-				if(result == AttackResult::Sink && isHit(row,col) != 3)
+				if(result == AttackResult::Sink && this->isHit(row,col) != 3)
 					totalNumberOfPoints += ships[indexShip].getNumberOfPoints();
 			}
 		}
