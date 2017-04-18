@@ -1091,43 +1091,6 @@ int main(int argc, char* argv[])
 
 	//deleteBoard(board);*/
 
-	std::string path;
-	if (argc==1)
-	{
-		path = workingDirectory();
-	} else
-	{
-		path = argv[1];
-	}
-
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
-
-	bool pathIsValid = false;
-	//std::cout << "path is: " << path << std::endl;
-	try
-	{
-		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-	}
-
-	if(!pathIsValid)
-	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-		return 1;
-	}
-
-
-	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	char** board = getBoardFromFile(fullPathToBoard.c_str());
-	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-	vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
-	vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
-
 	////prints board:
 	//for (int i = 0; i < BOARD_LENGTH; ++i)
 	//{
@@ -1173,9 +1136,9 @@ int main(int argc, char* argv[])
 	}
 	
 	//deletes ships to free allocated space(?)
-	(*playersShips).first.clear();
-	(*playersShips).second.clear();
-	delete playersShips;
+	//(*playersShips).first.clear();
+	//(*playersShips).second.clear();
+	//delete playersShips;
 
 
 	// Creating new player for the test of the game
@@ -1245,6 +1208,7 @@ int main(int argc, char* argv[])
 	playerA->ships[4] = *s5;
 
 	game(playerA, playerB);
+
 	deleteBoard(board);
 	if (pathIsValid)
 	{
