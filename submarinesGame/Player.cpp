@@ -2,7 +2,6 @@
 #include <iostream>
 #include "Ship.h"
 #include "Sizes.h"
-#include "ISubmarinesGameAlgo.h"
 #include <vector>
 
 using namespace std;

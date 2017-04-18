@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ISubmarinesGameAlgo.h"
+#include "IBattleshipGameAlgo.h"
 #include "Ship.h"
 #include "Sizes.h"
 #include <vector>
@@ -19,7 +19,7 @@ public:
 	char* pathToAttackFile = "";
 	std::vector<std::pair<int,int>> attacks;
 
-	Player();
+	Player(int playerNum, char* pathToAttackFile, Ship* ships);
 
 	void setBoard(const char ** board, int numRows, int numCols) override;
 
