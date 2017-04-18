@@ -83,21 +83,6 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
 	}
 }
 
-///*
-// * Returns path s.t. it won't contain the last 2 directories
-// * in the passed path.
-// * NOT FINISHED: because it's relevant to check if it's \ or /...
-// */
-//std::string getPath(std::string path)
-//{
-//	std::string str = path;
-//	for (int i = 0; i < 2; ++i)
-//	{
-//		str = str.
-//	}
-//}
-
-
 /*Checks if the path exists,
  *that the 3 files are there, 
  *And if they are - updates their names */
@@ -349,12 +334,8 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 			continue;
 		}
 		attacks.push_back(attack);
-
 	}
-
 	return attacks;
-
-	
 }
 
 
@@ -901,7 +882,25 @@ void game(Player* playerA, Player* playerB)
 int main(int argc, char* argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :)
+	
+	Ship* s1 = new Ship('P');
+	for (int i = 0; i < 2; i++)
+	{
+		(*s1).setPosition(i, 1+i, 0, 0);
+	}
 
+	Ship* s2 = new Ship('M');
+	for (int i = 0; i < 3; i++)
+	{
+		(*s2).setPosition(i, 2, 1+i, 0);
+	}
+
+	bool isNeig = checkNeighbourShips(s1, s2);
+
+	std::cout << ((isNeig) ? "Ships are adjacent" : "Ships aren't adjacent" )<< std::endl;
+
+	delete s1;
+	delete s2;
 	//int numShipsForCurrPlayer = 0;
 	//std::vector<Ship> shipsOfPlayer;
 	//bool wrongSizeOrShape = false;
@@ -982,71 +981,71 @@ int main(int argc, char* argv[])
 	//	delete[] attackFileBPtr;
 	//}
 
-	//latesl main - meital 17/4/17 18:22:
-	char b0[5] = { 'm','m','m',' ',' ' };
-	char b1[5] = { ' ',' ','D','P','P' };
-	char b2[5] = { 'P','P','D',' ',' ' };
-	char b3[5] = { 'P','P','D',' ',' ' };
-	char b4[5] = { ' ',' ','D',' ','b' };
-	char* b[5] = { b0, b1,b2,b3,b4 };
+	////latesl main - meital 17/4/17 18:22:
+	//char b0[5] = { 'm','m','m',' ',' ' };
+	//char b1[5] = { ' ',' ','D','P','P' };
+	//char b2[5] = { 'P','P','D',' ',' ' };
+	//char b3[5] = { 'P','P','D',' ',' ' };
+	//char b4[5] = { ' ',' ','D',' ','b' };
+	//char* b[5] = { b0, b1,b2,b3,b4 };
 
-	//prints board:
-	for (int i = 0; i < 5; ++i)
-	{
-		for (int j = 0; j < 5; ++j)
-		{
-			std::cout << b[i][j] << "\t";
-		}
-		std::cout << std::endl;
-	}
+	////prints board:
+	//for (int i = 0; i < 5; ++i)
+	//{
+	//	for (int j = 0; j < 5; ++j)
+	//	{
+	//		std::cout << b[i][j] << "\t";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(b, 5, 5);
+	//std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(b, 5, 5);
 
-	//prints board:
-	std::cout << "********PRINTING BOARD AFTER CHANGE********" << std::endl;
-	for (int i = 0; i < 5; ++i)
-	{
-		for (int j = 0; j < 5; ++j)
-		{
-			std::cout << b[i][j] << "\t";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << "Player A's ships are:" << std::endl;
-	for (int i = 0; i < (*((*playersShips).first)).size(); ++i)
-	{
-		std::cout << "ship of type: " << (*((*((*playersShips).first)).at(i))).getLetter() <<
-			"\n in position: " << std::endl;
-		int** pos = (*((*((*playersShips).first)).at(i))).getPosition();
-		for (int k = 0; k < (*((*((*playersShips).first)).at(i))).getShipSize(); ++k)
-		{
-			std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << "Player B's ships are:" << std::endl;
-	for (int i = 0; i < (*((*playersShips).second)).size(); ++i)
-	{
-		std::cout << "ship of type: " << (*((*((*playersShips).second)).at(i))).getLetter() <<
-			"\n in position: " << std::endl;
-		int** pos = (*((*((*playersShips).second)).at(i))).getPosition();
-		for (int k = 0; k < (*((*((*playersShips).second)).at(i))).getShipSize(); ++k)
-		{
-			std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
-		}
-		std::cout << std::endl;
-	}
-	
-	//deletes ships to free allocated space(?)
-	for (int i = 0; i < (*(*playersShips).first).size(); ++i)
-	{
-		delete ((*((*playersShips).first)).at(i));
-	}
-	for (int i = 0; i < (*(*playersShips).second).size(); ++i)
-	{
-		delete ((*((*playersShips).second)).at(i));
-	}
+	////prints board:
+	//std::cout << "********PRINTING BOARD AFTER CHANGE********" << std::endl;
+	//for (int i = 0; i < 5; ++i)
+	//{
+	//	for (int j = 0; j < 5; ++j)
+	//	{
+	//		std::cout << b[i][j] << "\t";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << "Player A's ships are:" << std::endl;
+	//for (int i = 0; i < (*((*playersShips).first)).size(); ++i)
+	//{
+	//	std::cout << "ship of type: " << (*((*((*playersShips).first)).at(i))).getLetter() <<
+	//		"\n in position: " << std::endl;
+	//	int** pos = (*((*((*playersShips).first)).at(i))).getPosition();
+	//	for (int k = 0; k < (*((*((*playersShips).first)).at(i))).getShipSize(); ++k)
+	//	{
+	//		std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << "Player B's ships are:" << std::endl;
+	//for (int i = 0; i < (*((*playersShips).second)).size(); ++i)
+	//{
+	//	std::cout << "ship of type: " << (*((*((*playersShips).second)).at(i))).getLetter() <<
+	//		"\n in position: " << std::endl;
+	//	int** pos = (*((*((*playersShips).second)).at(i))).getPosition();
+	//	for (int k = 0; k < (*((*((*playersShips).second)).at(i))).getShipSize(); ++k)
+	//	{
+	//		std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//
+	////deletes ships to free allocated space(?)
+	//for (int i = 0; i < (*(*playersShips).first).size(); ++i)
+	//{
+	//	delete ((*((*playersShips).first)).at(i));
+	//}
+	//for (int i = 0; i < (*(*playersShips).second).size(); ++i)
+	//{
+	//	delete ((*((*playersShips).second)).at(i));
+	//}
 
-	delete playersShips;
+	//delete playersShips;
 	return 0;
 }
