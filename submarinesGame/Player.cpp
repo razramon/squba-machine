@@ -7,6 +7,10 @@
 
 using namespace std;
 
+Player::Player(int playerNum, char* pathToAttackFile, Ship* ships)
+{
+	//TODO::complete
+}
 	
 void Player::setBoard(const char** board, int numRows, int numCols)
 {

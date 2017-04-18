@@ -1,4 +1,4 @@
-#include "ISubmarinesGameAlgo.h"
+#include "IBattleshipGameAlgo.h"
 #include <iostream>
 
 using namespace std;

@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 #include <string>
+#include "Macros.h"
 
 class Exception : public std::exception
 {

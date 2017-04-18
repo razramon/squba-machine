@@ -19,6 +19,7 @@ public:
 	char* pathToAttackFile;
 	std::vector<std::pair<int,int>> attacks;
 
+	Player(int playerNum, char* pathToAttackFile, Ship* ships);
 	int isHit(int row, int col);
 	void setBoard(const char** board, int numRows, int numCols);
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result);

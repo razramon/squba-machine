@@ -147,7 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Exception.h" />
-    <ClInclude Include="ISubmarinesGameAlgo.h" />
+    <ClInclude Include="IBattleshipGameAlgo.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Ship.h" />
@@ -155,7 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Exception.cpp" />
-    <ClCompile Include="ISubmarinesGameAlgo.cpp" />
+    <ClCompile Include="IBattleshipGameAlgo.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="submarinesGame.cpp" />
