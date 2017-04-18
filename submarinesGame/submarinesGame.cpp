@@ -405,11 +405,11 @@ void printBoard(Ship *ships)
 				int indexInShip = 0;
 
 				// Looping on the ships and their positions
-				while (ships[indexShip].position[indexInShip] != NULL)
+				while (ships[indexShip].getPosition()[indexInShip] != nullptr)
 				{
 					// Checking if there is a match in ship position
-					if (indexRow == ships[indexShip].position[indexInShip][0] &&
-						indexColumn == ships[indexShip].position[indexInShip][1])
+					if (indexRow == ships[indexShip].getPosition()[indexInShip][0] &&
+						indexColumn == ships[indexShip].getPosition()[indexInShip][1])
 					{
 						cout << ships[indexShip].getLetter();
 						letterInPosition = true;

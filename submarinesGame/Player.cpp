@@ -24,9 +24,9 @@ void Player::setBoard(const char** board, int numRows, int numCols)
 		// Looping over the position of each ship
 		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
 		{
-			int row = ships[indexShip].position[pos][0];
-			int col = ships[indexShip].position[pos][1];
-			ships[indexShip].position[pos][2] = board[row][col];
+			int row = ships[indexShip].getPosition()[pos][0];
+			int col = ships[indexShip].getPosition()[pos][1];
+			ships[indexShip].setPosition(pos, row, col, board[row][col]);
 		}
 	}
 }
@@ -46,15 +46,15 @@ int Player::isHit(int row, int col)
 		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
 		{
 			// If there is a match, return true - there is a hit
-			if (ships[indexShip].position[pos][0] == row && ships[indexShip].position[pos][1] == col)
+			if (ships[indexShip].getPosition()[pos][0] == row && ships[indexShip].getPosition()[pos][1] == col)
 			{
-				hitBefore = ships[indexShip].position[pos][2];
+				hitBefore = ships[indexShip].getPosition()[pos][2];
 				hit = true;
 				indexHitShip = indexShip;
 				letterHit = ships[indexShip].getLetter();
 			}
 				
-			numberOfHitInShip += ships[indexShip].position[pos][2];
+			numberOfHitInShip += ships[indexShip].getPosition()[pos][2];
 		}
 		if (hit)
 			break;
@@ -95,10 +95,10 @@ void Player::notifyOnAttackResult(int player, int row, int col, AttackResult res
 		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
 		{
 			// If there is a match
-			if (ships[indexShip].position[pos][0] == row && ships[indexShip].position[pos][1] == col)
+			if (ships[indexShip].getPosition()[pos][0] == row && ships[indexShip].getPosition()[pos][1] == col)
 			{
 				// Changing to hit
-				ships[indexShip].position[pos][2] = 1;
+				ships[indexShip].setPosition(pos, row, col, 1);
 				if(result == AttackResult::Sink && this->isHit(row,col) != 3)
 					totalNumberOfPoints += ships[indexShip].getNumberOfPoints();
 			}
