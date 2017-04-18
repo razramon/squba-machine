@@ -10,6 +10,11 @@ Player::Player(int playerNum, char* pathToAttackFile, Ship* ships)
 {
 	//TODO::complete
 }
+
+Player::~Player()
+{
+	//TODO::complete
+}
 	
 void Player::setBoard(const char** board, int numRows, int numCols)
 {
