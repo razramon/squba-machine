@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <set>
 #include "Player.h"
+
 using namespace std;
 static const char DEFAULT_LETTER='a';
 static const std::string ATTACK_A_SUFF = ".attack-a";
@@ -776,8 +777,8 @@ void game(Player* playerA, Player* playerB)
 		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
 			attack = (*playerB).attack();
 
-		isHitA = playerA->isHit(attack.first, attack.second);
-		isHitB = playerB->isHit(attack.first, attack.second);
+		isHitA = (*playerA).isHit(attack.first, attack.second);
+		isHitB = (*playerB).isHit(attack.first, attack.second);
 
 		// Hit before
 		if (isHitA == 3 || isHitB == 3)
@@ -796,6 +797,8 @@ void game(Player* playerA, Player* playerB)
 			{
 				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
 			}
+			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+			std::cout << " is dead" << std::endl;
 
 		}
 		// Hit 
@@ -807,6 +810,8 @@ void game(Player* playerA, Player* playerB)
 			{
 				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
 			}
+			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+			std::cout << " is hit" << std::endl;
 		}
 		// Miss
 		else
@@ -878,42 +883,42 @@ int main(int argc, char* argv[])
 
 	//deleteBoard(board);*/
 
-	//std::string path;
-	//if (argc==1)
-	//{
-	//	path = workingDirectory();
-	//} else
-	//{
-	//	path = argv[1];
-	//}
+	std::string path;
+	if (argc==1)
+	{
+		path = workingDirectory();
+	} else
+	{
+		path = argv[1];
+	}
 
-	//char* boardFilePtr = nullptr;
-	//char* attackFileAPtr = nullptr;
-	//char* attackFileBPtr = nullptr;
+	char* boardFilePtr = nullptr;
+	char* attackFileAPtr = nullptr;
+	char* attackFileBPtr = nullptr;
 
-	//bool pathIsValid = false;
-	////std::cout << "path is: " << path << std::endl;
-	//try
-	//{
-	//	pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	//} catch (std::exception& e)
-	//{
-	//	std::cout << e.what() << std::endl;
-	//}
+	bool pathIsValid = false;
+	//std::cout << "path is: " << path << std::endl;
+	try
+	{
+		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+	} catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 
-	//if(!pathIsValid)
-	//{
-	//	printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-	//	return 1;
-	//}
+	if(!pathIsValid)
+	{
+		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
+		return 1;
+	}
 
 
-	//std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	//char** board = getBoardFromFile(fullPathToBoard.c_str());
-	//std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	//std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-	//vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
-	//vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
+	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
+	char** board = getBoardFromFile(fullPathToBoard.c_str());
+	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
+	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
+	vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
+	vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
 
 	////prints board:
 	//for (int i = 0; i < BOARD_LENGTH; ++i)
@@ -952,5 +957,74 @@ int main(int argc, char* argv[])
 	(*playersShips).first.clear();
 	(*playersShips).second.clear();
 	delete playersShips;
+
+
+	// Creating new player for the test of the game
+	Player *playerA = new Player();
+	playerA->attacks = attackFileA;
+	Ship *s1 = new Ship('B');
+	s1->setPosition(0, 1, 4, 0);
+	playerA->ships[0] = *s1;
+
+	Ship *s2 = new Ship('P');
+	s2->setPosition(0, 2, 8, 0);
+	s2->setPosition(1, 2, 9, 0);
+	playerA->ships[1] = *s2;
+
+	Ship *s3 = new Ship('M');
+	s3->setPosition(0, 4, 6, 0);
+	s3->setPosition(1, 4, 7, 0);
+	s3->setPosition(2, 4, 8, 0);
+	playerA->ships[2] = *s3;
+
+	Ship *s4 = new Ship('B');
+	(*s4).setPosition(0, 9, 1, 0);
+	playerA->ships[3] = *s4;
+
+	Ship *s5 = new Ship('P');
+	(*s5).setPosition(0, 10, 9, 0);
+	(*s5).setPosition(1, 10, 10, 0);
+	playerA->ships[4] = *s5;
+	playerA->playerNum = 0;
+
+	int** pos = (*s2).getPosition();
+	for (int k = 0; k < (*s2).getShipSize(); ++k)
+	{
+		std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+	}
+	std::cout << std::endl;
+
+
+
+	Player *playerB = new Player();
+	playerB->attacks = attackFileB;
+	playerB->playerNum = 1;
+	s1 = new Ship('b');
+	s1->setPosition(0, 10, 4, 0);
+	playerB->ships[2] = *s1;
+
+	s2 = new Ship('p');
+	s2->setPosition(0, 2, 2, 0);
+	s2->setPosition(1, 3, 2, 0);
+	playerB->ships[0] = *s2;
+
+	s3 = new Ship('m');
+	s3->setPosition(0, 5, 1, 0);
+	s3->setPosition(1, 6, 1, 0);
+	s3->setPosition(2, 7, 1, 0);
+	playerB->ships[1] = *s3;
+
+	s4 = new Ship('b');
+	(*s4).setPosition(0, 6, 10, 0);
+	playerA->ships[3] = *s4;
+
+	s5 = new Ship('d');
+	s5->setPosition(0, 5, 4, 0);
+	s5->setPosition(1, 6, 4, 0);
+	s5->setPosition(2, 7, 4, 0);
+	s5->setPosition(3, 8, 4, 0);
+	playerA->ships[4] = *s5;
+
+	game(playerA, playerB);
 	return 0;
 }
