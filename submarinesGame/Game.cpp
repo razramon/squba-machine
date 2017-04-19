@@ -1,11 +1,12 @@
 #include "Game.h"
 
-
-
-Game::Game()
+Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB)
 {
-}
+	// Creating new players for the test of the game
+	Player* playerA = new Player(PLAYER_A, *fullPathToAttackFileA, (*playersShips).first);
+	Player* playerB = new Player(PLAYER_B, *fullPathToAttackFileB, (*playersShips).second);
 
+}
 
 Game::~Game()
 {

@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <direct.h>
 #include <string>
+#include "Game.h"
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -94,7 +95,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	command.insert(0, "2>NUL dir /b /a-d *.*");
 	command.append(" > file_names.txt");
 	std::cout << "command is: " << command.c_str() << std::endl;
-	bool b = system(command.c_str());
+	bool b = system(command.c_str()); //system returns 0 if succeeded
 
 	if(b)
 	{
@@ -611,7 +612,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 				break;
 			case 'd':badLetterIndexes = badLetterIndexes_d;
 				break;
-			default: //TODO:: throw exception or something, never supposed to get here anyway
+			default: //never supposed to get here anyway
 				break;
 			}
 			if (Ship::isShip(letter)) {
@@ -672,37 +673,6 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 			originalShipIndex++;
 		}
 	}
-		
-	///*Searching for adjacent ships*/
-	//for (int n = 0; n < (*shipsA).size(); ++n)
-	//{
-	//	for (int m = n+1; m < (*shipsA).size(); ++m)
-	//	{
-	//		adjacentShips = checkNeighbourShips((*shipsA).at(n), (*shipsA).at(m));
-	//		if (adjacentShips) break;
-	//	}
-	//	if (adjacentShips) break;
-	//	for (int m = 0; m < (*shipsB).size(); ++m)
-	//	{
-	//		adjacentShips = checkNeighbourShips((*shipsA).at(n), (*shipsB).at(m));
-	//		if (adjacentShips) break;
-	//	}
-	//	if (adjacentShips) break;
-	//}
-	//if (!adjacentShips)
-	//{
-	//	for (int n = 0; n < (*shipsB).size(); ++n)
-	//	{
-	//		for (int m = n + 1; m < (*shipsB).size(); ++m)
-	//		{
-	//			adjacentShips = checkNeighbourShips((*shipsB).at(n), (*shipsB).at(m));
-	//			if (adjacentShips) break;
-
-	//		}
-	//		if (adjacentShips) break;
-	//	}
-	//}
-	///*End of searching for adjacent ships*/
 	
 	/*Printing errors as instructed - wrong size or shape*/
 	if (wrongSizeShapeShips.size() > 0)
@@ -882,7 +852,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 
 int main(int argc, char* argv[])
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
 	std::string path;
 	if (argc == 1)
@@ -905,6 +875,7 @@ int main(int argc, char* argv[])
 	} catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
+		return 1;
 	}
 
 	if(!pathIsValid)
@@ -914,206 +885,62 @@ int main(int argc, char* argv[])
 	}
 
 	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	char** board = getBoardFromFile(fullPathToBoard.c_str());
+	char** board = nullptr;
+	try
+	{
+		char** board = getBoardFromFile(fullPathToBoard.c_str());
+	} catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 1;
+	}
 	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	//std::string* fullPathToAttackFileA = new std::string(path);
-	//(*fullPathToAttackFileA).append("\\");
-	//(*fullPathToAttackFileA).append(attackFileAPtr);
-
 	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-	//vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
-	//vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
 
-	//prints board:
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "  ";
-		}
-		std::cout << std::endl;
-	}
-
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
-
-	//prints board:
-	std::cout << "********PRINTING BOARD AFTER CHANGE********" << std::endl;
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "  ";
-		}
-		std::cout << std::endl;
-	}
-	//int numShipsForCurrPlayer = 0;
-	//std::vector<Ship> shipsOfPlayer;
-	//bool wrongSizeOrShape = false;
-	//std::vector<std::pair<int, int>*> badLetterIndexes;
-	//checkShipBorders(b, 5, 5, 2, 4, 'P', numShipsForCurrPlayer, shipsOfPlayer, wrongSizeOrShape, badLetterIndexes);
-
-
-	//std::cout << "numShipsForCurrPlayer is: " << numShipsForCurrPlayer << std::endl;
-	//std::cout << "shipsOfPlayer size is: " << shipsOfPlayer.size() << std::endl;
-	//std::cout << "wrongSizeOrShape is: " << (wrongSizeOrShape ? "true":"false") << std::endl;
-	//for (int i = 0; i < badLetterIndexes.size(); ++i)
-	//{
-	//	std::cout << "badLetterIndexes in index: " << i << " is: " << (*(badLetterIndexes[i])).first << "," << (*badLetterIndexes[i]).second << std::endl;
-	//}
-	//shipsOfPlayer.clear();
-
-
-
-	///*char** board= getBoardFromFile("good_board_0.sboard");
-
-	//deleteBoard(board);*/
-
-	////prints board:
+	////prints board: TODO:: DELETE THIS
 	//for (int i = 0; i < BOARD_LENGTH; ++i)
 	//{
 	//	for (int j = 0; j < BOARD_LENGTH; ++j)
 	//	{
-	//		std::cout << board[i][j] << "\t";
+	//		std::cout << board[i][j] << "  ";
 	//	}
 	//	std::cout << std::endl;
 	//}
 
+	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
 
-
-	//deleteBoard(board);
-
-
-	
-	//deletes ships to free allocated space(?)
-	//(*playersShips).first.clear();
-	//(*playersShips).second.clear();
-	//delete playersShips;
-
-
-	// Creating new players for the test of the game
-	Player* playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
-	Player* playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
-
-	int i = playerA->getAttackNumber();
-	std::cout << "Attacks of player A are:" << std::endl;
-	while (i!=-1)
+	if (playersShips == nullptr)
 	{
-		std::cout << "this is attack number: " << i << std::endl;
-		std::pair<int, int>* att = playerA->getAttack();
-		std::cout << "(" << att->first << "," << att->second << ")" << std::endl;
-		i= playerA->getAttackNumber();
+		return 1; //Appropriate errors have already been printed in "checkBoard"
 	}
 
-	for (int i = 0 ; i < NUMBER_SHIPS; ++i)
-	{
-		playerB->getShips()[i]->printShipInfo();
-	}
+	Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
 
-	if (playersShips != nullptr)
-	{
-		//std::cout << "Player A's ships are:" << std::endl;
-		//for (int i = 0; i < (*((*playersShips).first)).size(); ++i)
-		//{
-		//	(*((*((*playersShips).first)).at(i))).printShipInfo();
-		//}
-		//std::cout << "Player B's ships are:" << std::endl;
-		//for (int i = 0; i < (*((*playersShips).second)).size(); ++i)
-		//{
-		//	(*((*((*playersShips).second)).at(i))).printShipInfo();
-		//}
-
-		//deletes ships to free allocated space
-		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
-		{
-			delete ((*((*playersShips).first)).at(i));
-		}
-		delete (*playersShips).first;
-		for (int i = 0; i < (*(*playersShips).second).size(); ++i)
-		{
-			delete ((*((*playersShips).second)).at(i));
-		}
-		delete (*playersShips).second;
-		delete playersShips;
-	}
-	else
-	{
-		std::cout << "Board is invalid." << std::endl;
-	}
-
-
-
-	//playerA->attacks = attackFileA;
-	//Ship *s1 = new Ship('B');
-	//s1->setPosition(0, 1, 4, 0);
-	//playerA->ships[0] = *s1;
-
-	//Player *playerB = new Player();
-	//playerB->attacks = attackFileB;
-	//playerB->playerNum = 1;
-	//s1 = new Ship('b');
-	//s1->setPosition(0, 10, 4, 0);
-	//playerB->ships[2] = *s1;
-
-	//Ship *s2 = new Ship('P');
-	//s2->setPosition(0, 2, 8, 0);
-	//s2->setPosition(1, 2, 9, 0);
-	//playerA->ships[1] = *s2;
-
-	//Ship *s3 = new Ship('M');
-	//s3->setPosition(0, 4, 6, 0);
-	//s3->setPosition(1, 4, 7, 0);
-	//s3->setPosition(2, 4, 8, 0);
-	//playerA->ships[2] = *s3;
-
-	//Ship *s4 = new Ship('B');
-	//(*s4).setPosition(0, 9, 1, 0);
-	//playerA->ships[3] = *s4;
-
-	//Ship *s5 = new Ship('P');
-	//(*s5).setPosition(0, 10, 9, 0);
-	//(*s5).setPosition(1, 10, 10, 0);
-	//playerA->ships[4] = *s5;
-	//playerA->playerNum = 0;
-
-	//int** pos = (*s2).getPosition();
-	//for (int k = 0; k < (*s2).getShipSize(); ++k)
+	//int i = playerA->getAttackNumber();
+	//std::cout << "Attacks of player A are:" << std::endl;
+	//while (i!=-1)
 	//{
-	//	std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+	//	std::cout << "this is attack number: " << i << std::endl;
+	//	std::pair<int, int>* att = playerA->getAttack();
+	//	std::cout << "(" << att->first << "," << att->second << ")" << std::endl;
+	//	i= playerA->getAttackNumber();
 	//}
-	//std::cout << std::endl;
+
+	//for (int i = 0 ; i < NUMBER_SHIPS; ++i)
+	//{
+	//	playerB->getShips()[i]->printShipInfo();
+	//}
 
 
-	//s2 = new Ship('p');
-	//s2->setPosition(0, 2, 2, 0);
-	//s2->setPosition(1, 3, 2, 0);
-	//playerB->ships[0] = *s2;
 
-	//s3 = new Ship('m');
-	//s3->setPosition(0, 5, 1, 0);
-	//s3->setPosition(1, 6, 1, 0);
-	//s3->setPosition(2, 7, 1, 0);
-	//playerB->ships[1] = *s3;
-
-	//s4 = new Ship('b');
-	//(*s4).setPosition(0, 6, 10, 0);
-	//playerA->ships[3] = *s4;
-
-	//s5 = new Ship('d');
-	//s5->setPosition(0, 5, 4, 0);
-	//s5->setPosition(1, 6, 4, 0);
-	//s5->setPosition(2, 7, 4, 0);
-	//s5->setPosition(3, 8, 4, 0);
-	//playerA->ships[4] = *s5;
-
-	//game(playerA, playerB);
-	delete playerA;
-	delete playerB;
-	deleteBoard(board);
-	if (pathIsValid)
-	{
-		delete[] boardFilePtr;
-		delete[] attackFileAPtr;
-		delete[] attackFileBPtr;
-	}
+	//delete playerA;
+	//delete playerB;
+	//deleteBoard(board);
+	//if (pathIsValid)
+	//{
+	//	delete[] boardFilePtr;
+	//	delete[] attackFileAPtr;
+	//	delete[] attackFileBPtr;
+	//}
 	return 0;
 }
