@@ -180,17 +180,6 @@ static void printNotFoundFileErrors(const char* path,char* boardFile, char* atta
 	}
 }
 
-/*
- *Frees memory of allocated board
- */
-static void deleteBoard(char** board)
-{
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		delete[] board[i];
-	}
-	delete[] board;
-}
 
 /*
  * This Function returns a refference to a 2D-array of chars, representing the game board
@@ -850,9 +839,14 @@ int main(int argc, char* argv[])
 		return 1; //Appropriate errors have already been printed in "checkBoard"
 	}
 
-	Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
-	firstGame->setBoard(board, BOARD_LENGTH, BOARD_LENGTH);
-
+	try
+	{
+		Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
+		firstGame->setBoard(board, BOARD_LENGTH, BOARD_LENGTH);
+	} catch (std::exception& e)
+	{
+		std::cout << "Error: " << e.what() << std::endl;
+	}
 
 	delete[] boardFilePtr;
 	delete[] attackFileAPtr;

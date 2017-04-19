@@ -4,6 +4,7 @@
 #include "Ship.h"
 #include <vector>
 #include "Player.h"
+#include <iostream>
 
 class Game : public IBattleshipGameAlgo
 {
@@ -22,5 +23,7 @@ public:
 private:
 	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
 	char ** board;
+	Player* playerA;
+	Player* playerB;
 };
 

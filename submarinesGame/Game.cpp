@@ -6,14 +6,54 @@ Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, st
 {
 	this->playersShips = playersShips;
 	// Creating new players for the test of the game
-	Player* playerA = new Player(PLAYER_A, *fullPathToAttackFileA, (*playersShips).first);
-	Player* playerB = new Player(PLAYER_B, *fullPathToAttackFileB, (*playersShips).second);
-
-
+	try
+	{
+		this->playerA = new Player(PLAYER_A, *fullPathToAttackFileA, (*playersShips).first);
+		this->playerB = new Player(PLAYER_B, *fullPathToAttackFileB, (*playersShips).second);
+	}
+	catch (std::exception&e)
+	{
+		//deletes ships to free allocated space
+		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
+		{
+			delete ((*((*playersShips).first)).at(i));
+		}
+		delete (*playersShips).first;
+		for (int i = 0; i < (*(*playersShips).second).size(); ++i)
+		{
+			delete ((*((*playersShips).second)).at(i));
+		}
+		delete (*playersShips).second;
+		delete playersShips;
+		throw &e;
+	}
 }
 
 Game::~Game()
 {
+	delete playerA;
+	delete playerB;
+	if (playersShips != nullptr)
+	{
+		//deletes ships to free allocated space
+		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
+		{
+			delete ((*((*playersShips).first)).at(i));
+		}
+		delete (*playersShips).first;
+		for (int i = 0; i < (*(*playersShips).second).size(); ++i)
+		{
+			delete ((*((*playersShips).second)).at(i));
+		}
+		delete (*playersShips).second;
+		delete playersShips;
+	}
+	//Frees memory of allocated board
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		delete[] board[i];
+	}
+	delete[] board;
 }
 
 void Game::setBoard(const char** board, int numRows, int numCols)
