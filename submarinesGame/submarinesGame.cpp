@@ -10,6 +10,7 @@
 #include <set>
 #include "Player.h"
 #include "Utilities.h"
+#include "Shlwapi.h"
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -80,23 +81,37 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
 static bool isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
 {
 	bool doesExist = false;
-	try
-	{
-		doesExist = doesPathExist(path);
-	} catch (std::exception& e) {  
-		throw Exception(exceptionInfo(WRONG_PATH, path));
-	}
-	if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
+	//try
+	//{
+	//	doesExist = doesPathExist(path);
+	//} catch (std::exception& e) {  
+	//	throw Exception(exceptionInfo(WRONG_PATH, path));
+	//}
+	//if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
+	//{
+	//	throw Exception(exceptionInfo(WRONG_PATH, path));
+	//}
+
+	const int size = 1000;
+	char buf[size];
+
+	//creating a file conataining all files in "path" 
+	_fullpath(buf, path, size);
+	std::string command = buf;
+
+	//std::cout << GetFullPathName(path) << std::endl;
+	command.insert(0, "\"");
+	command.insert(0, "2>NUL dir ");
+	command.append( "\"");
+	command.append(" /a-d /b > file_names.txt");
+	std::cout << "command is: " << command.c_str() << std::endl;
+	bool b = system(command.c_str());
+
+	if(!b)
 	{
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	//creating a file conataining all files in "path" 
-	std::string command = string(path);
-	command.insert(0, "2>NUL dir \"");
-	command.append("\" /b /a-d > file_names.txt");
-//	std::cout << "command is: " << command << std::endl;
-	system(command.c_str());
 
 	std::ifstream file("file_names.txt");
 	if (!file) {
