@@ -95,7 +95,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	std::string command = string(path);
 	command.insert(0, "2>NUL dir \"");
 	command.append("\" /b /a-d > file_names.txt");
-//	std::cout << "command is: " << command << std::endl;
+	std::cout << "command is: " << command << std::endl;
 	system(command.c_str());
 
 	std::ifstream file("file_names.txt");
@@ -1054,12 +1054,24 @@ int main(int argc, char* argv[])
 	//delete playersShips;
 
 
-	//// Creating new player for the test of the game
-	//Player *playerA = new Player();
+	// Creating new players for the test of the game
+	Player* playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
+	Player* playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+
+	delete playerA;
+	delete playerB;
+
 	//playerA->attacks = attackFileA;
 	//Ship *s1 = new Ship('B');
 	//s1->setPosition(0, 1, 4, 0);
 	//playerA->ships[0] = *s1;
+
+	//Player *playerB = new Player();
+	//playerB->attacks = attackFileB;
+	//playerB->playerNum = 1;
+	//s1 = new Ship('b');
+	//s1->setPosition(0, 10, 4, 0);
+	//playerB->ships[2] = *s1;
 
 	//Ship *s2 = new Ship('P');
 	//s2->setPosition(0, 2, 8, 0);
@@ -1089,14 +1101,6 @@ int main(int argc, char* argv[])
 	//}
 	//std::cout << std::endl;
 
-
-
-	//Player *playerB = new Player();
-	//playerB->attacks = attackFileB;
-	//playerB->playerNum = 1;
-	//s1 = new Ship('b');
-	//s1->setPosition(0, 10, 4, 0);
-	//playerB->ships[2] = *s1;
 
 	//s2 = new Ship('p');
 	//s2->setPosition(0, 2, 2, 0);

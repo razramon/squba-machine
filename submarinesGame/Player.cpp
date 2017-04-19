@@ -7,13 +7,14 @@
 
 using namespace std;
 
-std::vector<std::pair<int, int>> Player::getAttackFile(const char * attackFile)
+std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 {
-	vector<pair<int, int>> attacks;
+	vector<pair<int, int>>* attacks = new vector<pair<int, int>>();
 
 	//opening attackFile:
 	std::ifstream bfile(attackFile);
 	if (!bfile) {
+		delete attacks;
 		throw Exception("Error: failed opening attack file.");
 	}
 	std::string line;
@@ -28,6 +29,7 @@ std::vector<std::pair<int, int>> Player::getAttackFile(const char * attackFile)
 		catch (std::exception& e)
 		{
 			//TODO:: print the relevant messege. this one is temporary - meital: think i fixed it.. check it :)
+			delete attacks;
 			std::string s("Error: failed when reading attack file: ");
 			s.append(e.what());
 			throw Exception(s.c_str());
@@ -49,12 +51,12 @@ std::vector<std::pair<int, int>> Player::getAttackFile(const char * attackFile)
 		{
 			continue;
 		}
-		attacks.push_back(attack);
+		(*attacks).push_back(attack);
 	}
 	return attacks;
 }
 
-Player::Player(int playerNum, std::string fullPathToAttackFile, Ship* ships)
+Player::Player(int playerNum, std::string fullPathToAttackFile, std::vector<Ship*>* ships)
 {
 	if((playerNum!=PLAYER_A)&&(playerNum!=PLAYER_B))
 	{
@@ -74,7 +76,7 @@ Player::Player(int playerNum, std::string fullPathToAttackFile, Ship* ships)
 	this->ships = new Ship[NUMBER_SHIPS];
 	for (int i = 0; i < NUMBER_SHIPS; ++i)
 	{
-		this->ships[i] = ships[i];
+		this->ships[i] = *((*ships).at(i));//using assignment - creates a copy
 	}
 }
 
@@ -85,18 +87,44 @@ Player::~Player()
 		delete &ships[i]; //TODO:: check this.. also make sure no memory leaks accure!
 	}
 	delete[] ships;
+	delete attacks;
 }
 
-void Player::attackResOnPlayer(char shipLetter, int row, int col, AttackResult result)
-{
-	//TODO::complete
+void Player::attackResOnPlayer(char shipLetter, int row, int col, AttackResult result) const
+{		
+	switch (result)
+	{
+	case AttackResult::Miss:
+		return;
+	case AttackResult::Hit:
+	case AttackResult::Sink:
+		for (int i = 0; i < NUMBER_SHIPS; ++i) {
+			if (this->ships[i].getLetter() == shipLetter) {
+				int** pos = (*this).ships[i].getPosition();
+				for (int j = 0; j < (*this).ships[i].getShipSize(); ++j) {
+					if (pos[j][0] == row && pos[j][1] == col) {
+						this->ships[i].setPosition(j, row, col, 1);
+					}
+				}
+			}
+
+		}
+		break;
+	default:
+		break;
+	}
 
 }
 
-std::pair<int, int> Player::getAttack(int i)
+std::pair<int, int>* Player::getAttack()
 {
-	//TODO::complete
-	return std::pair<int, int>();
+	if (attackNumber==-1 || attackNumber>=(*attacks).size())
+	{
+		attackNumber = -1;
+		return nullptr;
+	}
+	++attackNumber;
+	return &((*attacks).at(attackNumber));
 }
 
 int Player::getAttackNumber() const
