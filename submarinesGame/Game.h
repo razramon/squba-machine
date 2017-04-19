@@ -20,6 +20,7 @@ public:
 	std::pair<int, int> attack() override;
 
 private:
-	std::vector<Ship> ships[2];
+	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
+	char ** board;
 };
 

@@ -16,20 +16,18 @@ Game::~Game()
 
 void Game::setBoard(const char** board, int numRows, int numCols)
 {
-	for (int i = 0; i < 2; i++) {
-		// Looping over all the ships of the player
-		for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
+	this->board = new char*[numRows];
+	for (int indexRow = 0; indexRow < numRows; indexRow++)
+	{
+		this->board[indexRow] = new char[numCols];
+
+		for (int indexCol = 0; indexCol < numCols; indexCol++)
 		{
-			// Looping over the position of each ship
-			for (int pos = 0; pos < Ship::sizeOfShip(ships[i][indexShip].getLetter()); pos++)
-			{
-				int row = ships[i][indexShip].getPosition()[pos][0];
-				int col = ships[i][indexShip].getPosition()[pos][1];
-				ships[i][indexShip].setPosition(pos, row, col, board[row][col]);
-			}
+			this->board[indexRow][indexCol] = board[indexRow][indexCol];
 		}
 	}
 }
+
 int Game::isHit(int row, int col)
 {
 	Ship ships[5];
@@ -118,3 +116,69 @@ std::pair<int, int> Game::attack()
 	//}
 	//return attack;
 }
+
+//void game(Player* playerA, Player* playerB)
+//{
+//	int isHitA = 0;
+//	int isHitB = 0;
+//	int playerPlaying = 0;
+//	//TODO: add points checker for the players
+//	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
+//	{
+//		pair<int, int> attack;
+//		AttackResult result = AttackResult::Miss;
+//		// Inside player A and there are attacks left
+//		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
+//			attack = (*playerA).attack();
+//		// Inside player B and there are attacks left
+//		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
+//			attack = (*playerB).attack();
+//
+//		isHitA = (*playerA).isHit(attack.first, attack.second);
+//		isHitB = (*playerB).isHit(attack.first, attack.second);
+//
+//		// Hit before
+//		if (isHitA == 3 || isHitB == 3)
+//		{
+//			// Send hit, change playerPlaying
+//			result = AttackResult::Hit;
+//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//
+//		}
+//		// Sink
+//		else if (isHitA == 2 || isHitB == 2)
+//		{
+//			result = AttackResult::Sink;
+//			// Self sink and change playerPlaying to the other
+//			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
+//			{
+//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//			}
+//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+//			std::cout << " is dead" << std::endl;
+//
+//		}
+//		// Hit 
+//		else if (isHitA == 1 || isHitB == 1)
+//		{
+//			result = AttackResult::Hit;
+//			// Self hit and change playerPlaying to the other
+//			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
+//			{
+//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//			}
+//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+//			std::cout << " is hit" << std::endl;
+//		}
+//		// Miss
+//		else
+//		{
+//			// Change playerPlaying
+//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//		}
+//
+//		// Notify players on the result
+//		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+//		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+//	}
+//}

@@ -783,71 +783,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 }
 
 
-//void game(Player* playerA, Player* playerB)
-//{
-//	int isHitA = 0;
-//	int isHitB = 0;
-//	int playerPlaying = 0;
-//	//TODO: add points checker for the players
-//	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
-//	{
-//		pair<int, int> attack;
-//		AttackResult result = AttackResult::Miss;
-//		// Inside player A and there are attacks left
-//		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
-//			attack = (*playerA).attack();
-//		// Inside player B and there are attacks left
-//		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
-//			attack = (*playerB).attack();
-//
-//		isHitA = (*playerA).isHit(attack.first, attack.second);
-//		isHitB = (*playerB).isHit(attack.first, attack.second);
-//
-//		// Hit before
-//		if (isHitA == 3 || isHitB == 3)
-//		{
-//			// Send hit, change playerPlaying
-//			result = AttackResult::Hit;
-//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-//
-//		}
-//		// Sink
-//		else if (isHitA == 2 || isHitB == 2)
-//		{
-//			result = AttackResult::Sink;
-//			// Self sink and change playerPlaying to the other
-//			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
-//			{
-//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-//			}
-//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
-//			std::cout << " is dead" << std::endl;
-//
-//		}
-//		// Hit 
-//		else if (isHitA == 1 || isHitB == 1)
-//		{
-//			result = AttackResult::Hit;
-//			// Self hit and change playerPlaying to the other
-//			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
-//			{
-//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-//			}
-//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
-//			std::cout << " is hit" << std::endl;
-//		}
-//		// Miss
-//		else
-//		{
-//			// Change playerPlaying
-//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-//		}
-//
-//		// Notify players on the result
-//		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
-//		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
-//	}
-//}
+
 
 
 int main(int argc, char* argv[])
