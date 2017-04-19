@@ -1,7 +1,4 @@
 #include "Game.h"
-#include "Ship.h"
-#include "Sizes.h"
-#include <iostream>
 
 Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB)
 {
@@ -167,16 +164,16 @@ void Game::game(Player* playerA, Player* playerB)
 	int isHitA = 0;
 	int isHitB = 0;
 	//TODO: add points checker for the players
-	while ((*playerA).getAttackNumber() != -1 || (*playerB).getAttackNumber() != -1)
+	while (hasAttacks.first || hasAttacks.second)
 	{
-		std::pair<int, int> curAttack;
+		std::pair<int, int> curAttack = attack();
 		AttackResult result = AttackResult::Miss;
-		// Inside player A and there are attacks left
-		if (playerPlaying == (*playerA).getPlayerNumber() && (*playerA).getAttackNumber() != -1)
-			curAttack = attack();
-		// Inside player B and there are attacks left
-		else if (playerPlaying == (*playerB).getPlayerNumber() && (*playerB).getAttackNumber() != -1)
-			curAttack = attack();
+
+		if(curAttack.first == -1 || curAttack.second == -1)
+		{
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+			continue;
+		}
 
 		isHitA = isHit(curAttack.first, curAttack.second);
 		isHitB = isHit(curAttack.first, curAttack.second);
@@ -186,17 +183,16 @@ void Game::game(Player* playerA, Player* playerB)
 		{
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
-			playerPlaying = playerPlaying == (*playerB).getPlayerNumber() ? (*playerA).getPlayerNumber() : (*playerB).getPlayerNumber();
-
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 		}
 		// Sink
 		else if (isHitA == 2 || isHitB == 2)
 		{
 			result = AttackResult::Sink;
 			// Self sink and change playerPlaying to the other
-			if ((isHitA == 2 && playerPlaying == (*playerA).getPlayerNumber()) || (isHitB == 2 && playerPlaying == (*playerB).getPlayerNumber()))
+			if ((isHitA == 2 && playerPlaying == PLAYER_A) || (isHitB == 2 && playerPlaying == PLAYER_B))
 			{
-				playerPlaying = playerPlaying == (*playerB).getPlayerNumber() ? (*playerA).getPlayerNumber() : (*playerB).getPlayerNumber();
+				playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			}
 			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
 			std::cout << " is dead" << std::endl;
@@ -207,9 +203,9 @@ void Game::game(Player* playerA, Player* playerB)
 		{
 			result = AttackResult::Hit;
 			// Self hit and change playerPlaying to the other
-			if ((isHitA == 1 && playerPlaying == (*playerA).getPlayerNumber()) || (isHitB == 1 && playerPlaying == (*playerB).getPlayerNumber()))
+			if ((isHitA == 1 && playerPlaying == PLAYER_A) || (isHitB == 1 && playerPlaying == PLAYER_B))
 			{
-				playerPlaying = playerPlaying == (*playerB).getPlayerNumber() ? (*playerA).getPlayerNumber() : (*playerB).getPlayerNumber();
+				playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			}
 			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
 			std::cout << " is hit" << std::endl;
@@ -218,7 +214,7 @@ void Game::game(Player* playerA, Player* playerB)
 		else
 		{
 			// Change playerPlaying
-			playerPlaying = playerPlaying == (*playerB).getPlayerNumber() ? (*playerA).getPlayerNumber() : (*playerB).getPlayerNumber();
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 		}
 
 		// Notify players on the result

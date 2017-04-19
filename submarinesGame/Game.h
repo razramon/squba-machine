@@ -5,6 +5,7 @@
 #include <vector>
 #include "Player.h"
 #include <iostream>
+#include "Sizes.h"
 
 class Game : public IBattleshipGameAlgo
 {
@@ -29,5 +30,6 @@ private:
 	Player* playerB;
 	std::pair<int, int> points;
 	int playerPlaying;
+	std::pair<bool, bool> hasAttacks;
 };
 

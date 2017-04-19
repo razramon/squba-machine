@@ -5,10 +5,7 @@
 #include "Exception.h"
 #include "Macros.h"
 #include <fstream>
-#include <vector>
-#include <algorithm>
 #include <set>
-#include "Player.h"
 #include "Utilities.h"
 
 #include <stdlib.h>
