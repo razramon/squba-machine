@@ -149,14 +149,22 @@ void Game::notifyOnAttackResult(int player, int row, int col, AttackResult resul
 //}
 std::pair<int, int> Game::attack()
 {
-	//std::pair<int, int> attack = attacks[++attackNumber];
+	std::pair<int, int>* attack = nullptr;
 
-	//// Checking if the number of the attack equal the size of the vector, if so changing to -1 to say there aren't more moves
-	//if (attackNumber == attacks.size() - 1)
-	//{
-	//	attackNumber = -1;
-	//}
-	//return attack;
+	if (playerPlaying==PLAYER_A)
+	{
+		attack = playerA->getAttack();
+	} else //player B's turn..
+	{
+		attack = playerB->getAttack();
+	}
+
+	if (attack == nullptr)
+	{
+		return std::pair<int, int>(-1, -1);
+	}
+	return *attack;
+
 }
 
 void Game::game(Player* playerA, Player* playerB)
