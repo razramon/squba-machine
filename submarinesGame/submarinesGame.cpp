@@ -265,50 +265,6 @@ static char** getBoardFromFile(const char* boardFile){
 	return board;
 }
 
-//Implemented in Player Class!! 19/4/2017
-vector<pair<int, int>> getAttackFile(const char* attackFile)
-{
-	vector<pair<int, int>> attacks;
-
-	//opening attackFile:
-	std::ifstream bfile(attackFile);
-	if (!bfile) {
-		throw Exception("Error: failed opening attack file.");
-	}
-	string line;
-	while(!bfile.eof())
-	{
-		try
-		{
-			Utilities::getAllKindsOfLine(bfile, line);
-			if (line == "" || line.find(",") == std::string::npos || line.find_first_of(",") != line.find_last_of(","))
-				continue;;
-		}
-		catch (std::exception& e)
-		{
-			//TODO:: print the relevant messege. this one is temporary
-			std::cout << e.what() << std::endl;
-		}
-
-		
-		// Getting each number, deleting spaces and turning to integer
-		string row = Utilities::delSpaces(line.substr(0, line.find(",")));
-		string col = Utilities::delSpaces(line.substr(line.find(",") + 1, line.length()));
-		pair<int, int> attack;
-
-		attack.first = stoi(row);
-		attack.second = stoi(col);
-
-		// Check if in range
-		if(attack.first > 10 || attack.first < 1 || attack.second > 10 || attack.second < 1)
-		{
-			continue;
-		}
-		attacks.push_back(attack);
-	}
-	return attacks;
-}
-
 
 void printBoard(Ship *ships)
 {
@@ -960,9 +916,13 @@ int main(int argc, char* argv[])
 	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
 	char** board = getBoardFromFile(fullPathToBoard.c_str());
 	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
+	//std::string* fullPathToAttackFileA = new std::string(path);
+	//(*fullPathToAttackFileA).append("\\");
+	//(*fullPathToAttackFileA).append(attackFileAPtr);
+
 	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-	vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
-	vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
+	//vector<pair<int, int>> attackFileA = getAttackFile(fullPathToAttackFileA.c_str());
+	//vector<pair<int, int>> attackFileB = getAttackFile(fullPathToAttackFileB.c_str());
 
 	//prints board:
 	for (int i = 0; i < BOARD_LENGTH; ++i)
@@ -1022,18 +982,45 @@ int main(int argc, char* argv[])
 
 	//deleteBoard(board);
 
-	if (playersShips!=nullptr)
+
+	
+	//deletes ships to free allocated space(?)
+	//(*playersShips).first.clear();
+	//(*playersShips).second.clear();
+	//delete playersShips;
+
+
+	// Creating new players for the test of the game
+	Player* playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
+	Player* playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+
+	int i = playerA->getAttackNumber();
+	std::cout << "Attacks of player A are:" << std::endl;
+	while (i!=-1)
 	{
-		std::cout << "Player A's ships are:" << std::endl;
-		for (int i = 0; i < (*((*playersShips).first)).size(); ++i)
-		{
-			(*((*((*playersShips).first)).at(i))).printShipInfo();
-		}
-		std::cout << "Player B's ships are:" << std::endl;
-		for (int i = 0; i < (*((*playersShips).second)).size(); ++i)
-		{
-			(*((*((*playersShips).second)).at(i))).printShipInfo();
-		}
+		std::cout << "this is attack number: " << i << std::endl;
+		std::pair<int, int>* att = playerA->getAttack();
+		std::cout << "(" << att->first << "," << att->second << ")" << std::endl;
+		i= playerA->getAttackNumber();
+	}
+
+	for (int i = 0 ; i < NUMBER_SHIPS; ++i)
+	{
+		playerB->getShips()[i]->printShipInfo();
+	}
+
+	if (playersShips != nullptr)
+	{
+		//std::cout << "Player A's ships are:" << std::endl;
+		//for (int i = 0; i < (*((*playersShips).first)).size(); ++i)
+		//{
+		//	(*((*((*playersShips).first)).at(i))).printShipInfo();
+		//}
+		//std::cout << "Player B's ships are:" << std::endl;
+		//for (int i = 0; i < (*((*playersShips).second)).size(); ++i)
+		//{
+		//	(*((*((*playersShips).second)).at(i))).printShipInfo();
+		//}
 
 		//deletes ships to free allocated space
 		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
@@ -1047,23 +1034,13 @@ int main(int argc, char* argv[])
 		}
 		delete (*playersShips).second;
 		delete playersShips;
-	} else
+	}
+	else
 	{
 		std::cout << "Board is invalid." << std::endl;
 	}
-	
-	//deletes ships to free allocated space(?)
-	//(*playersShips).first.clear();
-	//(*playersShips).second.clear();
-	//delete playersShips;
 
 
-	// Creating new players for the test of the game
-	Player* playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
-	Player* playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
-
-	delete playerA;
-	delete playerB;
 
 	//playerA->attacks = attackFileA;
 	//Ship *s1 = new Ship('B');
@@ -1129,7 +1106,8 @@ int main(int argc, char* argv[])
 	//playerA->ships[4] = *s5;
 
 	//game(playerA, playerB);
-
+	delete playerA;
+	delete playerB;
 	deleteBoard(board);
 	if (pathIsValid)
 	{

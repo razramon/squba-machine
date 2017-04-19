@@ -5,7 +5,7 @@ class Ship {
 	char letter;
 	int numberOfPoints;
 	int ** position; // Array of size of the ship, has 3 properties: 1. row ; 2. column ; 3. is hit - 1 for hit, 0 otherwise
-	
+	Ship& operator=(const Ship& s) = delete;//assignments operator - disabeled
 	
 	public:
 
@@ -13,7 +13,6 @@ class Ship {
 	Ship();
 	~Ship();
 	Ship(const Ship& s);//copy constructor
-	Ship& operator=(const Ship& s);//assignments operator
 	char getLetter();
 	void setLetter(char l);
 	int getNumberOfPoints();
