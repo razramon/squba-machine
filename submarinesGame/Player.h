@@ -26,6 +26,6 @@ class Player
 	~Player();
 	int getAttackNumber() const;
 	void attackResOnPlayer(char shipLetter, int row, int col, AttackResult result) const; //this function is called by Game to announce this Player he's been hit
-	std::pair<int, int>* getAttack(); //returns (a copy of) the i'th players attack 
+	std::pair<int, int>* getAttack(); //returns (a copy of) the i th players attack 
 };
 

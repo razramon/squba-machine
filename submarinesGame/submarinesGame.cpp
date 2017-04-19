@@ -10,7 +10,10 @@
 #include <set>
 #include "Player.h"
 #include "Utilities.h"
-#include "Shlwapi.h"
+
+#include <stdlib.h>
+#include <direct.h>
+#include <string>
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -80,44 +83,23 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
  *And if they are - updates their names */
 static bool isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
 {
-	bool doesExist = false;
-	//try
-	//{
-	//	doesExist = doesPathExist(path);
-	//} catch (std::exception& e) {  
-	//	throw Exception(exceptionInfo(WRONG_PATH, path));
-	//}
-	//if (!doesExist) //meaning: path exist, but it's not a directory (it's a file)
-	//{
-	//	throw Exception(exceptionInfo(WRONG_PATH, path));
-	//}
 
-	const int size = 1000;
-	char buf[size];
-
-	//creating a file conataining all files in "path" 
-	_fullpath(buf, path, size);
-	std::string command = buf;
-
-	//std::cout << GetFullPathName(path) << std::endl;
-	command.insert(0, "\"");
-	command.insert(0, "2>NUL dir ");
-	command.append( "\"");
-	command.append(" /a-d /b > file_names.txt");
-	std::cout << "command is: " << command.c_str() << std::endl;
-	bool b = system(command.c_str());
-
-	if(!b)
+	// Changing work directory to reletive path if needed
+	if (_chdir(path) != 0)
 	{
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	//creating a file conataining all files in "path" 
-	std::string command = string(path);
-	command.insert(0, "2>NUL dir \"");
-	command.append("\" /b /a-d > file_names.txt");
-//	std::cout << "command is: " << command << std::endl;
-	system(command.c_str());
+	std::string command = "";
+	command.insert(0, "2>NUL dir /b /a-d *.*");
+	command.append(" > file_names.txt");
+	std::cout << "command is: " << command.c_str() << std::endl;
+	bool b = system(command.c_str());
+
+	if(b)
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
 
 	std::ifstream file("file_names.txt");
 	if (!file) {
@@ -130,6 +112,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	{
 		while (std::getline(file, line))
 		{
+
 			checkFileName(line, boardFile, attackFileA, attackFileB);
 		}
 	} catch (std::ifstream::failure e)
@@ -946,7 +929,7 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
 	std::string path;
-	if (argc==1)
+	if (argc == 1)
 	{
 		path = Utilities::workingDirectory();
 	} else
