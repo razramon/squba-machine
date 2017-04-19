@@ -73,10 +73,10 @@ Player::Player(int playerNum, std::string fullPathToAttackFile, std::vector<Ship
 	}
 	this->attackNumber = 0;
 
-	this->ships = new Ship[NUMBER_SHIPS];
+	this->ships = new Ship*[NUMBER_SHIPS];
 	for (int i = 0; i < NUMBER_SHIPS; ++i)
 	{
-		this->ships[i] = *((*ships).at(i));//using assignment - creates a copy
+		this->ships[i] =new Ship(*((*ships).at(i)));//using assignment - creates a copy
 	}
 }
 
@@ -84,7 +84,7 @@ Player::~Player()
 {
 	for (int i = 0; i < NUMBER_SHIPS; ++i)
 	{
-		delete &ships[i]; //TODO:: check this.. also make sure no memory leaks accure!
+		delete this->ships[i]; //TODO:: check this.. also make sure no memory leaks accure!
 	}
 	delete[] ships;
 	delete attacks;
@@ -99,11 +99,11 @@ void Player::attackResOnPlayer(char shipLetter, int row, int col, AttackResult r
 	case AttackResult::Hit:
 	case AttackResult::Sink:
 		for (int i = 0; i < NUMBER_SHIPS; ++i) {
-			if (this->ships[i].getLetter() == shipLetter) {
-				int** pos = (*this).ships[i].getPosition();
-				for (int j = 0; j < (*this).ships[i].getShipSize(); ++j) {
+			if ((*this->ships[i]).getLetter() == shipLetter) {
+				int** pos = (*(*this).ships[i]).getPosition();
+				for (int j = 0; j < (*(*this).ships[i]).getShipSize(); ++j) {
 					if (pos[j][0] == row && pos[j][1] == col) {
-						this->ships[i].setPosition(j, row, col, 1);
+						(*(*this).ships[i]).setPosition(j, row, col, 1);
 					}
 				}
 			}
@@ -118,13 +118,22 @@ void Player::attackResOnPlayer(char shipLetter, int row, int col, AttackResult r
 
 std::pair<int, int>* Player::getAttack()
 {
-	if (attackNumber==-1 || attackNumber>=(*attacks).size())
+	if (attackNumber < 0 || attackNumber>=(*attacks).size())
 	{
-		attackNumber = -1;
 		return nullptr;
 	}
 	++attackNumber;
-	return &((*attacks).at(attackNumber));
+	if (attackNumber == (*attacks).size())
+	{
+		attackNumber = -1;
+		return &((*attacks).at(((*attacks).size()) - 1));
+	}
+	return &((*attacks).at(attackNumber-1));
+}
+
+Ship ** Player::getShips()
+{
+	return this->ships;
 }
 
 int Player::getAttackNumber() const

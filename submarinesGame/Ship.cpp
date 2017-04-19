@@ -27,34 +27,19 @@ Ship::~Ship()
 }
 Ship::Ship(const Ship & s)
 {
-	*this = s; //using the assignment operator to create a copy
-}
-
-Ship & Ship::operator=(const Ship & s)
-{
-	if (this != &s)
+	this->letter = s.letter;
+	this->numberOfPoints = Ship::pointsOfShip(letter);
+	this->position = new int*[sizeOfShip(letter)];
+	for (int i = 0; i < sizeOfShip(letter); ++i)
 	{
-		for (int i = 0; i < this->getShipSize(); ++i)
-			{
-				delete position[i];
-			}
-		delete[] position;
-
-		this->letter = s.letter;
-		this->numberOfPoints = Ship::pointsOfShip(letter);
-		this->position = new int*[sizeOfShip(letter)];
-		for (int i = 0; i < sizeOfShip(letter); ++i)
-		{
-			position[i] = new int[3];
-		}
-		for (int i = 0; i < sizeOfShip(letter); ++i) {
-			for (int j = 0; j < 3; ++j)
-			{
-				this->position[i][j] = s.position[i][j];
-			}
-		}
+		position[i] = new int[3];
 	}
-	return *this;
+	for (int i = 0; i < sizeOfShip(letter); ++i) {
+		for (int j = 0; j < 3; ++j)
+		{
+			this->position[i][j] = s.position[i][j];
+		}
+	}	
 }
 
 char Ship::getLetter() {

@@ -1,6 +1,0 @@
-dirty_but_legal_movesA.attack-a
-dirty_but_legal_movesB.attack-b
-good_board_1.sboard
-submarinesGame.exe
-submarinesGame.ilk
-submarinesGame.pdb
