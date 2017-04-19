@@ -7,8 +7,6 @@
 
 class Game : public IBattleshipGameAlgo
 {
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
-
 public:
 	Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB);
 	~Game();
@@ -20,5 +18,9 @@ public:
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
 	std::pair<int, int> attack() override;
+
+private:
+	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
+	char ** board;
 };
 
