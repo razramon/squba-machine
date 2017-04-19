@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <set>
 #include "Player.h"
+#include "Utilities.h"
 
 using namespace std;
 static const char DEFAULT_LETTER='a';
@@ -24,7 +25,7 @@ static bool doesPathExist(const char* path)
 	DWORD dirAttr = GetFileAttributesA(path);
 	if (dirAttr == INVALID_FILE_ATTRIBUTES)
 	{
-		throw Exception(exceptionInfo(WRONG_PATH,path)); //change thisto create a new exception
+		throw Exception(exceptionInfo(WRONG_PATH,path));
 	} 
 	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
@@ -49,17 +50,6 @@ static bool endsWith(const std::string& fileName, const std::string& suffix)
 		}
 	}
 	return true;
-}
-
-/*
- *Returns a path to (this) working directory - it's where the .exe file is... 
- *http://moodle.tau.ac.il/mod/forum/discuss.php?d=47695#p73943
- */
-static std::string workingDirectory() {
-	char buffer[MAX_PATH];
-	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
-	string::size_type pos = string(buffer).find_last_of("\\/");
-	return string(buffer).substr(0, pos);
 }
 
 /* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF, 
@@ -89,7 +79,7 @@ static void checkFileName(const std::string& fileName, char** boardFile, char** 
  *And if they are - updates their names */
 static bool isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
 {
-	bool doesExist;
+	bool doesExist = false;
 	try
 	{
 		doesExist = doesPathExist(path);
@@ -186,46 +176,6 @@ static void printNotFoundFileErrors(const char* path,char* boardFile, char* atta
 }
 
 /*
- * Returns the current stream position,
- * Updates the current line into "line".
- */
-std::istream& getAllKindsOfLine(std::istream& inputStream, std::string& line)
-{
-	line.clear();
-	try
-	{
-		std::istream::sentry se(inputStream, true);
-		std::streambuf* sb = inputStream.rdbuf();
-		int c;
-		while (true) {
-			c = sb->std::streambuf::sbumpc();
-			switch (c) {
-			case '\n':
-				return inputStream;
-			case '\r':
-				if (sb->std::streambuf::sgetc() == '\n')
-				{
-					sb->std::streambuf::sbumpc();
-				}
-				return inputStream;
-			case EOF:
-				if (line.empty()) //last line of the file has no line terminator
-				{
-					inputStream.setstate(std::ios::eofbit);
-				}
-				return inputStream;
-			default:
-				line += static_cast<char>(c);
-			}
-		}
-
-	} catch (std::exception& e)
-	{
-		throw Exception("Error: failed reading line.");
-	}
-}
-
-/*
  *Frees memory of allocated board
  */
 static void deleteBoard(char** board)
@@ -263,7 +213,7 @@ static char** getBoardFromFile(const char* boardFile){
 		line.clear();
 		try
 		{
-			getAllKindsOfLine(bfile, line);
+			Utilities::getAllKindsOfLine(bfile, line);
 		}
 		catch (std::exception& e)
 		{
@@ -311,13 +261,7 @@ static char** getBoardFromFile(const char* boardFile){
 	return board;
 }
 
-string delSpaces(string &str)
-{
-	std::string::iterator end_pos = std::remove(str.begin(), str.end(), ' ');
-	str.erase(end_pos, str.end());
-	return str;
-}
-
+//Implemented in Player Class!! 19/4/2017
 vector<pair<int, int>> getAttackFile(const char* attackFile)
 {
 	vector<pair<int, int>> attacks;
@@ -332,7 +276,7 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 	{
 		try
 		{
-			getAllKindsOfLine(bfile, line);
+			Utilities::getAllKindsOfLine(bfile, line);
 			if (line == "" || line.find(",") == std::string::npos || line.find_first_of(",") != line.find_last_of(","))
 				continue;;
 		}
@@ -344,8 +288,8 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 
 		
 		// Getting each number, deleting spaces and turning to integer
-		string row = delSpaces(line.substr(0, line.find(",")));
-		string col = delSpaces(line.substr(line.find(",") + 1, line.length()));
+		string row = Utilities::delSpaces(line.substr(0, line.find(",")));
+		string col = Utilities::delSpaces(line.substr(line.find(",") + 1, line.length()));
 		pair<int, int> attack;
 
 		attack.first = stoi(row);
@@ -360,37 +304,6 @@ vector<pair<int, int>> getAttackFile(const char* attackFile)
 	}
 	return attacks;
 }
-
-
-///*
-//*Returns true if ship1 and ship2 are adjacent.
-//*/
-//bool checkNeighbourShips(Ship* ship1, Ship* ship2)
-//{
-//	int row1 = -1;
-//	int col1 = -1;
-//	int row2 = -1;
-//	int col2 = -1;
-//	int** pos1 = (*ship1).getPosition();
-//	int** pos2 = (*ship2).getPosition();
-//	
-//	for (int i = 0; i < (*ship1).getShipSize();++i)
-//	{
-//		row1 = pos1[i][0];
-//		col1 = pos1[i][1];
-//		for (int j = 0; j < (*ship2).getShipSize(); ++j)
-//		{
-//			row2 = pos2[j][0];
-//			col2 = pos2[j][1];
-//			if (((row2==row1-1)&&( col2==col1-1 || col2==col1 || col2==col1+1)) ||
-//				((row2==row1)&&( col2==col1-1 || col2==col1+1)) ||
-//				((row2==row1+1)&&( col2==col1-1 || col2 == col1 || col2 == col1 + 1))){
-//					return true;
-//				}
-//		}
-//	}
-//	return false;
-//}
 
 
 void printBoard(Ship *ships)
@@ -940,71 +853,71 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 }
 
 
-void game(Player* playerA, Player* playerB)
-{
-	int isHitA = 0;
-	int isHitB = 0;
-	int playerPlaying = 0;
-	//TODO: add points checker for the players
-	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
-	{
-		pair<int, int> attack;
-		AttackResult result = AttackResult::Miss;
-		// Inside player A and there are attacks left
-		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
-			attack = (*playerA).attack();
-		// Inside player B and there are attacks left
-		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
-			attack = (*playerB).attack();
-
-		isHitA = (*playerA).isHit(attack.first, attack.second);
-		isHitB = (*playerB).isHit(attack.first, attack.second);
-
-		// Hit before
-		if (isHitA == 3 || isHitB == 3)
-		{
-			// Send hit, change playerPlaying
-			result = AttackResult::Hit;
-			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-
-		}
-		// Sink
-		else if (isHitA == 2 || isHitB == 2)
-		{
-			result = AttackResult::Sink;
-			// Self sink and change playerPlaying to the other
-			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
-			{
-				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-			}
-			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
-			std::cout << " is dead" << std::endl;
-
-		}
-		// Hit 
-		else if (isHitA == 1 || isHitB == 1)
-		{
-			result = AttackResult::Hit;
-			// Self hit and change playerPlaying to the other
-			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
-			{
-				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-			}
-			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
-			std::cout << " is hit" << std::endl;
-		}
-		// Miss
-		else
-		{
-			// Change playerPlaying
-			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
-		}
-
-		// Notify players on the result
-		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
-		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
-	}
-}
+//void game(Player* playerA, Player* playerB)
+//{
+//	int isHitA = 0;
+//	int isHitB = 0;
+//	int playerPlaying = 0;
+//	//TODO: add points checker for the players
+//	while ((*playerA).attackNumber != -1 || (*playerB).attackNumber != -1)
+//	{
+//		pair<int, int> attack;
+//		AttackResult result = AttackResult::Miss;
+//		// Inside player A and there are attacks left
+//		if (playerPlaying == (*playerA).playerNum && (*playerA).attackNumber != -1)
+//			attack = (*playerA).attack();
+//		// Inside player B and there are attacks left
+//		else if (playerPlaying == (*playerB).playerNum && (*playerB).attackNumber != -1)
+//			attack = (*playerB).attack();
+//
+//		isHitA = (*playerA).isHit(attack.first, attack.second);
+//		isHitB = (*playerB).isHit(attack.first, attack.second);
+//
+//		// Hit before
+//		if (isHitA == 3 || isHitB == 3)
+//		{
+//			// Send hit, change playerPlaying
+//			result = AttackResult::Hit;
+//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//
+//		}
+//		// Sink
+//		else if (isHitA == 2 || isHitB == 2)
+//		{
+//			result = AttackResult::Sink;
+//			// Self sink and change playerPlaying to the other
+//			if ((isHitA == 2 && playerPlaying == (*playerA).playerNum) || (isHitB == 2 && playerPlaying == (*playerB).playerNum))
+//			{
+//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//			}
+//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+//			std::cout << " is dead" << std::endl;
+//
+//		}
+//		// Hit 
+//		else if (isHitA == 1 || isHitB == 1)
+//		{
+//			result = AttackResult::Hit;
+//			// Self hit and change playerPlaying to the other
+//			if ((isHitA == 1 && playerPlaying == (*playerA).playerNum) || (isHitB == 1 && playerPlaying == (*playerB).playerNum))
+//			{
+//				playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//			}
+//			std::cout << std::to_string(attack.first) + "," + std::to_string(attack.second);
+//			std::cout << " is hit" << std::endl;
+//		}
+//		// Miss
+//		else
+//		{
+//			// Change playerPlaying
+//			playerPlaying = playerPlaying == (*playerB).playerNum ? (*playerA).playerNum : (*playerB).playerNum;
+//		}
+//
+//		// Notify players on the result
+//		(*playerA).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+//		(*playerB).notifyOnAttackResult(playerPlaying, attack.first, attack.second, result);
+//	}
+//}
 
 
 int main(int argc, char* argv[])
@@ -1014,7 +927,7 @@ int main(int argc, char* argv[])
 	std::string path;
 	if (argc==1)
 	{
-		path = workingDirectory();
+		path = Utilities::workingDirectory();
 	} else
 	{
 		path = argv[1];
@@ -1141,73 +1054,73 @@ int main(int argc, char* argv[])
 	//delete playersShips;
 
 
-	// Creating new player for the test of the game
-	Player *playerA = new Player();
-	playerA->attacks = attackFileA;
-	Ship *s1 = new Ship('B');
-	s1->setPosition(0, 1, 4, 0);
-	playerA->ships[0] = *s1;
+	//// Creating new player for the test of the game
+	//Player *playerA = new Player();
+	//playerA->attacks = attackFileA;
+	//Ship *s1 = new Ship('B');
+	//s1->setPosition(0, 1, 4, 0);
+	//playerA->ships[0] = *s1;
 
-	Ship *s2 = new Ship('P');
-	s2->setPosition(0, 2, 8, 0);
-	s2->setPosition(1, 2, 9, 0);
-	playerA->ships[1] = *s2;
+	//Ship *s2 = new Ship('P');
+	//s2->setPosition(0, 2, 8, 0);
+	//s2->setPosition(1, 2, 9, 0);
+	//playerA->ships[1] = *s2;
 
-	Ship *s3 = new Ship('M');
-	s3->setPosition(0, 4, 6, 0);
-	s3->setPosition(1, 4, 7, 0);
-	s3->setPosition(2, 4, 8, 0);
-	playerA->ships[2] = *s3;
+	//Ship *s3 = new Ship('M');
+	//s3->setPosition(0, 4, 6, 0);
+	//s3->setPosition(1, 4, 7, 0);
+	//s3->setPosition(2, 4, 8, 0);
+	//playerA->ships[2] = *s3;
 
-	Ship *s4 = new Ship('B');
-	(*s4).setPosition(0, 9, 1, 0);
-	playerA->ships[3] = *s4;
+	//Ship *s4 = new Ship('B');
+	//(*s4).setPosition(0, 9, 1, 0);
+	//playerA->ships[3] = *s4;
 
-	Ship *s5 = new Ship('P');
-	(*s5).setPosition(0, 10, 9, 0);
-	(*s5).setPosition(1, 10, 10, 0);
-	playerA->ships[4] = *s5;
-	playerA->playerNum = 0;
+	//Ship *s5 = new Ship('P');
+	//(*s5).setPosition(0, 10, 9, 0);
+	//(*s5).setPosition(1, 10, 10, 0);
+	//playerA->ships[4] = *s5;
+	//playerA->playerNum = 0;
 
-	int** pos = (*s2).getPosition();
-	for (int k = 0; k < (*s2).getShipSize(); ++k)
-	{
-		std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
-	}
-	std::cout << std::endl;
+	//int** pos = (*s2).getPosition();
+	//for (int k = 0; k < (*s2).getShipSize(); ++k)
+	//{
+	//	std::cout << "(" << pos[k][0] << "," << pos[k][1] << ")  ,  ";
+	//}
+	//std::cout << std::endl;
 
 
 
-	Player *playerB = new Player();
-	playerB->attacks = attackFileB;
-	playerB->playerNum = 1;
-	s1 = new Ship('b');
-	s1->setPosition(0, 10, 4, 0);
-	playerB->ships[2] = *s1;
+	//Player *playerB = new Player();
+	//playerB->attacks = attackFileB;
+	//playerB->playerNum = 1;
+	//s1 = new Ship('b');
+	//s1->setPosition(0, 10, 4, 0);
+	//playerB->ships[2] = *s1;
 
-	s2 = new Ship('p');
-	s2->setPosition(0, 2, 2, 0);
-	s2->setPosition(1, 3, 2, 0);
-	playerB->ships[0] = *s2;
+	//s2 = new Ship('p');
+	//s2->setPosition(0, 2, 2, 0);
+	//s2->setPosition(1, 3, 2, 0);
+	//playerB->ships[0] = *s2;
 
-	s3 = new Ship('m');
-	s3->setPosition(0, 5, 1, 0);
-	s3->setPosition(1, 6, 1, 0);
-	s3->setPosition(2, 7, 1, 0);
-	playerB->ships[1] = *s3;
+	//s3 = new Ship('m');
+	//s3->setPosition(0, 5, 1, 0);
+	//s3->setPosition(1, 6, 1, 0);
+	//s3->setPosition(2, 7, 1, 0);
+	//playerB->ships[1] = *s3;
 
-	s4 = new Ship('b');
-	(*s4).setPosition(0, 6, 10, 0);
-	playerA->ships[3] = *s4;
+	//s4 = new Ship('b');
+	//(*s4).setPosition(0, 6, 10, 0);
+	//playerA->ships[3] = *s4;
 
-	s5 = new Ship('d');
-	s5->setPosition(0, 5, 4, 0);
-	s5->setPosition(1, 6, 4, 0);
-	s5->setPosition(2, 7, 4, 0);
-	s5->setPosition(3, 8, 4, 0);
-	playerA->ships[4] = *s5;
+	//s5 = new Ship('d');
+	//s5->setPosition(0, 5, 4, 0);
+	//s5->setPosition(1, 6, 4, 0);
+	//s5->setPosition(2, 7, 4, 0);
+	//s5->setPosition(3, 8, 4, 0);
+	//playerA->ships[4] = *s5;
 
-	game(playerA, playerB);
+	//game(playerA, playerB);
 
 	deleteBoard(board);
 	if (pathIsValid)
