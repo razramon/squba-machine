@@ -140,3 +140,8 @@ int Player::getAttackNumber() const
 {
 	return attackNumber;
 }
+
+int Player::getPlayerNumber() const
+{
+	return playerNum;
+}

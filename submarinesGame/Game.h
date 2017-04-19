@@ -19,8 +19,12 @@ public:
 
 	std::pair<int, int> attack() override;
 
+	void game(Player * playerA, Player * playerB);
+
 private:
 	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
 	char ** board;
+	std::pair<int, int> points;
+	int playerPlaying;
 };
 
