@@ -915,32 +915,12 @@ int main(int argc, char* argv[])
 	}
 
 	Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
-
-	//int i = playerA->getAttackNumber();
-	//std::cout << "Attacks of player A are:" << std::endl;
-	//while (i!=-1)
-	//{
-	//	std::cout << "this is attack number: " << i << std::endl;
-	//	std::pair<int, int>* att = playerA->getAttack();
-	//	std::cout << "(" << att->first << "," << att->second << ")" << std::endl;
-	//	i= playerA->getAttackNumber();
-	//}
-
-	//for (int i = 0 ; i < NUMBER_SHIPS; ++i)
-	//{
-	//	playerB->getShips()[i]->printShipInfo();
-	//}
+	firstGame->setBoard(board, BOARD_LENGTH, BOARD_LENGTH);
 
 
+	delete[] boardFilePtr;
+	delete[] attackFileAPtr;
+	delete[] attackFileBPtr;
 
-	//delete playerA;
-	//delete playerB;
-	//deleteBoard(board);
-	//if (pathIsValid)
-	//{
-	//	delete[] boardFilePtr;
-	//	delete[] attackFileAPtr;
-	//	delete[] attackFileBPtr;
-	//}
 	return 0;
 }
