@@ -151,10 +151,11 @@ std::pair<int, int> Game::attack()
 {
 	std::pair<int, int>* attack = nullptr;
 
-	if (playerPlaying==PLAYER_A)
+	if (playerPlaying == PLAYER_A)
 	{
 		attack = playerA->getAttack();
-	} else //player B's turn..
+	}
+	else //player B's turn..
 	{
 		attack = playerB->getAttack();
 	}
@@ -179,6 +180,8 @@ void Game::game()
 
 		if(curAttack.first == -1 || curAttack.second == -1)
 		{
+			hasAttacks.first = curAttack.first == -1 ? false : true;
+			hasAttacks.second = curAttack.second == -1 ? false : true;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			continue;
 		}
@@ -202,6 +205,8 @@ void Game::game()
 				shipSunk.second++;
 			}
 			win = checkWin();
+			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << " suicide" << std::endl;
 
 		}
 		// Hit before \ hit myself
@@ -210,6 +215,8 @@ void Game::game()
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << " is self harm" << std::endl;
 		}
 		// Sink
 		else if (damaged == 2)
