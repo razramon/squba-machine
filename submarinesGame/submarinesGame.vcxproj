@@ -158,7 +158,6 @@
   <ItemGroup>
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="IBattleshipGameAlgo.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="submarinesGame.cpp" />

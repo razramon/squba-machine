@@ -53,9 +53,6 @@
     <ClCompile Include="Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IBattleshipGameAlgo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
