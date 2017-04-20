@@ -159,7 +159,7 @@ std::pair<int, int> Game::attack()
 
 }
 
-void Game::game(Player* playerA, Player* playerB)
+void Game::game()
 {
 	int damaged = 0;;
 	int win = 0;
