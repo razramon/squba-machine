@@ -849,15 +849,6 @@ int main(int argc, char* argv[])
 	{
 		return 1; //Appropriate errors have already been printed in "checkBoard"
 	}
-	//prints board:
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "  ";
-		}
-		std::cout << std::endl;
-	}
 
 	try
 	{
