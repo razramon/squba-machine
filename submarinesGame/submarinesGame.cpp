@@ -214,7 +214,12 @@ static char** getBoardFromFile(const char* boardFile){
 			}
 			else
 			{
-				deleteBoard(board);
+				//Frees memory of allocated board
+				for (int i = 0; i < BOARD_LENGTH; ++i)
+				{
+					delete[] board[i];
+				}
+				delete[] board;
 				throw Exception("Error: failed reading from board file.");
 			}
 		}
@@ -839,7 +844,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
-		firstGame->setBoard(board, BOARD_LENGTH, BOARD_LENGTH);
+		firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
 	} catch (std::exception& e)
 	{
 		std::cout << "Error: " << e.what() << std::endl;
