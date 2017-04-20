@@ -1,11 +1,4 @@
 #include "Player.h"
-#include <iostream>
-#include "Ship.h"
-#include "Sizes.h"
-#include <vector>
-#include "Utilities.h"
-
-using namespace std;
 
 std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 {

@@ -7,7 +7,6 @@
 #include <fstream>
 #include <set>
 #include "Utilities.h"
-
 #include <stdlib.h>
 #include <direct.h>
 #include <string>

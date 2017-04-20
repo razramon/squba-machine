@@ -5,7 +5,6 @@
 #include <vector>
 #include "Player.h"
 #include <iostream>
-#include "Sizes.h"
 
 class Game : public IBattleshipGameAlgo
 {

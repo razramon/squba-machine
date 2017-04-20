@@ -2,11 +2,12 @@
 
 #include "IBattleshipGameAlgo.h"
 #include "Ship.h"
-#include "Sizes.h"
 #include <vector>
-#include "Exception.h"
-#include <algorithm>
-#include <fstream>
+#include "Utilities.h"
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 #define END_READ_ATTACK_FILE -1
 

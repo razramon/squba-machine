@@ -1,4 +1,7 @@
 #pragma once
+#include "Sizes.h"
+#include <iostream>
+
 
 class Ship {
 
