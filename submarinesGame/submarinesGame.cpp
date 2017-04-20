@@ -810,7 +810,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < BOARD_LENGTH; ++i)
 	{
 		delete[] board[i];
-	}
+	} 
 	delete[] board;
 
 	delete[] boardFilePtr;
