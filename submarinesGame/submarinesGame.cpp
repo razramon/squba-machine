@@ -846,6 +846,8 @@ int main(int argc, char* argv[])
 		Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
 		firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
 		firstGame->game();
+		delete firstGame;
+
 	} catch (std::exception& e)
 	{
 		std::cout << "Error: " << e.what() << std::endl;

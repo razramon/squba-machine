@@ -23,6 +23,7 @@ public:
 
 	void game();
 
+
 	int checkWin();
 
 private:

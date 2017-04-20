@@ -3,6 +3,10 @@
 Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB)
 {
 	this->playersShips = playersShips;
+	this->points.first = 0;
+	this->points.second = 0;
+	this->hasAttacks.first = true;
+	this->hasAttacks.second = true;
 	// Creating new players for the test of the game
 	try
 	{
@@ -180,6 +184,7 @@ void Game::game()
 		// Destroy my own ship
 		if(damaged == 4)
 		{
+			std::cout<<
 			result = AttackResult::Sink;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 
