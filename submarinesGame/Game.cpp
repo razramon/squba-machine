@@ -85,6 +85,8 @@ int Game::isHit(int row, int col,char& letter) const
 		for (int i = 0; i < (*ps).size(); ++i)
 		{
 			s = (*ps).at(i);
+			if (s->isSunk())
+				continue;
 			posArray = ((*s).getPosition());
 			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
@@ -94,7 +96,7 @@ int Game::isHit(int row, int col,char& letter) const
 					switch (posArray[pos][2]){
 					case 0:
 						(*s).setPosition(pos, row, col, HIT);
-						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() == PLAYER_B))
+						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() != PLAYER_A))
 						{
 							return (s->numOfHits() == s->getShipSize())? SELF_DESTRUCT:BAD_HIT;
 						} else
@@ -171,9 +173,9 @@ std::pair<int, int> Game::attack()
 void Game::game()
 {
 	int damaged = 0;;
-	int win = 0;
+	int win = -1;
 	char letter = 'a';
-	while ((hasAttacks.first || hasAttacks.second) && win == 0)
+	while ((hasAttacks.first || hasAttacks.second) && win == -1)
 	{
 		std::pair<int, int> curAttack = attack();
 		AttackResult result = AttackResult::Miss;
@@ -197,12 +199,12 @@ void Game::game()
 			if(playerPlaying == PLAYER_A)
 			{
 				points.second += Ship::pointsOfShip(letter);
-				shipSunk.first++;
+				shipSunk.first += 1;
 			}
 			else
 			{
 				points.first += Ship::pointsOfShip(letter);
-				shipSunk.second++;
+				shipSunk.second += 1;
 			}
 			win = checkWin();
 			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
@@ -226,12 +228,12 @@ void Game::game()
 			if (playerPlaying == PLAYER_A)
 			{
 				points.first += Ship::pointsOfShip(letter);
-				shipSunk.second++;
+				shipSunk.second +=1;
 			}
 			else
 			{
 				points.second += Ship::pointsOfShip(letter);
-				shipSunk.first++;
+				shipSunk.first +=1;
 			}
 
 			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
@@ -258,7 +260,7 @@ void Game::game()
 		notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
 	}
 
-	if(win)
+	if(win != -1)
 	{
 		std::cout << "Player " << Player::getLetterByNumber(win);
 		std::cout << " Won" << std::endl;
@@ -273,7 +275,20 @@ void Game::game()
 
 int Game::checkWin()
 {
-	int whoWon = 0;
-	whoWon = shipSunk.first == 5 ? 1 : 0;
-	return whoWon = whoWon == 1 ? 1 : (shipSunk.second == 5 ? 2 : 0);
+	int count = 0;
+	for(int i =0 ; i < NUMBER_SHIPS; i++)
+	{
+		count += playerA->getShips()[i]->isSunk() ? 1 : 0;
+	}
+	if (count == 5)
+		return 0;
+	count = 0;
+	for (int i = 0; i < NUMBER_SHIPS; i++)
+	{
+		count += playerB->getShips()[i]->isSunk() ? 1 : 0;
+	}
+	if (count == 5)
+		return 1;
+	return -1;
+
 }
