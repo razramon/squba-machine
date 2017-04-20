@@ -243,7 +243,7 @@ void Game::game()
 		{
 			result = AttackResult::Hit;
 
-			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " is hit" << std::endl;
 		}
 		// Miss
