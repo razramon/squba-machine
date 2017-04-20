@@ -147,10 +147,11 @@ std::pair<int, int> Game::attack()
 {
 	std::pair<int, int>* attack = nullptr;
 
-	if (playerPlaying==PLAYER_A)
+	if (playerPlaying == PLAYER_A)
 	{
 		attack = playerA->getAttack();
-	} else //player B's turn..
+	}
+	else //player B's turn..
 	{
 		attack = playerB->getAttack();
 	}
@@ -175,30 +176,33 @@ void Game::game()
 
 		if(curAttack.first == -1 || curAttack.second == -1)
 		{
+			hasAttacks.first = curAttack.first == -1 ? false : true;
+			hasAttacks.second = curAttack.second == -1 ? false : true;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			continue;
 		}
 
-		damaged = isHit(curAttack.first, curAttack.second);
+		damaged = isHit(curAttack.first -1, curAttack.second -1);
 
 		// Destroy my own ship
 		if(damaged == 4)
 		{
-			std::cout<<
 			result = AttackResult::Sink;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 
 			if(playerPlaying == PLAYER_A)
 			{
-				points.second += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				points.second += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
 				shipSunk.first++;
 			}
 			else
 			{
-				points.first += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				points.first += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
 				shipSunk.second++;
 			}
 			win = checkWin();
+			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << " suicide" << std::endl;
 
 		}
 		// Hit before \ hit myself
@@ -207,6 +211,8 @@ void Game::game()
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << " is self harm" << std::endl;
 		}
 		// Sink
 		else if (damaged == 2)
@@ -215,12 +221,12 @@ void Game::game()
 
 			if (playerPlaying == PLAYER_A)
 			{
-				points.first += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				points.first += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
 				shipSunk.second++;
 			}
 			else
 			{
-				points.second += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				points.second += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
 				shipSunk.first++;
 			}
 
@@ -250,7 +256,7 @@ void Game::game()
 
 	if(win)
 	{
-		std::cout << "Player " + Player::getLetterByNumber(win);
+		std::cout << "Player " << Player::getLetterByNumber(win);
 		std::cout << " Won" << std::endl;
 	}
 	std::cout << "Points:" << std::endl;
