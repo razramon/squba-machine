@@ -136,3 +136,23 @@ void Ship::printShipInfo()
 	}
 	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")" << std::endl;
 }
+
+
+int Ship::numOfHits()
+{
+	int hits = 0;
+	//counts number of hits in ship s
+	for (int i = 0; i < this->getShipSize(); ++i)
+	{
+		if (position[i][2] == 1)
+		{
+			hits++;
+		}
+	}
+	return hits;
+}
+
+int Ship::shipOfPlayer() const
+{
+	return (islower(letter)) ? PLAYER_B : PLAYER_A;
+}

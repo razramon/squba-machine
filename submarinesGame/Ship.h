@@ -25,4 +25,6 @@ class Ship {
 	int getShipSize();
 	void setPosition(int pos, int row, int col, int state);
 	void printShipInfo();
+	int numOfHits();
+	int shipOfPlayer() const;
 };

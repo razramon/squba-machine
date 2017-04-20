@@ -70,49 +70,41 @@ void Game::setBoard(const char** board, int numRows, int numCols)
 	}
 }
 
-int Game::isHit(int row, int col)
+int Game::isHit(int row, int col) const
 {
-	Ship ships[5];
-	int numberOfHitInShip = 0;
-	char letterHit = ' ';
-	int indexHitShip = 0;
-	bool hit = false;
-	int hitBefore = 0;
-
-	// Looping over all the ships of the player
-	for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
+	Ship* s = nullptr;
+	// Looping over all ships
+	for (int j = 0; j < 2; j++)
 	{
-		numberOfHitInShip = 0;
-		// Looping over the position of each ship
-		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
+		std::vector<Ship*>* ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
+		for (int i = 0; i < (*ps).size(); ++i)
 		{
-			// If there is a match, return true - there is a hit
-			if (ships[indexShip].getPosition()[pos][0] == row && ships[indexShip].getPosition()[pos][1] == col)
+			s = (*ps).at(i);
+			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
-				hitBefore = ships[indexShip].getPosition()[pos][2];
-				hit = true;
-				indexHitShip = indexShip;
-				letterHit = ships[indexShip].getLetter();
+				if (row==(*s).getPosition()[pos][0] && col== (*s).getPosition()[pos][1])
+				{
+					switch ((*s).getPosition()[pos][2]){
+					case 0:
+						(*s).setPosition(pos, row, col, HIT);
+						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() == PLAYER_B))
+						{
+							return (s->numOfHits() == s->getShipSize())? SELF_DESTRUCT:BAD_HIT;
+						} else
+						{
+							return (s->numOfHits() == s->getShipSize()) ? SUNK : HIT;
+						}
+					case 1:
+						return BAD_HIT;
+					default:
+						break;
+					}
+				}
 			}
-
-			numberOfHitInShip += ships[indexShip].getPosition()[pos][2];
 		}
-		if (hit)
-			break;
-	}
 
-	// If was hit
-	if (hitBefore != 0)
-		return 3;
-	// If there is a hit and all the ship was hit - sink
-	else if (hit && numberOfHitInShip == Ship::sizeOfShip(letterHit) - 1 && !ships[indexHitShip].isSunk())
-		return 2;
-	// Check if there was atleast a hit
-	else if (hit)
-		return 1;
-	// Miss
-	else
-		return 0;
+	}
+	return MISS;
 }
 void Game::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
