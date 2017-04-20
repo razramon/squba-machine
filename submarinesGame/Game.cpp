@@ -177,6 +177,7 @@ void Game::game()
 	char letter = 'a';
 	while ((hasAttacks.first || hasAttacks.second) && win == -1)
 	{
+		letter = 'a';
 		std::pair<int, int> curAttack = attack();
 		AttackResult result = AttackResult::Miss;
 
@@ -194,7 +195,7 @@ void Game::game()
 		if(damaged == 4)
 		{
 			result = AttackResult::Sink;
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+
 
 			if(playerPlaying == PLAYER_A)
 			{
@@ -206,9 +207,7 @@ void Game::game()
 				points.first += Ship::pointsOfShip(letter);
 				shipSunk.second += 1;
 			}
-			win = checkWin();
-			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
-			std::cout << " suicide" << std::endl;
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 
 		}
 		// Hit before \ hit myself
@@ -217,8 +216,6 @@ void Game::game()
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
-			std::cout << " is self harm" << std::endl;
 		}
 		// Sink
 		else if (damaged == 2)
@@ -235,18 +232,11 @@ void Game::game()
 				points.second += Ship::pointsOfShip(letter);
 				shipSunk.first +=1;
 			}
-
-			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
-			std::cout << " is dead" << std::endl;
-			win = checkWin();
 		}
 		// Hit 
 		else if (damaged == 1)
 		{
 			result = AttackResult::Hit;
-
-			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
-			std::cout << " is hit" << std::endl;
 		}
 		// Miss
 		else
@@ -254,7 +244,7 @@ void Game::game()
 			// Change playerPlaying
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 		}
-
+		win = checkWin();
 		// Notify players on the result
 		notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
 		notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
@@ -263,8 +253,9 @@ void Game::game()
 	if(win != -1)
 	{
 		std::cout << "Player " << Player::getLetterByNumber(win);
-		std::cout << " Won" << std::endl;
+		std::cout << " won" << std::endl;
 	}
+
 	std::cout << "Points:" << std::endl;
 	std::cout << "Player A: ";
 	std::cout << points.first << std::endl;
@@ -276,19 +267,23 @@ void Game::game()
 int Game::checkWin()
 {
 	int count = 0;
+	std::vector<Ship*>* ps = (*playersShips).first;
 	for(int i =0 ; i < NUMBER_SHIPS; i++)
 	{
-		count += playerA->getShips()[i]->isSunk() ? 1 : 0;
-	}
-	if (count == 5)
-		return 0;
-	count = 0;
-	for (int i = 0; i < NUMBER_SHIPS; i++)
-	{
-		count += playerB->getShips()[i]->isSunk() ? 1 : 0;
+		count += ps->at(i)->isSunk() ? 1 : 0;
 	}
 	if (count == 5)
 		return 1;
+	else {
+		ps = (*playersShips).second;
+		count = 0;
+		for (int i = 0; i < NUMBER_SHIPS; i++)
+		{
+			count += ps->at(i)->isSunk() ? 1 : 0;
+		}
+		if (count == 5)
+			return 0;
+	}
 	return -1;
 
 }

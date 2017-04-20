@@ -834,15 +834,6 @@ int main(int argc, char* argv[])
 	//	std::cout << std::endl;
 	//}
 
-	//prints board:
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		for (int j = 0; j < BOARD_LENGTH; ++j)
-		{
-			std::cout << board[i][j] << "  ";
-		}
-		std::cout << std::endl;
-	}
 	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
 
 	if (playersShips == nullptr)
