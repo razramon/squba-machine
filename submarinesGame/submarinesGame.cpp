@@ -91,7 +91,7 @@ static bool isValidPath(const char* path, char** boardFile, char** attackFileA, 
 	std::string command = "";
 	command.insert(0, "2>NUL dir /b /a-d *.*");
 	command.append(" > file_names.txt");
-	std::cout << "command is: " << command.c_str() << std::endl;
+	//std::cout << "command is: " << command.c_str() << std::endl;
 	bool b = system(command.c_str()); //system returns 0 if succeeded
 
 	if(b)
@@ -779,7 +779,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 
 int main(int argc, char* argv[])
 {
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
 	std::string path;
 	if (argc == 1)
@@ -815,7 +815,7 @@ int main(int argc, char* argv[])
 	char** board = nullptr;
 	try
 	{
-		char** board = getBoardFromFile(fullPathToBoard.c_str());
+		board = getBoardFromFile(fullPathToBoard.c_str());
 	} catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
@@ -845,6 +845,7 @@ int main(int argc, char* argv[])
 	{
 		Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
 		firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
+		firstGame->game();
 	} catch (std::exception& e)
 	{
 		std::cout << "Error: " << e.what() << std::endl;

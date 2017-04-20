@@ -21,7 +21,7 @@ public:
 
 	std::pair<int, int> attack() override;
 
-	void game(Player * playerA, Player * playerB);
+	void game();
 
 	int checkWin();
 
