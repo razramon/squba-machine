@@ -141,6 +141,11 @@ int Player::getAttackNumber() const
 	return attackNumber;
 }
 
+char Player::getLetterByNumber(int number)
+{
+	return number == 0 ? 'A' : 'B';
+}
+
 int Player::getPlayerNumber() const
 {
 	return playerNum;

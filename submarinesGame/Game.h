@@ -23,13 +23,16 @@ public:
 
 	void game(Player * playerA, Player * playerB);
 
+	int checkWin();
+
 private:
 	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
 	char ** board;
 	Player* playerA;
 	Player* playerB;
-	std::pair<int, int> points;
 	int playerPlaying;
+	std::pair<int, int> points;
+	std::pair<int, int> shipSunk;
 	std::pair<bool, bool> hasAttacks;
 };
 

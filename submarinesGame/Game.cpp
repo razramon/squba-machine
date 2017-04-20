@@ -169,10 +169,10 @@ std::pair<int, int> Game::attack()
 
 void Game::game(Player* playerA, Player* playerB)
 {
-	int isHitA = 0;
-	int isHitB = 0;
-	//TODO: add points checker for the players
-	while (hasAttacks.first || hasAttacks.second)
+	int damaged = 0;;
+	int win = 0;
+
+	while ((hasAttacks.first || hasAttacks.second) && win == 0)
 	{
 		std::pair<int, int> curAttack = attack();
 		AttackResult result = AttackResult::Miss;
@@ -183,38 +183,59 @@ void Game::game(Player* playerA, Player* playerB)
 			continue;
 		}
 
-		isHitA = isHit(curAttack.first, curAttack.second);
-		isHitB = isHit(curAttack.first, curAttack.second);
+		damaged = isHit(curAttack.first, curAttack.second);
 
-		// Hit before
-		if (isHitA == 3 || isHitB == 3)
+		// Destroy my own ship
+		if(damaged == 4)
+		{
+			result = AttackResult::Sink;
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+
+			if(playerPlaying == PLAYER_A)
+			{
+				points.second += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				shipSunk.first++;
+			}
+			else
+			{
+				points.first += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				shipSunk.second++;
+			}
+			win = checkWin();
+
+		}
+		// Hit before \ hit myself
+		else if (damaged == 3)
 		{
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 		}
 		// Sink
-		else if (isHitA == 2 || isHitB == 2)
+		else if (damaged == 2)
 		{
 			result = AttackResult::Sink;
-			// Self sink and change playerPlaying to the other
-			if ((isHitA == 2 && playerPlaying == PLAYER_A) || (isHitB == 2 && playerPlaying == PLAYER_B))
+
+			if (playerPlaying == PLAYER_A)
 			{
-				playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+				points.first += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				shipSunk.second++;
 			}
+			else
+			{
+				points.second += Ship::pointsOfShip(board[curAttack.first][curAttack.second]);
+				shipSunk.first++;
+			}
+
 			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
 			std::cout << " is dead" << std::endl;
-
+			win = checkWin();
 		}
 		// Hit 
-		else if (isHitA == 1 || isHitB == 1)
+		else if (damaged == 1)
 		{
 			result = AttackResult::Hit;
-			// Self hit and change playerPlaying to the other
-			if ((isHitA == 1 && playerPlaying == PLAYER_A) || (isHitB == 1 && playerPlaying == PLAYER_B))
-			{
-				playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-			}
+
 			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
 			std::cout << " is hit" << std::endl;
 		}
@@ -229,4 +250,21 @@ void Game::game(Player* playerA, Player* playerB)
 		notifyOnAttackResult(playerPlaying, curAttack.first, curAttack.second, result);
 		notifyOnAttackResult(playerPlaying, curAttack.first, curAttack.second, result);
 	}
+
+	if(win)
+	{
+		std::cout << "Player " + Player::getLetterByNumber(win);
+		std::cout << " Won" << std::endl;
+	}
+	std::cout << "Points:" << std::endl;
+	std::cout << "Player A: " + points.first << std::endl;
+	std::cout << "Player B: " + points.second << std::endl;
+
+}
+
+int Game::checkWin()
+{
+	int whoWon = 0;
+	whoWon = shipSunk.first == 5 ? 1 : 0;
+	return whoWon = whoWon == 1 ? 1 : (shipSunk.second == 5 ? 2 : 0);
 }

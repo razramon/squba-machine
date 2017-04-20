@@ -25,6 +25,7 @@ class Player
 	Player(int playerNum, std::string fullPathToAttackFile, std::vector<Ship*>* ships);
 	~Player();
 	int getAttackNumber() const;
+	static char getLetterByNumber(int number);
 	int getPlayerNumber() const;
 	void attackResOnPlayer(char shipLetter, int row, int col, AttackResult result) const; //this function is called by Game to announce this Player he's been hit
 	std::pair<int, int>* getAttack(); //returns (a copy of) the i'th players attack: IN RANGE 1-10!! (not 0-9)
