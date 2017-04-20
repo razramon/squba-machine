@@ -649,7 +649,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 				break;
 			case 'd':badLetterIndexes = badLetterIndexes_d;
 				break;
-			default: //TODO:: throw exception or something, never supposed to get here anyway
+			default: 
 				break;
 			}
 			if (checkShipShape((*ships).at(currShipToCheck), (*((*ships).at(currShipToCheck))).getLetter(), *badLetterIndexes, (*ships)))//if true, it's invalid ship
@@ -795,7 +795,7 @@ int main(int argc, char* argv[])
 	char* attackFileBPtr = nullptr;
 
 	bool pathIsValid = false;
-	//std::cout << "path is: " << path << std::endl;
+
 	try
 	{
 		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
@@ -824,16 +824,6 @@ int main(int argc, char* argv[])
 	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
 	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
 
-	////prints board: TODO:: DELETE THIS
-	//for (int i = 0; i < BOARD_LENGTH; ++i)
-	//{
-	//	for (int j = 0; j < BOARD_LENGTH; ++j)
-	//	{
-	//		std::cout << board[i][j] << "  ";
-	//	}
-	//	std::cout << std::endl;
-	//}
-
 	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
 
 	if (playersShips == nullptr)
@@ -852,6 +842,13 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Error: " << e.what() << std::endl;
 	}
+
+	//Frees memory of allocated board
+	for (int i = 0; i < BOARD_LENGTH; ++i)
+	{
+		delete[] board[i];
+	}
+	delete[] board;
 
 	delete[] boardFilePtr;
 	delete[] attackFileAPtr;
