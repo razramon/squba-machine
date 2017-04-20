@@ -215,7 +215,7 @@ void Game::game()
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " is self harm" << std::endl;
 		}
 		// Sink
