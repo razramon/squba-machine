@@ -15,6 +15,7 @@ std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 	std::ifstream bfile(attackFile);
 	if (!bfile) {
 		delete attacks;
+		bfile.close();
 		throw Exception("Error: failed opening attack file.");
 	}
 	std::string line;
@@ -32,6 +33,7 @@ std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 			delete attacks;
 			std::string s("Error: failed when reading attack file: ");
 			s.append(e.what());
+			bfile.close();
 			throw Exception(s.c_str());
 		}
 
@@ -53,6 +55,7 @@ std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 		}
 		(*attacks).push_back(attack);
 	}
+	bfile.close();
 	return attacks;
 }
 
