@@ -154,5 +154,5 @@ int Ship::numOfHits()
 
 int Ship::shipOfPlayer() const
 {
-	return (islower(letter)) ? PLAYER_B : PLAYER_A;
+	return ((islower(letter)) ? PLAYER_B : PLAYER_A);
 }

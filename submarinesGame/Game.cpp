@@ -96,7 +96,7 @@ int Game::isHit(int row, int col,char& letter) const
 					switch (posArray[pos][2]){
 					case 0:
 						(*s).setPosition(pos, row, col, HIT);
-						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() != PLAYER_A))
+						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() == PLAYER_B))
 						{
 							return (s->numOfHits() == s->getShipSize())? SELF_DESTRUCT:BAD_HIT;
 						} else
@@ -194,7 +194,6 @@ void Game::game()
 		if(damaged == 4)
 		{
 			result = AttackResult::Sink;
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 
 			if(playerPlaying == PLAYER_A)
 			{
@@ -209,7 +208,7 @@ void Game::game()
 			win = checkWin();
 			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " suicide" << std::endl;
-
+			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 		}
 		// Hit before \ hit myself
 		else if (damaged == 3)
@@ -276,16 +275,20 @@ void Game::game()
 int Game::checkWin()
 {
 	int count = 0;
+	std::vector<Ship*>* ps = (*playersShips).first;
 	for(int i =0 ; i < NUMBER_SHIPS; i++)
 	{
-		count += playerA->getShips()[i]->isSunk() ? 1 : 0;
+		//std::pair<std::vector<Ship*>*
+		count += ((ps->at(i)->isSunk()) ? 1 : 0);
 	}
 	if (count == 5)
 		return 0;
+	
 	count = 0;
+	ps = (*playersShips).second;
 	for (int i = 0; i < NUMBER_SHIPS; i++)
 	{
-		count += playerB->getShips()[i]->isSunk() ? 1 : 0;
+		count += ((ps->at(i)->isSunk()) ? 1 : 0);
 	}
 	if (count == 5)
 		return 1;

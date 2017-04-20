@@ -143,7 +143,7 @@ int Player::getAttackNumber() const
 
 char Player::getLetterByNumber(int number)
 {
-	return number == 0 ? 'A' : 'B';
+	return (number == 0 ? 'A' : 'B');
 }
 
 int Player::getPlayerNumber() const
