@@ -249,8 +249,10 @@ void Game::game(Player* playerA, Player* playerB)
 		std::cout << " Won" << std::endl;
 	}
 	std::cout << "Points:" << std::endl;
-	std::cout << "Player A: " + points.first << std::endl;
-	std::cout << "Player B: " + points.second << std::endl;
+	std::cout << "Player A: ";
+	std::cout << points.first << std::endl;
+	std::cout << "Player B: ";
+	std::cout << points.second << std::endl;
 
 }
 
