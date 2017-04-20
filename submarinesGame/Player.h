@@ -9,8 +9,6 @@
 #include <fstream>
 
 #define END_READ_ATTACK_FILE -1
-#define HIT '*'
-#define SINK '@'
 
 class Player
 {

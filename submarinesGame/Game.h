@@ -15,7 +15,7 @@ public:
 
 	void setBoard(const char ** board, int numRows, int numCols) override;
 
-	int isHit(int row, int col);
+	int isHit(int row, int col) const;
 
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
@@ -24,7 +24,7 @@ public:
 	void game(Player * playerA, Player * playerB);
 
 private:
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
+	mutable std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
 	char ** board;
 	Player* playerA;
 	Player* playerB;

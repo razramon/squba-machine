@@ -19,3 +19,10 @@
 // Players' numbers
 #define PLAYER_A 0
 #define PLAYER_B 1
+
+//attack's constants
+#define MISS 0
+#define HIT 1
+#define SUNK 2
+#define BAD_HIT 3
+#define SELF_DESTRUCT 4
