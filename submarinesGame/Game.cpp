@@ -205,7 +205,7 @@ void Game::game()
 				shipSunk.second++;
 			}
 			win = checkWin();
-			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " suicide" << std::endl;
 
 		}
@@ -215,7 +215,7 @@ void Game::game()
 			// Send hit, change playerPlaying
 			result = AttackResult::Hit;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " is self harm" << std::endl;
 		}
 		// Sink
@@ -234,7 +234,7 @@ void Game::game()
 				shipSunk.first++;
 			}
 
-			std::cout << std::to_string(curAttack.first) + "," + std::to_string(curAttack.second);
+			std::cout << std::to_string(curAttack.first) << "," << std::to_string(curAttack.second);
 			std::cout << " is dead" << std::endl;
 			win = checkWin();
 		}
