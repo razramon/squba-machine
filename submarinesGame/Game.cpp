@@ -74,21 +74,24 @@ void Game::setBoard(const char** board, int numRows, int numCols)
 	}
 }
 
-int Game::isHit(int row, int col) const
+int Game::isHit(int row, int col,char& letter) const
 {
 	Ship* s = nullptr;
+	int** posArray;
 	// Looping over all ships
-	for (int j = 0; j < 2; j++)
+	for (int j = 0; j < 2; ++j)
 	{
 		std::vector<Ship*>* ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
 		for (int i = 0; i < (*ps).size(); ++i)
 		{
 			s = (*ps).at(i);
+			posArray = ((*s).getPosition());
 			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
-				if (row==(*s).getPosition()[pos][0] && col== (*s).getPosition()[pos][1])
+				if (row==(posArray)[pos][0] && col==(posArray)[pos][1])
 				{
-					switch ((*s).getPosition()[pos][2]){
+					letter = (*s).getLetter();
+					switch (posArray[pos][2]){
 					case 0:
 						(*s).setPosition(pos, row, col, HIT);
 						if((playerPlaying==PLAYER_A && (*s).shipOfPlayer()==PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() == PLAYER_B))
@@ -108,6 +111,7 @@ int Game::isHit(int row, int col) const
 		}
 
 	}
+	letter = 'a';
 	return MISS;
 }
 void Game::notifyOnAttackResult(int player, int row, int col, AttackResult result)
@@ -168,7 +172,7 @@ void Game::game()
 {
 	int damaged = 0;;
 	int win = 0;
-
+	char letter = 'a';
 	while ((hasAttacks.first || hasAttacks.second) && win == 0)
 	{
 		std::pair<int, int> curAttack = attack();
@@ -182,7 +186,7 @@ void Game::game()
 			continue;
 		}
 
-		damaged = isHit(curAttack.first -1, curAttack.second -1);
+		damaged = isHit(curAttack.first-1, curAttack.second-1, letter);
 
 		// Destroy my own ship
 		if(damaged == 4)
@@ -192,12 +196,12 @@ void Game::game()
 
 			if(playerPlaying == PLAYER_A)
 			{
-				points.second += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
+				points.second += Ship::pointsOfShip(letter);
 				shipSunk.first++;
 			}
 			else
 			{
-				points.first += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
+				points.first += Ship::pointsOfShip(letter);
 				shipSunk.second++;
 			}
 			win = checkWin();
@@ -221,12 +225,12 @@ void Game::game()
 
 			if (playerPlaying == PLAYER_A)
 			{
-				points.first += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
+				points.first += Ship::pointsOfShip(letter);
 				shipSunk.second++;
 			}
 			else
 			{
-				points.second += Ship::pointsOfShip(board[curAttack.first-1][curAttack.second-1]);
+				points.second += Ship::pointsOfShip(letter);
 				shipSunk.first++;
 			}
 
@@ -250,8 +254,8 @@ void Game::game()
 		}
 
 		// Notify players on the result
-		notifyOnAttackResult(playerPlaying, curAttack.first, curAttack.second, result);
-		notifyOnAttackResult(playerPlaying, curAttack.first, curAttack.second, result);
+		notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
+		notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
 	}
 
 	if(win)

@@ -15,7 +15,7 @@ public:
 
 	void setBoard(const char ** board, int numRows, int numCols) override;
 
-	int isHit(int row, int col) const;
+	int isHit(int row, int col, char& letter) const;
 
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
