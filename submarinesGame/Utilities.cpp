@@ -1,5 +1,9 @@
 #include "Utilities.h"
 
+const std::string Utilities::ATTACK_A_SUFF = ".attack-a";
+const std::string Utilities::ATTACK_B_SUFF = ".attack-b";
+const std::string Utilities::BOARD_SUFF = ".sboard";
+
 Utilities::Utilities()
 {
 }
@@ -8,6 +12,41 @@ Utilities::~Utilities()
 {
 }
 
+
+/*
+*Returns true if path exists && it's a directory
+*/
+bool Utilities::doesPathExist(const char* path)
+{
+	DWORD dirAttr = GetFileAttributesA(path);
+	if (dirAttr == INVALID_FILE_ATTRIBUTES)
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
+}
+
+/*
+*Returns true if "filename" ends with "suffix"
+*/
+bool Utilities::endsWith(const std::string& fileName, const std::string& suffix)
+{
+	if (fileName.length() < suffix.length())
+	{
+		return false;
+	}
+	if (suffix.length() == 0) return true; //if suffix is the empty string returns true
+	size_t fln = fileName.length();
+	size_t sln = suffix.length();
+	for (int i = 0; i < sln; ++i)
+	{
+		if (suffix.at(i) != fileName.at(fln - sln + i))
+		{
+			return false;
+		}
+	}
+	return true;
+}
 
 /*
 * Returns the current stream position,
@@ -46,7 +85,9 @@ std::istream& Utilities::getAllKindsOfLine(std::istream& inputStream, std::strin
 	}
 	catch (std::exception& e)
 	{
-		throw Exception("Error: failed reading line.");
+		std::string s= "Error: failed reading line: ";
+		s.append(e.what());
+		throw Exception(s.c_str());
 	}
 }
 
@@ -67,3 +108,119 @@ std::string Utilities::workingDirectory() {
 	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
 	return std::string(buffer).substr(0, pos);
 }
+
+
+/* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF,
+* if it does && the according attackFileA/attackFileB/boardFile is NOT initiallized,
+* initializes it.
+* USER OF THIS FUNCTION HAVE TO FREE MEMORY THAT HAS BEEN ALLOCATED IN IT!!
+*  */
+void Utilities::checkFileName(const std::string& fileName, char** boardFile, char** attackFileA, char** attackFileB)
+{
+	if (Utilities::endsWith(fileName, ATTACK_A_SUFF) && *attackFileA == nullptr)
+	{
+		*attackFileA = new char[fileName.length() + 1];
+		strcpy_s(*attackFileA, fileName.length() + 1, fileName.c_str());
+	}
+	else if (Utilities::endsWith(fileName, ATTACK_B_SUFF) && *attackFileB == nullptr)
+	{
+		*attackFileB = new char[fileName.length() + 1];
+		strcpy_s(*attackFileB, fileName.length() + 1, fileName.c_str());
+	}
+	else if (Utilities::endsWith(fileName, BOARD_SUFF) && *boardFile == nullptr)
+	{
+		*boardFile = new char[fileName.length() + 1];
+		strcpy_s(*boardFile, fileName.length() + 1, fileName.c_str());
+	}
+}
+
+/*Checks if the path exists,
+*that the 3 files are there,
+*And if they are - updates their names */
+ bool Utilities::isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
+{
+
+	// Changing work directory to reletive path if needed
+	if (_chdir(path) != 0)
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+
+	char buffer[MAX_BUFFER];
+	std::string data_str;
+	std::string command = "2>NUL dir /a-d /b \"";
+	command.append(path);
+	command.append("\"");
+	FILE* fp;
+	if ((fp = _popen(command.c_str(), "r")) != NULL) {
+		while (fgets(buffer, MAX_BUFFER, fp))
+		{
+			data_str += std::string(buffer);
+		}
+		_pclose(fp);
+	}
+	else
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+	std::stringstream data_stream(data_str);
+	std::string line;
+	while (std::getline(data_stream, line))
+	{
+		checkFileName(line, boardFile, attackFileA, attackFileB);
+	}
+
+	//making sure everything's initiallized
+	if (*boardFile == nullptr || *attackFileA == nullptr || *attackFileB == nullptr) {
+		return false;
+	}
+
+	return true;
+}
+
+/*
+*Used when crucial files are missing, frees memory of files who where found,
+*Prints relevant errors to the screen
+*/
+void Utilities::printNotFoundFileErrors(const char* path, char* boardFile, char* attackFileA, char* attackFileB)
+{
+	if (boardFile == nullptr) {
+		std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+		if (attackFileA != nullptr)
+		{
+			delete attackFileA; //clear memory
+		}
+		else
+		{
+			std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
+		}
+		if (attackFileB != nullptr)
+		{
+			delete attackFileB; //clear memory
+		}
+		else
+		{
+			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+		}
+		return;
+	}
+	if (attackFileA == nullptr) {
+		delete boardFile; //clear memory, if got here it's not nullptr
+		std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
+		if (attackFileB != nullptr)
+		{
+			delete attackFileB; //clear memory
+		}
+		else
+		{
+			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+		}
+		return;
+	}
+	if (attackFileB == nullptr) {
+		delete boardFile; //clear memory, if got here it's not nullptr
+		delete attackFileA; //clear memory,  if got here it's not nullptr
+		std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
+	}
+}
+

@@ -1,263 +1,12 @@
-#include <windows.h>
-#include "Ship.h"
-#include "Sizes.h"
-#include <iostream>
-#include "Exception.h"
-#include "Macros.h"
-#include <fstream>
-#include <set>
-#include "Utilities.h"
+#include "BoardCreator.h"
 
-#include <stdlib.h>
-#include <direct.h>
-#include <string>
-#include "Game.h"
-
-using namespace std;
-static const char DEFAULT_LETTER='a';
-static const std::string ATTACK_A_SUFF = ".attack-a";
-static const std::string ATTACK_B_SUFF = ".attack-b";
-static const std::string BOARD_SUFF = ".sboard";
-
-/*
- *Returns true if path exists && it's a directory
- */
-static bool doesPathExist(const char* path)
+BoardCreator::BoardCreator()
 {
-	DWORD dirAttr = GetFileAttributesA(path);
-	if (dirAttr == INVALID_FILE_ATTRIBUTES)
-	{
-		throw Exception(exceptionInfo(WRONG_PATH,path));
-	} 
-	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
 
-/*
- *Returns true if "filename" ends with "suffix"  
- */
-static bool endsWith(const std::string& fileName, const std::string& suffix)
+BoardCreator::~BoardCreator()
 {
-	if (fileName.length() < suffix.length())
-	{
-		return false;
-	}
-	if (suffix.length() == 0) return true; //if suffix is the empty string returns true
-	size_t fln = fileName.length();
-	size_t sln = suffix.length();
-	for (int i = 0 ; i < sln; ++i)
-	{
-		if (suffix.at(i)!=fileName.at(fln-sln+i))
-		{
-			return false;
-		}
-	}
-	return true;
 }
-
-/* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF, 
- * if it does && the according attackFileA/attackFileB/boardFile is NOT initiallized,
- * initializes it.
- * USER OF THIS FUNCTION HAVE TO FREE MEMORY THAT HAS BEEN ALLOCATED IN IT!!
- *  */
-static void checkFileName(const std::string& fileName, char** boardFile, char** attackFileA, char** attackFileB)
-{
-	if (endsWith(fileName, ATTACK_A_SUFF) && *attackFileA==nullptr)
-	{
-		*attackFileA = new char[fileName.length() + 1];
-		strcpy_s(*attackFileA, fileName.length() + 1 , fileName.c_str());
-	} else if (endsWith(fileName, ATTACK_B_SUFF) && *attackFileB == nullptr)
-	{
-		*attackFileB = new char[fileName.length() + 1];
-		strcpy_s(*attackFileB, fileName.length() + 1, fileName.c_str());
-	} else if(endsWith(fileName, BOARD_SUFF) && *boardFile == nullptr)
-	{
-		*boardFile = new char[fileName.length() + 1];
-		strcpy_s(*boardFile, fileName.length() + 1, fileName.c_str());
-	}
-}
-
-/*Checks if the path exists,
- *that the 3 files are there, 
- *And if they are - updates their names */
-static bool isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
-{
-
-	// Changing work directory to reletive path if needed
-	if (_chdir(path) != 0)
-	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
-	}
-
-	std::string command = "";
-	command.insert(0, "2>NUL dir /b /a-d *.*");
-	command.append(" > file_names.txt");
-	//std::cout << "command is: " << command.c_str() << std::endl;
-	bool b = system(command.c_str()); //system returns 0 if succeeded
-
-	if(b)
-	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
-	}
-
-	std::ifstream file("file_names.txt");
-	if (!file) {
-		std::cout << "Error: could not read file_names.txt." << std::endl;
-		return false;
-	}
-	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	std::string line;
-	try
-	{
-		while (std::getline(file, line))
-		{
-
-			checkFileName(line, boardFile, attackFileA, attackFileB);
-		}
-	} catch (std::ifstream::failure e)
-	{
-		if (!file.eof())
-		{
-			std::cout << "Error: could not open/read file_names.txt, error is: " << e.what() << std::endl;
-			return false;
-		}  //otherwise, the exception caught is because the file has ended and it's OK!
-	}
-
-	//making sure everything's initiallized
-	if (*boardFile == nullptr || *attackFileA == nullptr || *attackFileB == nullptr) {
-		return false;
-	}
-	
-	//deletes the file we've created
-	file.close();
-	system("del file_names.txt");
-	return true;
-}
-
-/*
- *Used when crucial files are missing, frees memory of files who where found,
- *Prints relevant errors to the screen
- */
-static void printNotFoundFileErrors(const char* path,char* boardFile, char* attackFileA, char* attackFileB)
-{
-	if (boardFile == nullptr) {
-		std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
-		if (attackFileA != nullptr)
-		{
-			delete attackFileA; //clear memory
-		} else
-		{
-			std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
-		}
-		if (attackFileB != nullptr)
-		{
-			delete attackFileB; //clear memory
-		} else
-		{
-			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-		}
-		return;
-	}
-	if (attackFileA == nullptr) {
-		delete boardFile; //clear memory, if got here it's not nullptr
-		std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
-		if (attackFileB != nullptr)
-		{
-			delete attackFileB; //clear memory
-		}
-		else
-		{
-			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-		}
-		return;
-	}
-	if (attackFileB == nullptr) {
-		delete boardFile; //clear memory, if got here it's not nullptr
-		delete attackFileA; //clear memory,  if got here it's not nullptr
-		std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-	}
-}
-
-
-/*
- * This Function returns a refference to a 2D-array of chars, representing the game board
- * BOARD HAS TO BE DELETED USING "deleteBoard" FUNCTION!
- */
-static char** getBoardFromFile(const char* boardFile){
-	
-	char** board = new char*[BOARD_LENGTH];
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		board[i] = new char[BOARD_LENGTH];
-	}
-		
-	std::string line;
-	
-	//opening boardfile:
-	std::ifstream bfile(boardFile);
-	if (!bfile) {
-		throw Exception("Error: failed opening board file.");
-	}
-	int row = 0;
-	while (row < BOARD_LENGTH)
-	{
-		//reads 1 line from the file:
-		line.clear();
-		try
-		{
-			Utilities::getAllKindsOfLine(bfile, line);
-		}
-		catch (std::exception& e)
-		{
-			if (bfile.eof())
-			{
-				break;
-			}
-			else
-			{
-				//Frees memory of allocated board
-				for (int i = 0; i < BOARD_LENGTH; ++i)
-				{
-					delete[] board[i];
-				}
-				delete[] board;
-				bfile.close();
-				throw Exception("Error: failed reading from board file.");
-			}
-		}
-		if (line.length() < BOARD_LENGTH)
-		{
-			for (int col = 0; col < line.length(); ++col)
-			{
-				board[row][col] = line.at(col);
-			}
-			for (int col = line.length(); col < BOARD_LENGTH; ++col)
-			{
-				board[row][col] = ' ';
-			}
-		} else
-		{
-			for (int col = 0; col < BOARD_LENGTH; ++col)
-			{
-				board[row][col] = line.at(col);
-			}
-		}
-		++row;
-	}
-
-	if (row < BOARD_LENGTH)
-	{
-		for (int i = row; i < BOARD_LENGTH; ++i)
-		{
-			for (int j = 0; j < BOARD_LENGTH; ++j)
-			{
-				board[i][j] = ' ';
-			}
-		}
-	}
-	bfile.close();
-	return board;
-}
-
 
 /*
 * Gets a letter and the first index of the ship on the board:
@@ -270,7 +19,7 @@ static char** getBoardFromFile(const char* boardFile){
 *		badLetterIndexes - if it's not a ship, adds the Letters "bad" indexes to a list
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
-void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
+void BoardCreator::checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
 	char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
 	bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes)
 {
@@ -312,7 +61,7 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 		//If gets here,shipCells == Ship::sizeOfShip(letter):
 		if (((col <= numCols - 1) && board[currRow][col] != letter) || (col == numCols)) //Makes sure the ship is of right size (not too large)
 		{
-			Ship* ship =new Ship(letter);
+			Ship* ship = new Ship(letter);
 			shipsOfPlayer.push_back(ship);
 			for (int i = 0; i < shipCells; ++i)
 			{
@@ -365,7 +114,7 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 			shipsOfPlayer.push_back(ship);
 			for (int i = 0; i < shipCells; ++i)
 			{
-				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i,currRow + i, currCol, 0);
+				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, currRow + i, currCol, 0);
 			}
 			numShipsForCurrPlayer++;
 		}
@@ -405,14 +154,15 @@ void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int 
 	}
 }
 
+
 /*
- * Returns true if ship is next to another ship/"bad index", of the same letter! (==wrong shape)
- * @Params:
- *		badLetterIndexes - a vector containing all indexes in which the letter appeard in, and weren't valid
- *		ship - the ship we're checking
- *		letter - the ship's letter
- */
-bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& badLetterIndexes, std::vector<Ship*>& shipsOfPlayer)
+* Returns true if ship is next to another ship/"bad index", of the same letter! (==wrong shape)
+* @Params:
+*		badLetterIndexes - a vector containing all indexes in which the letter appeard in, and weren't valid
+*		ship - the ship we're checking
+*		letter - the ship's letter
+*/
+bool BoardCreator::checkShipShape(Ship* ship, char letter, std::vector<std::pair<int, int>*>& badLetterIndexes, std::vector<Ship*>& shipsOfPlayer)
 {
 	bool res = false;
 	int** pos = (*ship).getPosition();
@@ -422,10 +172,10 @@ bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& b
 	{
 		row = pos[i][0];
 		col = pos[i][1];
-		for (int k = 0; k <  badLetterIndexes.size(); ++k)
+		for (int k = 0; k < badLetterIndexes.size(); ++k)
 		{
-			if (((row == (*badLetterIndexes.at(k)).first)&&( col-1 == (*badLetterIndexes.at(k)).second || col + 1 == (*badLetterIndexes.at(k)).second))
-				|| ((col == (*badLetterIndexes.at(k)).second)&&(row - 1 == (*badLetterIndexes.at(k)).first || row + 1 == (*badLetterIndexes.at(k)).first)))
+			if (((row == (*badLetterIndexes.at(k)).first) && (col - 1 == (*badLetterIndexes.at(k)).second || col + 1 == (*badLetterIndexes.at(k)).second))
+				|| ((col == (*badLetterIndexes.at(k)).second) && (row - 1 == (*badLetterIndexes.at(k)).first || row + 1 == (*badLetterIndexes.at(k)).first)))
 			{
 				res = true;
 				break;
@@ -433,8 +183,8 @@ bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& b
 		}
 		if (res) break;
 	}
-	
-	if(!res) //now check in "valid" ships
+
+	if (!res) //now check in "valid" ships
 	{
 		for (int i = 0; i < shipsOfPlayer.size(); ++i)
 		{
@@ -460,7 +210,7 @@ bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& b
 
 				}
 			}
-			if(res)	break;
+			if (res)	break;
 		}
 	}
 	if (res)
@@ -477,7 +227,7 @@ bool checkShipShape(Ship* ship,char letter, std::vector<std::pair<int, int>*>& b
 /*
 *Returns true if there IS an adjacent (different) ship.
 */
-bool checkNeighbourShips1(char ** board, int currentRow, int currentCol, int numRows, int numCols)
+bool BoardCreator::checkNeighbourShips(char ** board, int currentRow, int currentCol, int numRows, int numCols)
 {
 	if (currentRow - 1 >= 0)
 	{
@@ -486,21 +236,21 @@ bool checkNeighbourShips1(char ** board, int currentRow, int currentCol, int num
 			return true;
 		}
 	}
-	if (currentCol -1 >=0)
+	if (currentCol - 1 >= 0)
 	{
 		if (Ship::isShip(board[currentRow][currentCol - 1]) && (board[currentRow][currentCol - 1] != board[currentRow][currentCol]))
 		{
 			return true;
 		}
 	}
-	if (currentRow+1 < numRows)
+	if (currentRow + 1 < numRows)
 	{
 		if (Ship::isShip(board[currentRow + 1][currentCol]) && (board[currentRow + 1][currentCol] != board[currentRow][currentCol]))
 		{
 			return true;
 		}
 	}
-	if (currentCol+1 < numCols)
+	if (currentCol + 1 < numCols)
 	{
 		if (Ship::isShip(board[currentRow][currentCol + 1]) && (board[currentRow][currentCol + 1] != board[currentRow][currentCol]))
 		{
@@ -510,7 +260,7 @@ bool checkNeighbourShips1(char ** board, int currentRow, int currentCol, int num
 	return false;
 }
 
-std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, int numRows, int numCols)
+std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(char ** board, int numRows, int numCols)
 {
 	std::vector<Ship*>* shipsA = new std::vector<Ship*>;
 	std::vector<Ship*>* shipsB = new std::vector<Ship*>;
@@ -524,7 +274,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 	std::vector<std::pair<int, int>*>* badLetterIndexes_d = new std::vector<std::pair<int, int>*>;
 	//Initialized to an arbitrary "badLetterIndex" in order to prevent error:
 	std::vector<std::pair<int, int>*>* badLetterIndexes = badLetterIndexes_B;
-	
+
 	std::set<char>  wrongSizeShapeShips;
 
 	int indexShipA = 0;
@@ -534,12 +284,12 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 	bool wrongSizeOrShape;
 	bool adjacentShips = false;
 	char letter = '`';
-	
+
 	for (int row = 0; row < numRows; row++) {
 		for (int col = 0; col < numCols; col++) {
 			if (Ship::isShip(board[row][col]))
 			{
-				adjacentShips = checkNeighbourShips1(board, row, col, numRows, numCols);
+				adjacentShips = checkNeighbourShips(board, row, col, numRows, numCols);
 			}
 			if (adjacentShips) break;
 		}
@@ -575,7 +325,8 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 				if (islower(letter))//letter is "player B"'s letter (small letters)
 				{
 					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipB, *shipsB, wrongSizeOrShape, *badLetterIndexes);
-				} else //"player A"'s letter
+				}
+				else //"player A"'s letter
 				{
 					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipA, *shipsA, wrongSizeOrShape, *badLetterIndexes);
 				}
@@ -591,7 +342,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 	for (int m = 0; m < 2; ++m)
 	{
 		std::vector<Ship*>* ships = (m == 0) ? shipsA : shipsB;
-		int numOfShipsToCheck = (m == 0) ? (*shipsA).size() : (*shipsB).size();
+		size_t numOfShipsToCheck = (m == 0) ? (*shipsA).size() : (*shipsB).size();
 		int originalShipIndex = 0;
 		int currShipToCheck = 0;
 		while (originalShipIndex < numOfShipsToCheck)
@@ -619,7 +370,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 			}
 			if (checkShipShape((*ships).at(currShipToCheck), (*((*ships).at(currShipToCheck))).getLetter(), *badLetterIndexes, (*ships)))//if true, it's invalid ship
 			{
-				(m==0) ? indexShipA-- : indexShipB--;
+				(m == 0) ? indexShipA-- : indexShipB--;
 				wrongSizeShapeShips.insert((*(*ships).at(currShipToCheck)).getLetter());
 				delete (*ships).at(currShipToCheck); //erase doesn't free allocated ship's space
 				(*ships).erase((*ships).begin() + currShipToCheck);
@@ -629,7 +380,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 			originalShipIndex++;
 		}
 	}
-	
+
 	/*Printing errors as instructed - wrong size or shape*/
 	if (wrongSizeShapeShips.size() > 0)
 	{
@@ -676,7 +427,7 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 	}
 
 	/*DELETEING allocations:*/
-	for (int k = 0; k < (*badLetterIndexes_B).size();++k)
+	for (int k = 0; k < (*badLetterIndexes_B).size(); ++k)
 	{
 		delete (*badLetterIndexes_B).at(k);
 	}
@@ -738,84 +489,82 @@ std::pair <std::vector<Ship*>*,std::vector<Ship*>*>* checkBoard(char ** board, i
 	return ret;
 }
 
+/*
+* This Function returns a refference to a 2D-array of chars, representing the game board
+* BOARD HAS TO BE DELETED USING "deleteBoard" FUNCTION!
+*/
+char** BoardCreator::getBoardFromFile(const char* boardFile) {
 
-
-int main(int argc, char* argv[])
-{
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
-
-	std::string path;
-	if (argc == 1)
-	{
-		path = Utilities::workingDirectory();
-	} else
-	{
-		path = argv[1];
-	}
-
-	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
-
-	bool pathIsValid = false;
-
-	try
-	{
-		pathIsValid = isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-		return 1;
-	}
-
-	if(!pathIsValid)
-	{
-		printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-		return 1;
-	}
-
-	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
-	char** board = nullptr;
-	try
-	{
-		board = getBoardFromFile(fullPathToBoard.c_str());
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
-		return 1;
-	}
-	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
-
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips = checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
-
-	if (playersShips == nullptr)
-	{
-		return 1; //Appropriate errors have already been printed in "checkBoard"
-	}
-
-	try
-	{
-		Game* firstGame = new Game(playersShips, &fullPathToAttackFileA, &fullPathToAttackFileB);
-		firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
-		firstGame->game();
-		delete firstGame;
-
-	} catch (std::exception& e)
-	{
-		std::cout << "Error: " << e.what() << std::endl;
-	}
-
-	//Frees memory of allocated board
+	char** board = new char*[BOARD_LENGTH];
 	for (int i = 0; i < BOARD_LENGTH; ++i)
 	{
-		delete[] board[i];
+		board[i] = new char[BOARD_LENGTH];
 	}
-	delete[] board;
 
-	delete[] boardFilePtr;
-	delete[] attackFileAPtr;
-	delete[] attackFileBPtr;
+	std::string line;
 
-	return 0;
+	//opening boardfile:
+	std::ifstream bfile(boardFile);
+	if (!bfile) {
+		throw Exception("Error: failed opening board file.");
+	}
+	int row = 0;
+	while (row < BOARD_LENGTH)
+	{
+		//reads 1 line from the file:
+		line.clear();
+		try
+		{
+			Utilities::getAllKindsOfLine(bfile, line);
+		}
+		catch (std::exception& e)
+		{
+			if (bfile.eof())
+			{
+				break;
+			}
+			//Frees memory of allocated board
+			for (int i = 0; i < BOARD_LENGTH; ++i)
+			{
+				delete[] board[i];
+			}
+			delete[] board;
+			bfile.close();
+			std::string str = e.what();
+			str.insert(0, "Error: failed reading from board file: ");
+			throw Exception(str.c_str());
+		}
+		if (line.length() < BOARD_LENGTH)
+		{
+			for (size_t col = 0; col < line.length(); ++col)
+			{
+				board[row][col] = line.at(col);
+			}
+			for (size_t col = line.length(); col < BOARD_LENGTH; ++col)
+			{
+				board[row][col] = ' ';
+			}
+		}
+		else
+		{
+			for (int col = 0; col < BOARD_LENGTH; ++col)
+			{
+				board[row][col] = line.at(col);
+			}
+		}
+		++row;
+	}
+
+	if (row < BOARD_LENGTH)
+	{
+		for (int i = row; i < BOARD_LENGTH; ++i)
+		{
+			for (int j = 0; j < BOARD_LENGTH; ++j)
+			{
+				board[i][j] = ' ';
+			}
+		}
+	}
+	bfile.close();
+	return board;
 }

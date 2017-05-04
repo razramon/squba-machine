@@ -1,6 +1,4 @@
 #include "Ship.h"
-#include "Sizes.h"
-#include <iostream>
 
 using namespace std;
 	
