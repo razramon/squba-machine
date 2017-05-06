@@ -568,3 +568,54 @@ char** BoardCreator::getBoardFromFile(const char* boardFile) {
 	bfile.close();
 	return board;
 }
+
+/*TODO:: this function
+* Gets a path, updates "
+*/
+int BoardCreator::findBoardFile(const char* path, size_t pathLen, char* boardFile)
+{
+	WIN32_FIND_DATAA ffd;
+	char szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	DWORD dwError = 0;
+
+	// Check that the input path plus 3 is not longer than MAX_PATH.
+	// Three characters are for the "\*" plus NULL appended below.
+	StringCchLengthA(path, MAX_PATH, &pathLen);
+	if (pathLen > (MAX_PATH - 3))
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+
+	// Prepare string for use with FindFile functions.  First, copy the
+	// string to a buffer, then append '\*' to the directory name.
+	StringCchCopyA(szDir, MAX_PATH, path);
+	StringCchCatA(szDir, MAX_PATH, "\\*");
+
+	// Find the first file in the directory.
+	hFind = FindFirstFileA(szDir, &ffd);
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		return dwError;
+	}
+
+	// checks all files in the directory in search for ".attack" files.
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
+		{
+			if (endsWith(std::string(ffd.cFileName), std::string(".attack")))
+			{
+				addAttackFileToList(attackFiles, std::string(ffd.cFileName));
+			}
+		}
+	} while (FindNextFileA(hFind, &ffd) != 0);
+	dwError = GetLastError();
+	if (dwError != ERROR_NO_MORE_FILES)
+	{
+		return dwError;
+	}
+	FindClose(hFind);
+	return dwError;
+}

@@ -18,5 +18,6 @@ public:
 	static bool checkNeighbourShips(char ** board, int currentRow, int currentCol, int numRows, int numCols);
 	static std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* checkBoard(char ** board, int numRows, int numCols);
 	static char** getBoardFromFile(const char* boardFile);
+	static int findBoardFile(const char* path, size_t pathLen, char* boardFile);
 };
 
