@@ -150,16 +150,20 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="NaiveAlgo.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Sizes.h" />
+    <ClInclude Include="SmartAlgo.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="NaiveAlgo.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
+    <ClCompile Include="SmartAlgo.cpp" />
     <ClCompile Include="submarinesGame.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
