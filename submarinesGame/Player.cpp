@@ -1,9 +1,4 @@
 #include "Player.h"
-#include <iostream>
-#include "Ship.h"
-#include "Sizes.h"
-#include <vector>
-#include "Utilities.h"
 
 using namespace std;
 
@@ -29,7 +24,6 @@ std::vector<std::pair<int, int>>* Player::getAttackFile(const char * attackFile)
 		}
 		catch (std::exception& e)
 		{
-			//TODO:: print the relevant messege. this one is temporary - meital: think i fixed it.. check it :)
 			delete attacks;
 			std::string s("Error: failed when reading attack file: ");
 			s.append(e.what());
@@ -119,19 +113,30 @@ void Player::attackResOnPlayer(char shipLetter, int row, int col, AttackResult r
 
 }
 
-std::pair<int, int>* Player::getAttack()
+std::pair<int, int> Player::attack()
 {
 	if (attackNumber < 0 || attackNumber>=(*attacks).size())
 	{
-		return nullptr;
+		return std::pair<int, int>(-1, -1);
 	}
 	++attackNumber;
 	if (attackNumber == (*attacks).size())
 	{
 		attackNumber = -1;
-		return &((*attacks).at(((*attacks).size()) - 1));
+		return ((*attacks).at(((*attacks).size()) - 1));
 	}
-	return &((*attacks).at(attackNumber-1));
+	return ((*attacks).at(attackNumber-1));
+}
+/*
+ * Returns true if this player still has an attack.
+ */
+bool Player::hasAttack() const
+{
+	if (attackNumber < 0 || attackNumber >= (*attacks).size())
+	{
+		return false;
+	}
+	return true;
 }
 
 Ship ** Player::getShips()
@@ -152,4 +157,52 @@ char Player::getLetterByNumber(int number)
 int Player::getPlayerNumber() const
 {
 	return playerNum;
+}
+
+void Player::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+{
+}
+//	switch (result)
+//	{
+//	case AttackResult::Miss:
+//		break;
+//	case AttackResult::Hit:
+//		break;
+//	case AttackResult::Sink:
+//		break;
+//	default:
+//		break;
+//
+//	}
+//	char letterSink = ' ';
+//	// Looping over all the ships of the player
+//	for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
+//	{
+//		// Looping over the position of each ship
+//		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
+//		{
+//			// If there is a match
+//			if (ships[indexShip].getPosition()[pos][0] == row && ships[indexShip].getPosition()[pos][1] == col)
+//			{
+//				// Changing to hit
+//				ships[indexShip].setPosition(pos, row, col, 1);
+//				if (result == AttackResult::Sink && this->isHit(row, col) != 3)
+//					totalNumberOfPoints += ships[indexShip].getNumberOfPoints();
+//			}
+//		}
+//	}
+//}
+
+void Player::setBoard(const char** board, int numRows, int numCols)
+{
+	//this->board = new char*[numRows];
+	//for (int indexRow = 0; indexRow < numRows; indexRow++)
+	//{
+	//	this->board[indexRow] = new char[numCols];
+
+	//	for (int indexCol = 0; indexCol < numCols; indexCol++)
+	//	{
+	//		this->board[indexRow][indexCol] = board[indexRow][indexCol];
+	//	}
+	//}
 }

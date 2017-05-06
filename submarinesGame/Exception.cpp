@@ -1,5 +1,4 @@
 #include "Exception.h"
-#include <iostream>
 
 
 Exception::Exception(const char* msgInfo)

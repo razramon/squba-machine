@@ -6,34 +6,29 @@
 #include "Player.h"
 #include <iostream>
 #include "Sizes.h"
+#include "BoardCreator.h"
 
-class Game : public IBattleshipGameAlgo
+class Game
 {
-public:
-	Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB);
-	~Game();
-
-	void setBoard(const char ** board, int numRows, int numCols) override;
-
-	int isHit(int row, int col, char& letter) const;
-
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
-
-	std::pair<int, int> attack() override;
-
-	void game();
-
-
-	int checkWin();
-
-private:
 	mutable std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
-	char ** board;
+	//char ** boardOfPlayerA;
+	//char ** boardOfPlayerB;
 	Player* playerA;
 	Player* playerB;
 	int playerPlaying;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
-	std::pair<bool, bool> hasAttacks;
+
+public:
+	Game(char** board, std::string& fullPathToAttackFileA, std::string& fullPathToAttackFileB);
+	~Game();
+
+	int isHit(int row, int col, char& letter) const;
+
+	void game();
+
+	int checkWin() const;
+
+
 };
 

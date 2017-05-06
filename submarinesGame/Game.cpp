@@ -1,19 +1,21 @@
 #include "Game.h"
 
-Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, std::string* fullPathToAttackFileA, std::string* fullPathToAttackFileB)
+
+Game::Game(char ** board, std::string& fullPathToAttackFileA, std::string& fullPathToAttackFileB)
 {
-	this->playersShips = playersShips;
-	this->points.first = 0;
-	this->points.second = 0;
-	this->hasAttacks.first = true;
-	this->hasAttacks.second = true;
-	// Creating new players for the test of the game
+	playersShips = BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
+
+	if (playersShips == nullptr)
+	{
+		throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
+	}
+	
 	try
 	{
-		this->playerA = new Player(PLAYER_A, *fullPathToAttackFileA, (*playersShips).first);
-		this->playerB = new Player(PLAYER_B, *fullPathToAttackFileB, (*playersShips).second);
-	}
-	catch (std::exception&e)
+		// Creating new players for the game
+		playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
+		playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+	} catch(std::exception& e)
 	{
 		//deletes ships to free allocated space
 		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
@@ -27,8 +29,7 @@ Game::Game(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips, st
 		}
 		delete (*playersShips).second;
 		delete playersShips;
-		throw &e;
-
+		throw e;
 	}
 	playerPlaying = PLAYER_A;
 }
@@ -53,25 +54,11 @@ Game::~Game()
 		delete playersShips;
 	}
 	//Frees memory of allocated board
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		delete[] board[i];
-	}
-	delete[] board;
-}
-
-void Game::setBoard(const char** board, int numRows, int numCols)
-{
-	this->board = new char*[numRows];
-	for (int indexRow = 0; indexRow < numRows; indexRow++)
-	{
-		this->board[indexRow] = new char[numCols];
-
-		for (int indexCol = 0; indexCol < numCols; indexCol++)
-		{
-			this->board[indexRow][indexCol] = board[indexRow][indexCol];
-		}
-	}
+	//for (int i = 0; i < BOARD_LENGTH; ++i)
+	//{
+	//	delete[] board[i];
+	//}
+	//delete[] board;
 }
 
 int Game::isHit(int row, int col,char& letter) const
@@ -116,75 +103,30 @@ int Game::isHit(int row, int col,char& letter) const
 	letter = 'a';
 	return MISS;
 }
-void Game::notifyOnAttackResult(int player, int row, int col, AttackResult result)
-{
-}
-//	switch (result)
-//	{
-//	case AttackResult::Miss:
-//		break;
-//	case AttackResult::Hit:
-//		break;
-//	case AttackResult::Sink:
-//		break;
-//	default:
-//		break;
-//
-//	}
-//	char letterSink = ' ';
-//	// Looping over all the ships of the player
-//	for (int indexShip = 0; indexShip < NUMBER_SHIPS; indexShip++)
-//	{
-//		// Looping over the position of each ship
-//		for (int pos = 0; pos < Ship::sizeOfShip(ships[indexShip].getLetter()); pos++)
-//		{
-//			// If there is a match
-//			if (ships[indexShip].getPosition()[pos][0] == row && ships[indexShip].getPosition()[pos][1] == col)
-//			{
-//				// Changing to hit
-//				ships[indexShip].setPosition(pos, row, col, 1);
-//				if (result == AttackResult::Sink && this->isHit(row, col) != 3)
-//					totalNumberOfPoints += ships[indexShip].getNumberOfPoints();
-//			}
-//		}
-//	}
-//}
-std::pair<int, int> Game::attack()
-{
-	std::pair<int, int>* attack = nullptr;
-
-	if (playerPlaying == PLAYER_A)
-	{
-		attack = playerA->getAttack();
-	}
-	else //player B's turn..
-	{
-		attack = playerB->getAttack();
-	}
-
-	if (attack == nullptr)
-	{
-		return std::pair<int, int>(-1, -1);
-	}
-	return *attack;
-
-}
 
 void Game::game()
 {
 	int damaged = 0;;
 	int win = -1;
 	char letter = 'a';
-	while ((hasAttacks.first || hasAttacks.second) && win == -1)
+	while (((*playerA).hasAttack() || (*playerB).hasAttack()) && win == -1)
 	{
 		letter = 'a';
-		std::pair<int, int> curAttack = attack();
+		std::pair<int, int> curAttack;
+		
+		if (playerPlaying == PLAYER_A)
+		{
+			curAttack = playerA->attack();
+		}
+		else //player B's turn..
+		{
+			curAttack = playerB->attack();
+		}
+		 
 		AttackResult result = AttackResult::Miss;
 
 		if(curAttack.first == -1 || curAttack.second == -1)
 		{
-			hasAttacks.first = curAttack.first == -1 ? false : true;
-			hasAttacks.second = curAttack.second == -1 ? false : true;
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			continue;
 		}
@@ -246,8 +188,8 @@ void Game::game()
 		}
 		win = checkWin();
 		// Notify players on the result
-		notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
-		notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
+		//notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
+		//notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
 	}
 
 	if(win != -1)
@@ -264,7 +206,7 @@ void Game::game()
 
 }
 
-int Game::checkWin()
+int Game::checkWin() const
 {
 	int count = 0;
 	std::vector<Ship*>* ps = (*playersShips).first;

@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BoardCreator.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BoardCreator.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="NaiveAlgo.cpp" />
