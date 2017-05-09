@@ -1,5 +1,7 @@
 #include "BoardCreator.h"
 
+const std::string BoardCreator::BOARD_SUFF = ".sboard";
+
 BoardCreator::BoardCreator()
 {
 }
@@ -491,15 +493,11 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 
 /*
 * This Function returns a refference to a 2D-array of chars, representing the game board
-* BOARD HAS TO BE DELETED USING "deleteBoard" FUNCTION!
+* BOARD HAS TO BE DELETED USING "freeBoard" FUNCTION!
 */
 char** BoardCreator::getBoardFromFile(const char* boardFile) {
 
-	char** board = new char*[BOARD_LENGTH];
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		board[i] = new char[BOARD_LENGTH];
-	}
+	char** board = createBoard(BOARD_LENGTH, BOARD_LENGTH);
 
 	std::string line;
 
@@ -569,53 +567,108 @@ char** BoardCreator::getBoardFromFile(const char* boardFile) {
 	return board;
 }
 
-/*TODO:: this function
-* Gets a path, updates "
+/*
+* Gets a path,
+* If it's a valid path and there exists a board file - updates "boardFile" to contain the name of the board file
+* and returns true.
+* If path is valid but there's no board file - returns false.
+* If path file isn't valid or an error accured - throws exception
 */
-int BoardCreator::findBoardFile(const char* path, size_t pathLen, char* boardFile)
+bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardFile)
 {
+	try
+	{
+		if(!(Utilities::doesPathExist(path)))
+		{
+			throw Exception(exceptionInfo(WRONG_PATH, path));
+		}
+	} catch (std::exception& e)
+	{
+		throw e;
+	}
+	
 	WIN32_FIND_DATAA ffd;
 	char szDir[MAX_PATH];
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	DWORD dwError = 0;
+	bool retVal = false;
 
-	// Check that the input path plus 3 is not longer than MAX_PATH.
-	// Three characters are for the "\*" plus NULL appended below.
+	// Check that the input path plus 3 is not longer than MAX_PATH: 3 characters for "\*" plus NULL appended below.
 	StringCchLengthA(path, MAX_PATH, &pathLen);
 	if (pathLen > (MAX_PATH - 3))
 	{
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	// Prepare string for use with FindFile functions.  First, copy the
-	// string to a buffer, then append '\*' to the directory name.
+	// Prepare string for use with FindFile functions: copy the string to a buffer, then append '\*' to the directory name.
 	StringCchCopyA(szDir, MAX_PATH, path);
 	StringCchCatA(szDir, MAX_PATH, "\\*");
 
 	// Find the first file in the directory.
 	hFind = FindFirstFileA(szDir, &ffd);
-
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-		return dwError;
+		throw Exception("Error: failed finding files in path");
 	}
 
-	// checks all files in the directory in search for ".attack" files.
+	// checks all files in the directory in search for ".sboard" files.
+	std::string currFileName;
 	do
 	{
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
 		{
-			if (endsWith(std::string(ffd.cFileName), std::string(".attack")))
+			currFileName = std::string(ffd.cFileName);
+			if (Utilities::endsWith(currFileName, std::string(".sboard")))
 			{
-				addAttackFileToList(attackFiles, std::string(ffd.cFileName));
+				*boardFile = new char[currFileName.size() + 1];
+				strcpy_s(*boardFile, currFileName.size() + 1, ffd.cFileName);
+				retVal = true;
+				break;
 			}
 		}
 	} while (FindNextFileA(hFind, &ffd) != 0);
-	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
-		return dwError;
-	}
 	FindClose(hFind);
-	return dwError;
+	return retVal;
+}
+
+/*
+ * Deletes memory allocations of "board" including itself.
+ */
+void BoardCreator::freeBoard(char ** board, int numRows)
+{
+	for (int row = 0; row < numRows; row++)
+	{
+		delete[] board[row];
+	}
+	delete[] board;
+}
+
+/*
+* Allocates memory for a "board", returns a pointer to it.
+* User of this function should delete the memory allocated in it using "freeBoard"!
+*/
+char ** BoardCreator::createBoard(int numRows, int numCols)
+{
+	char** board = new char*[numRows];
+	for (int i = 0; i < numRows; ++i)
+	{
+		board[i] = new char[numCols];
+	}
+	return board;
+}
+
+/*
+* Creates a copy of "board" - Allocates memory for that copy. 
+* User of this function should delete the memory allocated in it using "freeBoard"!
+*/
+char ** BoardCreator::copyBoard(const char ** board, int numRows, int numCols)
+{
+	char **retBoard = createBoard(numRows, numCols);
+	for (int row = 0; row < numRows; row++)
+	{
+		for (int col = 0; col < numCols; col++){
+			retBoard[row][col] = board[row][col];
+		}
+	}
+	return retBoard;
 }

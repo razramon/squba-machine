@@ -26,18 +26,17 @@ int main(int argc, char* argv[])
 		path = Utilities::workingDirectory();
 	} else
 	{
+		//TODO:: need to edit this, so that if there are more than 1 parameters it will choose the right "argv[i]"!
 		path = argv[1];
 	}
 
 	char* boardFilePtr = nullptr;
-	char* attackFileAPtr = nullptr;
-	char* attackFileBPtr = nullptr;
 
 	bool pathIsValid = false;
 
 	try
 	{
-		pathIsValid = Utilities::isValidPath(path.c_str(), &boardFilePtr, &attackFileAPtr, &attackFileBPtr);
+		pathIsValid = Utilities::isValidPath(path, &boardFilePtr);
 	} catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
