@@ -26,3 +26,4 @@
 #define SUNK 2
 #define BAD_HIT 3
 #define SELF_DESTRUCT 4
+

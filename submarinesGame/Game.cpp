@@ -1,9 +1,21 @@
 #include "Game.h"
 
 
-Game::Game(char ** board, std::string& fullPathToAttackFileA, std::string& fullPathToAttackFileB)
+bool Game::initPlayers(std::string & allErrors, int playerNum)
 {
-	playersShips = BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
+	IBattleshipGameAlgo* currentPlayer = (playerNum==PLAYER_A? playerA : playerB);
+
+	return false;
+}
+
+Game::Game(char ** board, std::vector<std::string>& filesFound):
+	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A)
+{
+	/**TODO:: don't forget to insert these to initialize list!**/
+	//IBattleshipGameAlgo* playerA;
+	//IBattleshipGameAlgo* playerB;
+	//std::pair<int, int> points;
+	//std::pair<int, int> shipSunk;
 
 	if (playersShips == nullptr)
 	{
@@ -12,9 +24,25 @@ Game::Game(char ** board, std::string& fullPathToAttackFileA, std::string& fullP
 	
 	try
 	{
-		// Creating new players for the game
-		playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
-		playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+		std::string allErrors;
+		//// Creating new players for the game
+		//playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
+		//playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
+		{
+			// Load dynamic library
+			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str()); // Notice: Unicode compatible version of LoadLibrary
+			if (!hDll)
+			{
+				allErrors.append("Cannot load dll: ");
+				allErrors.append(filesFound.at(i)+"\n");
+				initPlayers(allErrors);
+			}
+		}
+
+		
+
+
 	} catch(std::exception& e)
 	{
 		//deletes ships to free allocated space
@@ -31,28 +59,28 @@ Game::Game(char ** board, std::string& fullPathToAttackFileA, std::string& fullP
 		delete playersShips;
 		throw e;
 	}
-	playerPlaying = PLAYER_A;
+	
 }
 
 Game::~Game()
 {
-	delete playerA;
-	delete playerB;
-	if (playersShips != nullptr)
-	{
-		//deletes ships to free allocated space
-		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
-		{
-			delete ((*((*playersShips).first)).at(i));
-		}
-		delete (*playersShips).first;
-		for (int i = 0; i < (*(*playersShips).second).size(); ++i)
-		{
-			delete ((*((*playersShips).second)).at(i));
-		}
-		delete (*playersShips).second;
-		delete playersShips;
-	}
+	//delete playerA;
+	//delete playerB;
+	//if (playersShips != nullptr)
+	//{
+	//	//deletes ships to free allocated space
+	//	for (int i = 0; i < (*(*playersShips).first).size(); ++i)
+	//	{
+	//		delete ((*((*playersShips).first)).at(i));
+	//	}
+	//	delete (*playersShips).first;
+	//	for (int i = 0; i < (*(*playersShips).second).size(); ++i)
+	//	{
+	//		delete ((*((*playersShips).second)).at(i));
+	//	}
+	//	delete (*playersShips).second;
+	//	delete playersShips;
+	//}
 	//Frees memory of allocated board
 	//for (int i = 0; i < BOARD_LENGTH; ++i)
 	//{
@@ -106,103 +134,103 @@ int Game::isHit(int row, int col,char& letter) const
 
 void Game::game()
 {
-	int damaged = 0;;
-	int win = -1;
-	char letter = 'a';
-	while (((*playerA).hasAttack() || (*playerB).hasAttack()) && win == -1)
-	{
-		letter = 'a';
-		std::pair<int, int> curAttack;
-		
-		if (playerPlaying == PLAYER_A)
-		{
-			curAttack = playerA->attack();
-		}
-		else //player B's turn..
-		{
-			curAttack = playerB->attack();
-		}
-		 
-		AttackResult result = AttackResult::Miss;
+	//int damaged = 0;;
+	//int win = -1;
+	//char letter = 'a';
+	//while (((*playerA).hasAttack() || (*playerB).hasAttack()) && win == -1)
+	//{
+	//	letter = 'a';
+	//	std::pair<int, int> curAttack;
+	//	
+	//	if (playerPlaying == PLAYER_A)
+	//	{
+	//		curAttack = playerA->attack();
+	//	}
+	//	else //player B's turn..
+	//	{
+	//		curAttack = playerB->attack();
+	//	}
+	//	 
+	//	AttackResult result = AttackResult::Miss;
 
-		if(curAttack.first == -1 || curAttack.second == -1)
-		{
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-			continue;
-		}
+	//	if(curAttack.first == -1 || curAttack.second == -1)
+	//	{
+	//		playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+	//		continue;
+	//	}
 
-		damaged = isHit(curAttack.first-1, curAttack.second-1, letter);
+	//	damaged = isHit(curAttack.first-1, curAttack.second-1, letter);
 
-		// Destroy my own ship
-		if(damaged == 4)
-		{
-			result = AttackResult::Sink;
+	//	// Destroy my own ship
+	//	if(damaged == 4)
+	//	{
+	//		result = AttackResult::Sink;
 
 
-			if(playerPlaying == PLAYER_A)
-			{
-				points.second += Ship::pointsOfShip(letter);
-				shipSunk.first += 1;
-			}
-			else
-			{
-				points.first += Ship::pointsOfShip(letter);
-				shipSunk.second += 1;
-			}
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+	//		if(playerPlaying == PLAYER_A)
+	//		{
+	//			points.second += Ship::pointsOfShip(letter);
+	//			shipSunk.first += 1;
+	//		}
+	//		else
+	//		{
+	//			points.first += Ship::pointsOfShip(letter);
+	//			shipSunk.second += 1;
+	//		}
+	//		playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 
-		}
-		// Hit before \ hit myself
-		else if (damaged == 3)
-		{
-			// Send hit, change playerPlaying
-			result = AttackResult::Hit;
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-		}
-		// Sink
-		else if (damaged == 2)
-		{
-			result = AttackResult::Sink;
+	//	}
+	//	// Hit before \ hit myself
+	//	else if (damaged == 3)
+	//	{
+	//		// Send hit, change playerPlaying
+	//		result = AttackResult::Hit;
+	//		playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+	//	}
+	//	// Sink
+	//	else if (damaged == 2)
+	//	{
+	//		result = AttackResult::Sink;
 
-			if (playerPlaying == PLAYER_A)
-			{
-				points.first += Ship::pointsOfShip(letter);
-				shipSunk.second +=1;
-			}
-			else
-			{
-				points.second += Ship::pointsOfShip(letter);
-				shipSunk.first +=1;
-			}
-		}
-		// Hit 
-		else if (damaged == 1)
-		{
-			result = AttackResult::Hit;
-		}
-		// Miss
-		else
-		{
-			// Change playerPlaying
-			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
-		}
-		win = checkWin();
-		// Notify players on the result
-		//notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
-		//notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
-	}
+	//		if (playerPlaying == PLAYER_A)
+	//		{
+	//			points.first += Ship::pointsOfShip(letter);
+	//			shipSunk.second +=1;
+	//		}
+	//		else
+	//		{
+	//			points.second += Ship::pointsOfShip(letter);
+	//			shipSunk.first +=1;
+	//		}
+	//	}
+	//	// Hit 
+	//	else if (damaged == 1)
+	//	{
+	//		result = AttackResult::Hit;
+	//	}
+	//	// Miss
+	//	else
+	//	{
+	//		// Change playerPlaying
+	//		playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
+	//	}
+	//	win = checkWin();
+	//	// Notify players on the result
+	//	//notifyOnAttackResult(PLAYER_A, curAttack.first, curAttack.second, result);
+	//	//notifyOnAttackResult(PLAYER_B, curAttack.first, curAttack.second, result);
+	//}
 
-	if(win != -1)
-	{
-		std::cout << "Player " << Player::getLetterByNumber(win);
-		std::cout << " won" << std::endl;
-	}
+	//if(win != -1)
+	//{
+	//	std::cout << "Player " << Player::getLetterByNumber(win);
+	//	std::cout << " won" << std::endl;
+	//}
 
-	std::cout << "Points:" << std::endl;
-	std::cout << "Player A: ";
-	std::cout << points.first << std::endl;
-	std::cout << "Player B: ";
-	std::cout << points.second << std::endl;
+	//std::cout << "Points:" << std::endl;
+	//std::cout << "Player A: ";
+	//std::cout << points.first << std::endl;
+	//std::cout << "Player B: ";
+	//std::cout << points.second << std::endl;
 
 }
 

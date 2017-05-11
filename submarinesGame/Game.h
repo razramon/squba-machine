@@ -3,7 +3,6 @@
 #include "IBattleshipGameAlgo.h"
 #include "Ship.h"
 #include <vector>
-#include "Player.h"
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
@@ -11,16 +10,16 @@
 class Game
 {
 	mutable std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
+	int playerPlaying;
 	//char ** boardOfPlayerA;
 	//char ** boardOfPlayerB;
-	Player* playerA;
-	Player* playerB;
-	int playerPlaying;
+	IBattleshipGameAlgo* playerA;
+	IBattleshipGameAlgo* playerB;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
-
+	bool initPlayers(std::string& allErrors, int playerNum);
 public:
-	Game(char** board, std::string& fullPathToAttackFileA, std::string& fullPathToAttackFileB);
+	Game(char** board, std::vector<std::string>& filesFound);
 	~Game();
 
 	int isHit(int row, int col, char& letter) const;

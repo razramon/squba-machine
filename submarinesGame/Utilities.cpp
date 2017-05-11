@@ -1,13 +1,32 @@
 #include "Utilities.h"
 
 const std::string Utilities::ATTACK_SUFF = ".attack";
+const std::string Utilities::BOARD_SUFF = ".sboard";
+const std::string Utilities::DLL_SUFF = ".dll";
+const int Utilities::NUMBER_DLLS = 2;
+const int Utilities::FILE_NOT_FOUND_ERROR = -1;
+const int Utilities::INDEX_PATH_DLL_A = 0;
+const int Utilities::INDEX_PATH_DLL_B = 1;
+const int Utilities::INDEX_BOARD_PATH = 2;
 
-Utilities::Utilities()
-{
-}
 
-Utilities::~Utilities()
+void Utilities::getFullPath(std::string& path)
 {
+	char path_c[MAX_BUFFER];
+	strncpy_s(path_c, path.c_str(), path.size());
+	DWORD  retval = 0;
+	char buffer[MAX_BUFFER];
+	char** lppPart = { nullptr };
+
+	// Retrieve the full path name for a file. 
+	retval = GetFullPathNameA(path_c, MAX_BUFFER, buffer, lppPart);
+
+	if (retval == 0)
+	{
+		// Handle an error condition.
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+	path = buffer;	
 }
 
 
@@ -108,256 +127,192 @@ std::string Utilities::workingDirectory() {
 }
 
 
-///* Checks if a given fileName ends with ATTACK_A_SUFF/ATTACK_B_SUFF/BOARD_SUFF,
-//* if it does && the according attackFileA/attackFileB/boardFile is NOT initiallized,
-//* initializes it.
-//* USER OF THIS FUNCTION HAVE TO FREE MEMORY THAT HAS BEEN ALLOCATED IN IT!!
-//*  */
-//void Utilities::checkFileName(const std::string& fileName, char** boardFile, char** attackFileA, char** attackFileB)
-//{
-//	if (Utilities::endsWith(fileName, ATTACK_A_SUFF) && *attackFileA == nullptr)
-//	{
-//		*attackFileA = new char[fileName.length() + 1];
-//		strcpy_s(*attackFileA, fileName.length() + 1, fileName.c_str());
-//	}
-//	else if (Utilities::endsWith(fileName, ATTACK_B_SUFF) && *attackFileB == nullptr)
-//	{
-//		*attackFileB = new char[fileName.length() + 1];
-//		strcpy_s(*attackFileB, fileName.length() + 1, fileName.c_str());
-//	}
-//	else if (Utilities::endsWith(fileName, BOARD_SUFF) && *boardFile == nullptr)
-//	{
-//		*boardFile = new char[fileName.length() + 1];
-//		strcpy_s(*boardFile, fileName.length() + 1, fileName.c_str());
-//	}
-//}
-
 /*Checks if the path exists,
-*that the 3 files are there,
-*And if they are - updates their names */
-//TODO:: fix this function!!
- bool Utilities::isValidPath(const char* path, char** boardFile, char** attackFileA, char** attackFileB)
+*that the board file is there,
+*And if it is- updates its names */
+ bool Utilities::isValidPath(const std::string path, std::string& boardFile)
 {
-	// Changing work directory to reletive path if needed
-	if (_chdir(path) != 0)
+	// Change working directory to reletive path if needed
+	if (_chdir(path.c_str()) != 0)
 	{
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	try
+	WIN32_FIND_DATAA ffd;
+	char szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	// Check that input path+3 isn't longer than MAX_PATH, 3 characters for the "\*" plus NULL appended below.
+	if (path.size() > (MAX_PATH - 3))
 	{
-		std::vector<std::string> attackFiles;
-		findAttackFiles(path, std::strlen(path), attackFiles);
-	} catch (std::exception& e)
-	{
-		throw e;
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	//char buffer[MAX_BUFFER];
-	//std::string data_str;
-	//std::string command = "2>NUL dir /a-d /b \"";
-	//command.append(path);
-	//command.append("\"");
-	//FILE* fp;
-	//if ((fp = _popen(command.c_str(), "r")) != NULL) {
-	//	while (fgets(buffer, MAX_BUFFER, fp))
-	//	{
-	//		data_str += std::string(buffer);
-	//	}
-	//	_pclose(fp);
-	//}
-	//else
-	//{
-	//	throw Exception(exceptionInfo(WRONG_PATH, path));
-	//}
-	//std::stringstream data_stream(data_str);
-	//std::string line;
-	//while (std::getline(data_stream, line))
-	//{
-	//	checkFileName(line, boardFile, attackFileA, attackFileB);
-	//}
+	// Prepare string for use with FindFile functions.  First, copy the
+	// string to a buffer, then append '\*' to the directory name.
+	StringCchCopyA(szDir, MAX_PATH, path.c_str());
+	StringCchCatA(szDir, MAX_PATH, "\\*");
 
-	//making sure everything's initiallized
-	if (*boardFile == nullptr || *attackFileA == nullptr || *attackFileB == nullptr) {
-		return false;
+	// Find the first file in the directory.
+	hFind = FindFirstFileA(szDir, &ffd);
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
 
-	return true;
+	// checks all files in the directory in search for ".sboard" file.
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
+		{
+			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(Utilities::BOARD_SUFF)))
+			{
+				boardFile = std::string(ffd.cFileName);
+				FindClose(hFind);
+				return true;
+			}
+		}
+	} while (FindNextFileA(hFind, &ffd) != 0);
+	FindClose(hFind);
+	return false;
 }
 
 /*
-*Used when crucial files are missing, frees memory of files who where found,
-*Prints relevant errors to the screen
+* Prints relevant errors to the screen
 */
-void Utilities::printNotFoundFileErrors(const char* path, char* boardFile, char* attackFileA, char* attackFileB)
+void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& path,const std::vector<std::string>& filesFound)
 {
-	if (boardFile == nullptr) {
-		std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
-		if (attackFileA != nullptr)
-		{
-			delete attackFileA; //clear memory
-		}
-		else
-		{
-			std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
-		}
-		if (attackFileB != nullptr)
-		{
-			delete attackFileB; //clear memory
-		}
-		else
-		{
-			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-		}
-		return;
-	}
-	if (attackFileA == nullptr) {
-		delete boardFile; //clear memory, if got here it's not nullptr
-		std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << path << std::endl;
-		if (attackFileB != nullptr)
-		{
-			delete attackFileB; //clear memory
-		}
-		else
-		{
-			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-		}
-		return;
-	}
-	if (attackFileB == nullptr) {
-		delete boardFile; //clear memory, if got here it's not nullptr
-		delete attackFileA; //clear memory,  if got here it's not nullptr
-		std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << path << std::endl;
-	}
+	if (!pathIsValid) std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+	if (filesFound.size()<2) std::cout << "Missing an algorithm (dll) file looking in path: " << path << std::endl;
 }
 
-/*TODO:: move this function to relevant algorithm
-* Maintains "attackFiles" to hold at most 2 attack files,
+/*
+ * Returns a vector of size 3, containing:
+ *				index 0 = INDEX_PATH_DLL_A =  full path to player A's dll
+ *				index 1 = INDEX_PATH_DLL_B = full path to player B's dll
+ *				index 2 = INDEX_BOARD_PATH = full path to board.
+ *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
+ */
+std::vector<std::string>* Utilities::buildPath(int argc, char * argv[])
+{
+	std::string path;
+	if (argc == 1)
+	{
+		path = workingDirectory();
+	}
+	else
+	{
+		//TODO:: need to edit this, so that if there are more than 1 parameters it will choose the right "argv[i]"!
+		path = argv[1];
+	}
+
+	std::string boardFilePtr, fullPathToBoard;
+	bool pathIsValid = false;
+	std::vector<std::string>* filesFound = new std::vector<std::string>;
+
+	try
+	{
+		getFullPath(path);
+		pathIsValid = isValidPath(path, boardFilePtr);
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return filesFound;
+	}
+
+	find2FilesWithSuf(path.c_str(), path.size(), *filesFound, DLL_SUFF);
+	if (((*filesFound).size() != NUMBER_DLLS) || (!pathIsValid))
+	{
+		printNotFoundFileErrors(pathIsValid, path, *filesFound);
+	} else
+	{
+		(*filesFound).push_back(path + "\\" + boardFilePtr);
+	}
+
+	return filesFound;
+}
+
+
+/*
+* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files - oredered lexicographically
+* Returns:  number of files found (1 or 2) in path, which are inerted to "filesFound" vector,
+*			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
+*/
+int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound,const std::string suffix)
+{
+	WIN32_FIND_DATAA ffd;
+	char szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	// Check that the input path plus 3 is not longer than MAX_PATH.
+	// Three characters are for the "\*" plus NULL appended below.
+	StringCchLengthA(path, MAX_PATH, &pathLen);
+	if (pathLen > (MAX_PATH - 3))
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// Prepare string for use with FindFile functions.  First, copy the
+	// string to a buffer, then append '\*' to the directory name.
+	StringCchCopyA(szDir, MAX_PATH, path);
+	StringCchCatA(szDir, MAX_PATH, "\\*");
+
+	// Find the first file in the directory.
+	hFind = FindFirstFileA(szDir, &ffd);
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// checks all files in the directory in search for files that end with suffix.
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
+		{
+			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(suffix)))
+			{
+				addFileToList(filesFound, std::string(ffd.cFileName), path);
+			}
+		}
+	} while (FindNextFileA(hFind, &ffd) != 0);
+	if (GetLastError() != ERROR_NO_MORE_FILES)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+	FindClose(hFind);
+	return filesFound.size();
+}
+
+/*
+* Maintains "filesFound" to hold at most 2 files,
 * The ones which are first lexicographically.
 */
-void Utilities::addAttackFileToList(std::vector<std::string>& attackFiles, std::string filename)
+void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path)
 {
-	if (attackFiles.size() == 0)
+	if (filesFound.size() == 0)
 	{
-		attackFiles.push_back(filename);
+		filesFound.push_back(path + "\\" + filename);
 		return;
 	}
 	std::vector<std::string>::iterator iter;
-	for (iter = attackFiles.begin(); iter != attackFiles.end(); ++iter)
+	for (iter = filesFound.begin(); iter != filesFound.end(); ++iter)
 	{
 		if (*iter >= filename)
 		{
-			attackFiles.insert(iter, filename);
-			if (attackFiles.size() > 2) //deletes the "largest" file (lexicographically)
+
+			filesFound.insert(iter, path + "\\"+ filename);
+			if (filesFound.size() > 2) //deletes the "largest" file (lexicographically)
 			{
-				attackFiles.pop_back();
+				filesFound.pop_back();
 			}
 			break; //To avoid inserting "filename" twice.
 		}
 	}
-	if (attackFiles.size() < 2) //means: there was only 1 file in "attackFiles" which was smaller (lexicographically) than "filename"
+	if (filesFound.size() < 2) //means: there was only 1 file in "filesFound" which was smaller (lexicographically) than "filename"
 	{
-		attackFiles.push_back(filename);
+
+		filesFound.push_back(path + "\\" + filename);
 	}
-}
-
-/*TODO:: move this function to relevant algorithm
- * Gets a valid path (directory), updates "attackFiles" to contain 2 (at most) attack files - oredered lexicographically 
- */
-int Utilities::findAttackFiles(const char* path, size_t pathLen, std::vector<std::string>& attackFiles)
-{
-	WIN32_FIND_DATAA ffd;
-	char szDir[MAX_PATH];
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
-
-	// Check that the input path plus 3 is not longer than MAX_PATH.
-	// Three characters are for the "\*" plus NULL appended below.
-	StringCchLengthA(path, MAX_PATH, &pathLen);
-	if (pathLen > (MAX_PATH - 3))
-	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
-	}
-
-	// Prepare string for use with FindFile functions.  First, copy the
-	// string to a buffer, then append '\*' to the directory name.
-	StringCchCopyA(szDir, MAX_PATH, path);
-	StringCchCatA(szDir, MAX_PATH, "\\*");
-
-	// Find the first file in the directory.
-	hFind = FindFirstFileA(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		return dwError;
-	}
-
-	// checks all files in the directory in search for ".attack" files.
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
-		{
-			if (endsWith(std::string(ffd.cFileName), std::string(".attack")))
-			{
-				addAttackFileToList(attackFiles, std::string(ffd.cFileName));
-			}
-		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
-	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
-		return dwError;
-	}
-	FindClose(hFind);
-	return dwError;
-}
-
-/*TODO:: move this function to relevant algorithm
- * Gets a valid path (directory), updates "attackFiles" to contain 2 (at most) attack files - oredered lexicographically 
- */
-void Utilities::findAttackFiles(const char* path, size_t pathLen, std::vector<std::string>& attackFiles)
-{
-	WIN32_FIND_DATAA ffd;
-	char szDir[MAX_PATH];
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
-
-	// Check that the input path plus 3 is not longer than MAX_PATH.
-	// Three characters are for the "\*" plus NULL appended below.
-	StringCchLengthA(path, MAX_PATH, &pathLen);
-	if (pathLen > (MAX_PATH - 3))
-	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
-	}
-
-	// Prepare string for use with FindFile functions.  First, copy the
-	// string to a buffer, then append '\*' to the directory name.
-	StringCchCopyA(szDir, MAX_PATH, path);
-	StringCchCatA(szDir, MAX_PATH, "\\*");
-
-	// Find the first file in the directory.
-	hFind = FindFirstFileA(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		throw Exception("Error: failed finding files in path");
-	}
-
-	// checks all files in the directory in search for ".attack" files.
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
-		{
-			if (endsWith(std::string(ffd.cFileName), std::string(ATTACK_SUFF)))
-			{
-				addAttackFileToList(attackFiles, std::string(ffd.cFileName));
-			}
-		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
-	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
-		throw Exception("Error: failed passing all files in path");
-	}
-	FindClose(hFind);
 }
