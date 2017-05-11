@@ -1,37 +1,65 @@
 #include "Game.h"
 
 
-Game::Game(char ** board, std::string& fullPathToAttackFileA, std::string& fullPathToAttackFileB)
+bool Game::initPlayers(std::string & allErrors, int playerNum)
 {
-	//playersShips = BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH);
+	IBattleshipGameAlgo* currentPlayer = (playerNum==PLAYER_A? playerA : playerB);
 
-	//if (playersShips == nullptr)
-	//{
-	//	throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
-	//}
-	//
-	//try
-	//{
-	//	// Creating new players for the game
-	//	playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
-	//	playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
-	//} catch(std::exception& e)
-	//{
-	//	//deletes ships to free allocated space
-	//	for (int i = 0; i < (*(*playersShips).first).size(); ++i)
-	//	{
-	//		delete ((*((*playersShips).first)).at(i));
-	//	}
-	//	delete (*playersShips).first;
-	//	for (int i = 0; i < (*(*playersShips).second).size(); ++i)
-	//	{
-	//		delete ((*((*playersShips).second)).at(i));
-	//	}
-	//	delete (*playersShips).second;
-	//	delete playersShips;
-	//	throw e;
-	//}
-	//playerPlaying = PLAYER_A;
+	return false;
+}
+
+Game::Game(char ** board, std::vector<std::string>& filesFound):
+	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A)
+{
+	/**TODO:: don't forget to insert these to initialize list!**/
+	//IBattleshipGameAlgo* playerA;
+	//IBattleshipGameAlgo* playerB;
+	//std::pair<int, int> points;
+	//std::pair<int, int> shipSunk;
+
+	if (playersShips == nullptr)
+	{
+		throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
+	}
+	
+	try
+	{
+		std::string allErrors;
+		//// Creating new players for the game
+		//playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
+		//playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
+		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
+		{
+			// Load dynamic library
+			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str()); // Notice: Unicode compatible version of LoadLibrary
+			if (!hDll)
+			{
+				allErrors.append("Cannot load dll: ");
+				allErrors.append(filesFound.at(i)+"\n");
+				initPlayers(allErrors);
+			}
+		}
+
+		
+
+
+	} catch(std::exception& e)
+	{
+		//deletes ships to free allocated space
+		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
+		{
+			delete ((*((*playersShips).first)).at(i));
+		}
+		delete (*playersShips).first;
+		for (int i = 0; i < (*(*playersShips).second).size(); ++i)
+		{
+			delete ((*((*playersShips).second)).at(i));
+		}
+		delete (*playersShips).second;
+		delete playersShips;
+		throw e;
+	}
+	
 }
 
 Game::~Game()

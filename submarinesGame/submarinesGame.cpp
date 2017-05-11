@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		//firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
-		Game* firstGame = new Game(board, (*filesFound).at(Utilities::INDEX_PATH_DLL_A), (*filesFound).at(Utilities::INDEX_PATH_DLL_B));
+		Game* firstGame = new Game(board, *filesFound);
 		firstGame->game();
 		delete firstGame;
 	} catch (std::exception& e)
