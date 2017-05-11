@@ -3,7 +3,6 @@
 #include "IBattleshipGameAlgo.h"
 #include "Ship.h"
 #include <vector>
-#include "Player.h"
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
@@ -13,8 +12,8 @@ class Game
 	mutable std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
 	//char ** boardOfPlayerA;
 	//char ** boardOfPlayerB;
-	Player* playerA;
-	Player* playerB;
+	//Player* playerA;
+	//Player* playerB;
 	int playerPlaying;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;

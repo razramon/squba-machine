@@ -2,13 +2,31 @@
 
 const std::string Utilities::ATTACK_SUFF = ".attack";
 const std::string Utilities::BOARD_SUFF = ".sboard";
+const std::string Utilities::DLL_SUFF = ".dll";
+const int Utilities::NUMBER_DLLS = 2;
+const int Utilities::FILE_NOT_FOUND_ERROR = -1;
+const int Utilities::INDEX_PATH_DLL_A = 0;
+const int Utilities::INDEX_PATH_DLL_B = 1;
+const int Utilities::INDEX_BOARD_PATH = 2;
 
-Utilities::Utilities()
-{
-}
 
-Utilities::~Utilities()
+void Utilities::getFullPath(std::string& path)
 {
+	char path_c[MAX_BUFFER];
+	strncpy_s(path_c, path.c_str(), path.size());
+	DWORD  retval = 0;
+	char buffer[MAX_BUFFER];
+	char** lppPart = { nullptr };
+
+	// Retrieve the full path name for a file. 
+	retval = GetFullPathNameA(path_c, MAX_BUFFER, buffer, lppPart);
+
+	if (retval == 0)
+	{
+		// Handle an error condition.
+		throw Exception(exceptionInfo(WRONG_PATH, path));
+	}
+	path = buffer;	
 }
 
 
@@ -155,14 +173,146 @@ std::string Utilities::workingDirectory() {
 			}
 		}
 	} while (FindNextFileA(hFind, &ffd) != 0);
-
+	FindClose(hFind);
 	return false;
 }
 
 /*
 * Prints relevant errors to the screen
 */
-void Utilities::printNotFoundFileErrors(const char* path, char* boardFile)
+void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& path,const std::vector<std::string>& filesFound)
 {
-	if (boardFile == nullptr) std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+	if (!pathIsValid) std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+	if (filesFound.size()<2) std::cout << "Missing an algorithm (dll) file looking in path: " << path << std::endl;
+}
+
+/*
+ * Returns a vector of size 3, containing:
+ *				index 0 = INDEX_PATH_DLL_A =  full path to player A's dll
+ *				index 1 = INDEX_PATH_DLL_B = full path to player B's dll
+ *				index 2 = INDEX_BOARD_PATH = full path to board.
+ *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
+ */
+std::vector<std::string>* Utilities::buildPath(int argc, char * argv[])
+{
+	std::string path;
+	if (argc == 1)
+	{
+		path = workingDirectory();
+	}
+	else
+	{
+		//TODO:: need to edit this, so that if there are more than 1 parameters it will choose the right "argv[i]"!
+		path = argv[1];
+	}
+
+	std::string boardFilePtr, fullPathToBoard;
+	bool pathIsValid = false;
+	std::vector<std::string>* filesFound = new std::vector<std::string>;
+
+	try
+	{
+		getFullPath(path);
+		pathIsValid = isValidPath(path, boardFilePtr);
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return filesFound;
+	}
+
+	find2FilesWithSuf(path.c_str(), path.size(), *filesFound, DLL_SUFF);
+	if (((*filesFound).size() != NUMBER_DLLS) || (!pathIsValid))
+	{
+		printNotFoundFileErrors(pathIsValid, path, *filesFound);
+	} else
+	{
+		(*filesFound).push_back(path + "\\" + boardFilePtr);
+	}
+
+	return filesFound;
+}
+
+
+/*
+* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files - oredered lexicographically
+* Returns:  number of files found (1 or 2) in path, which are inerted to "filesFound" vector,
+*			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
+*/
+int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound,const std::string suffix)
+{
+	WIN32_FIND_DATAA ffd;
+	char szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	// Check that the input path plus 3 is not longer than MAX_PATH.
+	// Three characters are for the "\*" plus NULL appended below.
+	StringCchLengthA(path, MAX_PATH, &pathLen);
+	if (pathLen > (MAX_PATH - 3))
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// Prepare string for use with FindFile functions.  First, copy the
+	// string to a buffer, then append '\*' to the directory name.
+	StringCchCopyA(szDir, MAX_PATH, path);
+	StringCchCatA(szDir, MAX_PATH, "\\*");
+
+	// Find the first file in the directory.
+	hFind = FindFirstFileA(szDir, &ffd);
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// checks all files in the directory in search for files that end with suffix.
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
+		{
+			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(suffix)))
+			{
+				addFileToList(filesFound, std::string(ffd.cFileName), path);
+			}
+		}
+	} while (FindNextFileA(hFind, &ffd) != 0);
+	if (GetLastError() != ERROR_NO_MORE_FILES)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+	FindClose(hFind);
+	return filesFound.size();
+}
+
+/*
+* Maintains "filesFound" to hold at most 2 files,
+* The ones which are first lexicographically.
+*/
+void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path)
+{
+	if (filesFound.size() == 0)
+	{
+		filesFound.push_back(path + "\\" + filename);
+		return;
+	}
+	std::vector<std::string>::iterator iter;
+	for (iter = filesFound.begin(); iter != filesFound.end(); ++iter)
+	{
+		if (*iter >= filename)
+		{
+
+			filesFound.insert(iter, path + "\\"+ filename);
+			if (filesFound.size() > 2) //deletes the "largest" file (lexicographically)
+			{
+				filesFound.pop_back();
+			}
+			break; //To avoid inserting "filename" twice.
+		}
+	}
+	if (filesFound.size() < 2) //means: there was only 1 file in "filesFound" which was smaller (lexicographically) than "filename"
+	{
+
+		filesFound.push_back(path + "\\" + filename);
+	}
 }

@@ -14,15 +14,8 @@ class DllKnownStepsAlgo : public IBattleshipGameAlgo
 	std::vector<std::pair<int, int>>* attacks;
 	static void getAttackFromLine(std::string & line, std::pair<int, int>& attack);
 	static std::vector<std::pair<int, int>>* getAttackFile(const char* attackFile);
-	/*
-	* Maintains "attackFiles" to hold at most 2 attack files,
-	* The ones which are first lexicographically.
-	*/
-	static void addAttackFileToList(std::vector<std::string>& attackFiles, std::string filename);
-	/*
-	* Gets a valid path (directory), updates "attackFiles" to contain 2 (at most) attack files - oredered lexicographically
-	*/
-	static bool findAttackFile(const char* path, size_t pathLen, std::vector<std::string>& attackFiles);
+
+
 	/*
 	 * Returns the relevant full path to attack file - according to playerNumber
 	 */

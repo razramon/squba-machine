@@ -20,55 +20,31 @@ int main(int argc, char* argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
-	std::string path;
-	if (argc == 1)
+	std::vector<std::string>* filesFound = Utilities::buildPath(argc, argv);
+	if ((*filesFound).size() != 3)
 	{
-		path = Utilities::workingDirectory();
-	} else
-	{
-		//TODO:: need to edit this, so that if there are more than 1 parameters it will choose the right "argv[i]"!
-		path = argv[1];
-	}
-
-	char* boardFilePtr = nullptr;
-
-	bool pathIsValid = false;
-
-	try
-	{
-		pathIsValid = Utilities::isValidPath(path, &boardFilePtr);
-	} catch (std::exception& e)
-	{
-		std::cout << e.what() << std::endl;
+		delete filesFound;
 		return 1;
 	}
+		
 
-	if(!pathIsValid)
-	{
-		Utilities::printNotFoundFileErrors(path.c_str(), boardFilePtr, attackFileAPtr, attackFileBPtr);
-		return 1;
-	}
-
-	std::string fullPathToBoard = path +"\\"+ boardFilePtr;
 	char** board = nullptr;
 	try
 	{
-		board = BoardCreator::getBoardFromFile(fullPathToBoard.c_str());
+		board = BoardCreator::getBoardFromFile(((*filesFound).at(Utilities::INDEX_BOARD_PATH)).c_str());
 	} catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
+		delete filesFound;
 		return 1;
 	}
-	std::string fullPathToAttackFileA = path + "\\" + attackFileAPtr;
-	std::string fullPathToAttackFileB = path + "\\" + attackFileBPtr;
 
 	try
 	{
 		//firstGame->setBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
-		Game* firstGame = new Game(board, fullPathToAttackFileA, fullPathToAttackFileB);
+		Game* firstGame = new Game(board, (*filesFound).at(Utilities::INDEX_PATH_DLL_A), (*filesFound).at(Utilities::INDEX_PATH_DLL_B));
 		firstGame->game();
 		delete firstGame;
-
 	} catch (std::exception& e)
 	{
 		if (strcmp(e.what(), "PRINT_NOTHING") != 0)
@@ -76,16 +52,6 @@ int main(int argc, char* argv[])
 			std::cout << e.what() << std::endl;
 		}
 	}
-
-	//Frees memory of allocated board
-	for (int i = 0; i < BOARD_LENGTH; ++i)
-	{
-		delete[] board[i];
-	} 
-	delete[] board;
-	delete[] boardFilePtr;
-	delete[] attackFileAPtr;
-	delete[] attackFileBPtr;
-
+	delete filesFound;
 	return 0;
 }
