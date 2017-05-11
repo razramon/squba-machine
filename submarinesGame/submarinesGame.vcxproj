@@ -149,6 +149,7 @@
     <ClInclude Include="BoardCreator.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GUIBoard.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="NaiveAlgo.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="BoardCreator.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GUIBoard.cpp" />
     <ClCompile Include="NaiveAlgo.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />

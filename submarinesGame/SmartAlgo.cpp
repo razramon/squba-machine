@@ -168,16 +168,16 @@ void SmartAlgo::changeSurrounding(int row, int col, bool sink) {
 				&& !SmartAlgo::isShip(this->board[row + toDelete.first][col +toDelete.second])
 				&& this->board[row + toDelete.first][col + toDelete.second] != HIT_ENEMY){
 
-				this->board[row + toDelete.first][col + +toDelete.second] = HIT_WRONG;
+				this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
 			}
 		}
 	}
-	// Delete from the board all the wrong position if found a hit=
+	// Delete from the board all the wrong position if found a hit
 	for (std::pair<int, int> toDelete : this->placesToDelete) {
 
 		if (SmartAlgo::inBoard(row + toDelete.first) && SmartAlgo::inBoard(col + toDelete.second)) {
 
-			this->board[row + toDelete.first][col + +toDelete.second] = HIT_WRONG;
+			this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
 		}
 	}
 	

@@ -4,6 +4,8 @@
 #include <vector>
 #include <set>
 #include <fstream>
+#include <Windows.h>
+
 
 class BoardCreator
 {
