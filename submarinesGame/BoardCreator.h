@@ -6,11 +6,11 @@
 #include <fstream>
 #include <Windows.h>
 
-
+#define DEFAULT_LETTER 'a';
 class BoardCreator
 {
 	static const std::string BoardCreator::BOARD_SUFF;
-	static const char DEFAULT_LETTER = 'a';
+	//static const char DEFAULT_LETTER = 'a';
 public:
 	BoardCreator();
 	~BoardCreator();

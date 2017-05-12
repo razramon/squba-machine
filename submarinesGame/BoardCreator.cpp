@@ -10,6 +10,41 @@ BoardCreator::~BoardCreator()
 {
 }
 
+std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips) {
+	
+	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
+}
+
+char ** getBoardFromShips(std::vector<Ship*>* ships) {
+
+	char ** board = new char*[BOARD_LENGTH];
+	
+	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++) {
+
+		board[indexRow] = new char[BOARD_LENGTH];
+		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++) {
+
+			board[indexRow][indexCol] = DEFAULT_LETTER;
+		}
+	}
+	std::vector<Ship*>* ps = ships;
+	for (int i = 0; i < (*ps).size(); ++i)
+	{
+		Ship* s = (*ps).at(i);
+
+		int** positions = (*s).getPosition();
+		char letter = (*s).getLetter();
+
+		for (int pos = 0; pos < (*s).getShipSize(); ++pos) {
+
+			board[positions[pos][0]][positions[pos][1]] = letter;
+		}
+	}
+	return board;
+}
+
+
+
 /*
 * Gets a letter and the first index of the ship on the board:
 * If there's sequence that might represent a valid ship - creates it
