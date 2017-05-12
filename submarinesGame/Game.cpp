@@ -1,21 +1,14 @@
 #include "Game.h"
 
 
-bool Game::initPlayers(std::string & allErrors, int playerNum)
-{
-	IBattleshipGameAlgo* currentPlayer = (playerNum==PLAYER_A? playerA : playerB);
-
-	return false;
-}
+//bool Game::initPlayers(int playerNum, std::pair<char**, char**> boards)
+//{
+//}
 
 Game::Game(char ** board, std::vector<std::string>& filesFound):
 	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A)
 {
-	/**TODO:: don't forget to insert these to initialize list!**/
-	//IBattleshipGameAlgo* playerA;
-	//IBattleshipGameAlgo* playerB;
-	//std::pair<int, int> points;
-	//std::pair<int, int> shipSunk;
+	/**TODO:: don't forget to fix initialize list!**/
 
 	if (playersShips == nullptr)
 	{
@@ -24,27 +17,45 @@ Game::Game(char ** board, std::vector<std::string>& filesFound):
 	
 	try
 	{
-		std::string allErrors;
-		//// Creating new players for the game
-		//playerA = new Player(PLAYER_A, fullPathToAttackFileA, (*playersShips).first);
-		//playerB = new Player(PLAYER_B, fullPathToAttackFileB, (*playersShips).second);
 		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
 		{
 			// Load dynamic library
-			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str()); // Notice: Unicode compatible version of LoadLibrary
+			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str());
 			if (!hDll)
 			{
-				allErrors.append("Cannot load dll: ");
-				allErrors.append(filesFound.at(i)+"\n");
-				initPlayers(allErrors);
+				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
+			} else
+			{
+				dlls.push_back(hDll);
+				GetAlgoFuncType getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
+				if (!getAlgoFunc)
+				{
+					throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
+				}
+				else
+				{
+					IBattleshipGameAlgo* currPlayer = (i == PLAYER_A ? playerA : playerB);
+					currPlayer = getAlgoFunc();
+					//if (i == PLAYER_A) {
+					//	playerA = getAlgoFunc();
+					//}
+					//else {
+					//	playerB = getAlgoFunc();
+					//}
+					(*currPlayer).setBoard(i, boards[i], rows, cols);
+					if (!((*currPlayer).init(filesFound.at(i))))
+					{
+						throw Exception(exceptionInfo(ALGO_INIT_FAILED, filesFound.at(i)));
+					}
+				}
 			}
 		}
-
-		
 
 
 	} catch(std::exception& e)
 	{
+		//TODO:: free dlls and stuff!
+
 		//deletes ships to free allocated space
 		for (int i = 0; i < (*(*playersShips).first).size(); ++i)
 		{
