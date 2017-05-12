@@ -10,10 +10,12 @@
 class BoardCreator
 {
 	static const std::string BoardCreator::BOARD_SUFF;
+	static char ** getBoardFromShips(std::vector<Ship*>* ships);
 	//static const char DEFAULT_LETTER = 'a';
+	BoardCreator() = delete;
+	~BoardCreator() = delete;
 public:
-	BoardCreator();
-	~BoardCreator();
+	static std::pair<char **,char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
 	static void checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
 		char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
 		bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes);

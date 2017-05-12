@@ -2,20 +2,12 @@
 
 const std::string BoardCreator::BOARD_SUFF = ".sboard";
 
-BoardCreator::BoardCreator()
-{
-}
-
-BoardCreator::~BoardCreator()
-{
-}
-
-std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips) {
+std::pair<char **,char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips) {
 	
 	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
 }
 
-char ** getBoardFromShips(std::vector<Ship*>* ships) {
+char ** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships) {
 
 	char ** board = new char*[BOARD_LENGTH];
 	
@@ -42,7 +34,6 @@ char ** getBoardFromShips(std::vector<Ship*>* ships) {
 	}
 	return board;
 }
-
 
 
 /*

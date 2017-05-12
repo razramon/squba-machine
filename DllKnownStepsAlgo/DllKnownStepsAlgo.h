@@ -12,10 +12,9 @@ class DllKnownStepsAlgo : public IBattleshipGameAlgo
 	int playerNum;
 	int attackNumber;//starts from zero when initialized, and goes up as we deliver attacks to "Game".
 	std::vector<std::pair<int, int>>* attacks;
+	
 	static void getAttackFromLine(std::string & line, std::pair<int, int>& attack);
 	static std::vector<std::pair<int, int>>* getAttackFile(const char* attackFile);
-
-
 	/*
 	 * Returns the relevant full path to attack file - according to playerNumber
 	 */

@@ -58,13 +58,14 @@ std::vector<std::pair<int, int>>* DllKnownStepsAlgo::getAttackFile(const char * 
 	return attacksVector;
 }
 
-DllKnownStepsAlgo::DllKnownStepsAlgo() :attacks(nullptr), playerNum(NOT_INITIALIZED), 
-										rows(NOT_INITIALIZED), cols(NOT_INITIALIZED), attackNumber(NOT_INITIALIZED)
+DllKnownStepsAlgo::DllKnownStepsAlgo() :rows(NOT_INITIALIZED), cols(NOT_INITIALIZED), 
+										playerNum(NOT_INITIALIZED), attackNumber(NOT_INITIALIZED), attacks(nullptr)
 {
 }
 
 DllKnownStepsAlgo::~DllKnownStepsAlgo()
 {
+	delete attacks;
 }
 
 void DllKnownStepsAlgo::setBoard(int player, const char** board, int numRows, int numCols)
@@ -98,6 +99,7 @@ bool DllKnownStepsAlgo::init(const std::string & path)
 	catch (std::exception &e)
 	{
 		//no use of e: getting the attack file failed.
+		e.what();
 		return false;
 	}
 	attackNumber = 0;
@@ -126,15 +128,14 @@ void DllKnownStepsAlgo::notifyOnAttackResult(int player, int row, int col, Attac
 	//DOES NOTHING - because player from a file doesn't do anything with that information.
 }
 
-IBattleshipGameAlgo* GetAlgorithm()
-{
-	IBattleshipGameAlgo* ptrToAlg = new DllKnownStepsAlgo();
-	return ptrToAlg;
-}
-
 std::string DllKnownStepsAlgo::getFullPathToAttackFile(const std::vector<std::string>& attackFiles) const
 {
 	if (attackFiles.size() == 1) return attackFiles.at(0);
 	return (playerNum==PLAYER_A)? attackFiles.at(PLAYER_A):attackFiles.at(PLAYER_B);
 }
 
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	IBattleshipGameAlgo* ptrToAlg = new DllKnownStepsAlgo();
+	return ptrToAlg;
+}

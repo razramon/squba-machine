@@ -103,6 +103,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;DLLKNOWNSTEPSALGO_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\meital\Documents\GitHub\squba-machine\submarinesGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,6 +151,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllKnownStepsAlgo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\submarinesGame\submarinesGame.vcxproj">
+      <Project>{aa4e5445-baab-4e1b-8790-e702e60a15f9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
