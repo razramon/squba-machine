@@ -19,7 +19,7 @@ class Game
 	IBattleshipGameAlgo* playerB;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
-	std::vector<HINSTANCE, HINSTANCE> dlls;
+	std::vector<HINSTANCE> dlls;
 	/*
 	* Deletes all memory allocations of playerShips
 	*/
@@ -27,7 +27,7 @@ class Game
 	/*
 	* Frees all dlls' libraries
 	*/
-	void freeDlls() const;
+	void freeDlls();
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer
 	 * If he doesn't - updates playerPlaying to other player and if it has an attack updates attackOfPlayer
@@ -53,7 +53,7 @@ class Game
 	*/
 	static bool isValAttack(std::pair<int, int>& attackOfPlayer);
 
-//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
+	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
 	Game(char** board, std::vector<std::string>& filesFound);
@@ -64,7 +64,4 @@ public:
 	void game();
 
 	int checkWin() const;
-
-
 };
-

@@ -14,9 +14,9 @@ void Utilities::getFullPath(std::string& path)
 {
 	char path_c[MAX_BUFFER];
 	strncpy_s(path_c, path.c_str(), path.size());
-	DWORD  retval = 0;
+	DWORD retval = 0;
 	char buffer[MAX_BUFFER];
-	char** lppPart = { nullptr };
+	char** lppPart = {nullptr};
 
 	// Retrieve the full path name for a file. 
 	retval = GetFullPathNameA(path_c, MAX_BUFFER, buffer, lppPart);
@@ -26,7 +26,7 @@ void Utilities::getFullPath(std::string& path)
 		// Handle an error condition.
 		throw Exception(exceptionInfo(WRONG_PATH, path));
 	}
-	path = buffer;	
+	path = buffer;
 }
 
 
@@ -77,9 +77,11 @@ std::istream& Utilities::getAllKindsOfLine(std::istream& inputStream, std::strin
 		std::istream::sentry se(inputStream, true);
 		std::streambuf* sb = inputStream.rdbuf();
 		int c;
-		while (true) {
+		while (true)
+		{
 			c = sb->std::streambuf::sbumpc();
-			switch (c) {
+			switch (c)
+			{
 			case '\n':
 				return inputStream;
 			case '\r':
@@ -98,17 +100,16 @@ std::istream& Utilities::getAllKindsOfLine(std::istream& inputStream, std::strin
 				line += static_cast<char>(c);
 			}
 		}
-
 	}
 	catch (std::exception& e)
 	{
-		std::string s= "Error: failed reading line: ";
+		std::string s = "Error: failed reading line: ";
 		s.append(e.what());
 		throw Exception(s.c_str());
 	}
 }
 
-std::string Utilities::delSpaces(std::string &str)
+std::string Utilities::delSpaces(std::string& str)
 {
 	std::string::iterator end_pos = std::remove(str.begin(), str.end(), ' ');
 	str.erase(end_pos, str.end());
@@ -119,7 +120,8 @@ std::string Utilities::delSpaces(std::string &str)
 *Returns a path to (this) working directory - it's where the .exe file is...
 *http://moodle.tau.ac.il/mod/forum/discuss.php?d=47695#p73943
 */
-std::string Utilities::workingDirectory() {
+std::string Utilities::workingDirectory()
+{
 	char buffer[MAX_PATH];
 	GetModuleFileNameA(nullptr, buffer, MAX_PATH);
 	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
@@ -130,7 +132,7 @@ std::string Utilities::workingDirectory() {
 /*Checks if the path exists,
 *that the board file is there,
 *And if it is- updates its names */
- bool Utilities::isValidPath(const std::string path, std::string& boardFile)
+bool Utilities::isValidPath(const std::string path, std::string& boardFile)
 {
 	// Change working directory to reletive path if needed
 	if (_chdir(path.c_str()) != 0)
@@ -172,7 +174,8 @@ std::string Utilities::workingDirectory() {
 				return true;
 			}
 		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
+	}
+	while (FindNextFileA(hFind, &ffd) != 0);
 	FindClose(hFind);
 	return false;
 }
@@ -180,10 +183,10 @@ std::string Utilities::workingDirectory() {
 /*
 * Prints relevant errors to the screen
 */
-void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& path,const std::vector<std::string>& filesFound)
+void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& path, const std::vector<std::string>& filesFound)
 {
 	if (!pathIsValid) std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
-	if (filesFound.size()<2) std::cout << "Missing an algorithm (dll) file looking in path: " << path << std::endl;
+	if (filesFound.size() < 2) std::cout << "Missing an algorithm (dll) file looking in path: " << path << std::endl;
 }
 
 /*
@@ -193,7 +196,7 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
  *				index 2 = INDEX_BOARD_PATH = full path to board.
  *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
  */
-std::vector<std::string>* Utilities::buildPath(int argc, char * argv[])
+std::vector<std::string>* Utilities::buildPath(int argc, char* argv[])
 {
 	std::string path;
 	if (argc == 1)
@@ -225,7 +228,8 @@ std::vector<std::string>* Utilities::buildPath(int argc, char * argv[])
 	if (((*filesFound).size() != NUMBER_DLLS) || (!pathIsValid))
 	{
 		printNotFoundFileErrors(pathIsValid, path, *filesFound);
-	} else
+	}
+	else
 	{
 		(*filesFound).push_back(path + "\\" + boardFilePtr);
 	}
@@ -239,7 +243,7 @@ std::vector<std::string>* Utilities::buildPath(int argc, char * argv[])
 * Returns:  number of files found (1 or 2) in path, which are inerted to "filesFound" vector,
 *			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
 */
-int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound,const std::string suffix)
+int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix)
 {
 	WIN32_FIND_DATAA ffd;
 	char szDir[MAX_PATH];
@@ -276,7 +280,8 @@ int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<s
 				addFileToList(filesFound, std::string(ffd.cFileName), path);
 			}
 		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
+	}
+	while (FindNextFileA(hFind, &ffd) != 0);
 	if (GetLastError() != ERROR_NO_MORE_FILES)
 	{
 		return FILE_NOT_FOUND_ERROR;
@@ -301,8 +306,7 @@ void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string 
 	{
 		if (*iter >= filename)
 		{
-
-			filesFound.insert(iter, path + "\\"+ filename);
+			filesFound.insert(iter, path + "\\" + filename);
 			if (filesFound.size() > 2) //deletes the "largest" file (lexicographically)
 			{
 				filesFound.pop_back();
@@ -312,7 +316,6 @@ void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string 
 	}
 	if (filesFound.size() < 2) //means: there was only 1 file in "filesFound" which was smaller (lexicographically) than "filename"
 	{
-
 		filesFound.push_back(path + "\\" + filename);
 	}
 }

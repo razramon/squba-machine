@@ -14,4 +14,3 @@ public:
 	virtual ~Exception();
 	virtual const char* what() const;
 };
-

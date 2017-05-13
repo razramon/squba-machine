@@ -2,21 +2,21 @@
 
 const std::string BoardCreator::BOARD_SUFF = ".sboard";
 
-std::pair<char **,char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips) {
-	
+std::pair<char **, char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips)
+{
 	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
 }
 
-char ** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships) {
+char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
+{
+	char** board = new char*[BOARD_LENGTH];
 
-	char ** board = new char*[BOARD_LENGTH];
-	
-	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++) {
-
+	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
+	{
 		board[indexRow] = new char[BOARD_LENGTH];
-		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++) {
-
-			board[indexRow][indexCol] = DEFAULT_LETTER;
+		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
+		{
+			board[indexRow][indexCol] = EMPTY_LETTER;
 		}
 	}
 	std::vector<Ship*>* ps = ships;
@@ -27,8 +27,8 @@ char ** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships) {
 		int** positions = (*s).getPosition();
 		char letter = (*s).getLetter();
 
-		for (int pos = 0; pos < (*s).getShipSize(); ++pos) {
-
+		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
+		{
 			board[positions[pos][0]][positions[pos][1]] = letter;
 		}
 	}
@@ -47,9 +47,9 @@ char ** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships) {
 *		badLetterIndexes - if it's not a ship, adds the Letters "bad" indexes to a list
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
-void BoardCreator::checkShipBorders(char ** board, int numRows, int numCols, int currRow, int currCol,
-	char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
-	bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes)
+void BoardCreator::checkShipBorders(char** board, int numRows, int numCols, int currRow, int currCol,
+                                    char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
+                                    bool& wrongSizeOrShape, std::vector<std::pair<int, int>*>& badLetterIndexes)
 {
 	if ((currRow >= numRows) || (currCol >= numCols)) //never supposed to get here,just to check ourselves
 	{
@@ -218,7 +218,8 @@ bool BoardCreator::checkShipShape(Ship* ship, char letter, std::vector<std::pair
 		{
 			if (!(pos[0][0] == (*(shipsOfPlayer.at(i))).getPosition()[0][0] && pos[0][1] == (*(shipsOfPlayer.at(i))).getPosition()[0][1])) //makes sure it's NOT the same ship
 			{
-				if ((*(shipsOfPlayer.at(i))).getLetter() == letter) {
+				if ((*(shipsOfPlayer.at(i))).getLetter() == letter)
+				{
 					Ship* shipToCompare = shipsOfPlayer.at(i);
 					for (int j = 0; j < (*ship).getShipSize(); ++j)
 					{
@@ -235,10 +236,9 @@ bool BoardCreator::checkShipShape(Ship* ship, char letter, std::vector<std::pair
 						}
 						if (res) break;
 					}
-
 				}
 			}
-			if (res)	break;
+			if (res) break;
 		}
 	}
 	if (res)
@@ -255,7 +255,7 @@ bool BoardCreator::checkShipShape(Ship* ship, char letter, std::vector<std::pair
 /*
 *Returns true if there IS an adjacent (different) ship.
 */
-bool BoardCreator::checkNeighbourShips(char ** board, int currentRow, int currentCol, int numRows, int numCols)
+bool BoardCreator::checkNeighbourShips(char** board, int currentRow, int currentCol, int numRows, int numCols)
 {
 	if (currentRow - 1 >= 0)
 	{
@@ -288,7 +288,7 @@ bool BoardCreator::checkNeighbourShips(char ** board, int currentRow, int curren
 	return false;
 }
 
-std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(char ** board, int numRows, int numCols)
+std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(char** board, int numRows, int numCols)
 {
 	std::vector<Ship*>* shipsA = new std::vector<Ship*>;
 	std::vector<Ship*>* shipsB = new std::vector<Ship*>;
@@ -303,7 +303,7 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 	//Initialized to an arbitrary "badLetterIndex" in order to prevent error:
 	std::vector<std::pair<int, int>*>* badLetterIndexes = badLetterIndexes_B;
 
-	std::set<char>  wrongSizeShapeShips;
+	std::set<char> wrongSizeShapeShips;
 
 	int indexShipA = 0;
 	int indexShipB = 0;
@@ -313,8 +313,10 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 	bool adjacentShips = false;
 	char letter = '`';
 
-	for (int row = 0; row < numRows; row++) {
-		for (int col = 0; col < numCols; col++) {
+	for (int row = 0; row < numRows; row++)
+	{
+		for (int col = 0; col < numCols; col++)
+		{
 			if (Ship::isShip(board[row][col]))
 			{
 				adjacentShips = checkNeighbourShips(board, row, col, numRows, numCols);
@@ -324,32 +326,35 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 		if (adjacentShips) break;
 	}
 
-	for (int row = 0; row < numRows; row++) {
-		for (int col = 0; col < numCols; col++) {
+	for (int row = 0; row < numRows; row++)
+	{
+		for (int col = 0; col < numCols; col++)
+		{
 			wrongSizeOrShape = false;
 			letter = board[row][col];
 			switch (letter)
 			{
-			case 'B':badLetterIndexes = badLetterIndexes_B;
+			case 'B': badLetterIndexes = badLetterIndexes_B;
 				break;
-			case 'b':badLetterIndexes = badLetterIndexes_b;
+			case 'b': badLetterIndexes = badLetterIndexes_b;
 				break;
-			case 'P':badLetterIndexes = badLetterIndexes_P;
+			case 'P': badLetterIndexes = badLetterIndexes_P;
 				break;
-			case 'p':badLetterIndexes = badLetterIndexes_p;
+			case 'p': badLetterIndexes = badLetterIndexes_p;
 				break;
-			case 'M':badLetterIndexes = badLetterIndexes_M;
+			case 'M': badLetterIndexes = badLetterIndexes_M;
 				break;
-			case 'm':badLetterIndexes = badLetterIndexes_m;
+			case 'm': badLetterIndexes = badLetterIndexes_m;
 				break;
-			case 'D':badLetterIndexes = badLetterIndexes_D;
+			case 'D': badLetterIndexes = badLetterIndexes_D;
 				break;
-			case 'd':badLetterIndexes = badLetterIndexes_d;
+			case 'd': badLetterIndexes = badLetterIndexes_d;
 				break;
 			default: //never supposed to get here anyway
 				break;
 			}
-			if (Ship::isShip(letter)) {
+			if (Ship::isShip(letter))
+			{
 				if (islower(letter))//letter is "player B"'s letter (small letters)
 				{
 					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipB, *shipsB, wrongSizeOrShape, *badLetterIndexes);
@@ -377,21 +382,21 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 		{
 			switch ((*((*ships).at(currShipToCheck))).getLetter())
 			{
-			case 'B':badLetterIndexes = badLetterIndexes_B;
+			case 'B': badLetterIndexes = badLetterIndexes_B;
 				break;
-			case 'b':badLetterIndexes = badLetterIndexes_b;
+			case 'b': badLetterIndexes = badLetterIndexes_b;
 				break;
-			case 'P':badLetterIndexes = badLetterIndexes_P;
+			case 'P': badLetterIndexes = badLetterIndexes_P;
 				break;
-			case 'p':badLetterIndexes = badLetterIndexes_p;
+			case 'p': badLetterIndexes = badLetterIndexes_p;
 				break;
-			case 'M':badLetterIndexes = badLetterIndexes_M;
+			case 'M': badLetterIndexes = badLetterIndexes_M;
 				break;
-			case 'm':badLetterIndexes = badLetterIndexes_m;
+			case 'm': badLetterIndexes = badLetterIndexes_m;
 				break;
-			case 'D':badLetterIndexes = badLetterIndexes_D;
+			case 'D': badLetterIndexes = badLetterIndexes_D;
 				break;
-			case 'd':badLetterIndexes = badLetterIndexes_d;
+			case 'd': badLetterIndexes = badLetterIndexes_d;
 				break;
 			default: //never supposed to get here anyway
 				break;
@@ -430,7 +435,8 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 	}
 
 	/*Printing errors as instructed - too many / to few ships*/
-	if ((*shipsA).size() > NUMBER_SHIPS) {
+	if ((*shipsA).size() > NUMBER_SHIPS)
+	{
 		boardNotValid = true;
 		std::cout << "Too many ships for player A" << std::endl;
 	}
@@ -439,7 +445,8 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 		boardNotValid = true;
 		std::cout << "Too few ships for player A" << std::endl;
 	}
-	if ((*shipsB).size() > NUMBER_SHIPS) {
+	if ((*shipsB).size() > NUMBER_SHIPS)
+	{
 		boardNotValid = true;
 		std::cout << "Too many ships for player B" << std::endl;
 	}
@@ -521,15 +528,16 @@ std::pair <std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(c
 * This Function returns a refference to a 2D-array of chars, representing the game board
 * BOARD HAS TO BE DELETED USING "freeBoard" FUNCTION!
 */
-char** BoardCreator::getBoardFromFile(const char* boardFile) {
-
+char** BoardCreator::getBoardFromFile(const char* boardFile)
+{
 	char** board = createBoard(BOARD_LENGTH, BOARD_LENGTH);
 
 	std::string line;
 
 	//opening boardfile:
 	std::ifstream bfile(boardFile);
-	if (!bfile) {
+	if (!bfile)
+	{
 		throw Exception("Error: failed opening board file.");
 	}
 	int row = 0;
@@ -604,15 +612,16 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 {
 	try
 	{
-		if(!(Utilities::doesPathExist(path)))
+		if (!(Utilities::doesPathExist(path)))
 		{
 			throw Exception(exceptionInfo(WRONG_PATH, path));
 		}
-	} catch (std::exception& e)
+	}
+	catch (std::exception& e)
 	{
 		throw e;
 	}
-	
+
 	WIN32_FIND_DATAA ffd;
 	char szDir[MAX_PATH];
 	HANDLE hFind = INVALID_HANDLE_VALUE;
@@ -652,7 +661,8 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 				break;
 			}
 		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
+	}
+	while (FindNextFileA(hFind, &ffd) != 0);
 	FindClose(hFind);
 	return retVal;
 }
@@ -660,7 +670,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 /*
  * Deletes memory allocations of "board" including itself.
  */
-void BoardCreator::freeBoard(char ** board, int numRows)
+void BoardCreator::freeBoard(char** board, int numRows)
 {
 	for (int row = 0; row < numRows; row++)
 	{
@@ -673,7 +683,7 @@ void BoardCreator::freeBoard(char ** board, int numRows)
 * Allocates memory for a "board", returns a pointer to it.
 * User of this function should delete the memory allocated in it using "freeBoard"!
 */
-char ** BoardCreator::createBoard(int numRows, int numCols)
+char** BoardCreator::createBoard(int numRows, int numCols)
 {
 	char** board = new char*[numRows];
 	for (int i = 0; i < numRows; ++i)
@@ -687,14 +697,27 @@ char ** BoardCreator::createBoard(int numRows, int numCols)
 * Creates a copy of "board" - Allocates memory for that copy. 
 * User of this function should delete the memory allocated in it using "freeBoard"!
 */
-char ** BoardCreator::copyBoard(const char ** board, int numRows, int numCols)
+char** BoardCreator::copyBoard(const char** board, int numRows, int numCols)
 {
-	char **retBoard = createBoard(numRows, numCols);
+	char** retBoard = createBoard(numRows, numCols);
 	for (int row = 0; row < numRows; row++)
 	{
-		for (int col = 0; col < numCols; col++){
+		for (int col = 0; col < numCols; col++)
+		{
 			retBoard[row][col] = board[row][col];
 		}
 	}
 	return retBoard;
+}
+
+void BoardCreator::printBoard(const char ** board, int numRows, int numCols)
+{
+	for (int row = 0; row < numRows; row++)
+	{
+		for (int col = 0; col < numCols; col++)
+		{
+			std::cout << board[row][col] << " ";
+		}
+		std::cout << std::endl;
+	}
 }

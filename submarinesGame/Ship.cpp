@@ -1,7 +1,7 @@
 #include "Ship.h"
 
 using namespace std;
-	
+
 Ship::Ship(char letter)
 {
 	this->letter = letter;
@@ -12,18 +12,21 @@ Ship::Ship(char letter)
 		position[i] = new int[3];
 	}
 }
+
 Ship::Ship()
 {
 }
+
 Ship::~Ship()
 {
-	for(int i = 0; i < this->getShipSize(); ++i)
+	for (int i = 0; i < this->getShipSize(); ++i)
 	{
 		delete position[i];
 	}
 	delete[] position;
 }
-Ship::Ship(const Ship & s)
+
+Ship::Ship(const Ship& s)
 {
 	this->letter = s.letter;
 	this->numberOfPoints = Ship::pointsOfShip(letter);
@@ -32,30 +35,38 @@ Ship::Ship(const Ship & s)
 	{
 		position[i] = new int[3];
 	}
-	for (int i = 0; i < sizeOfShip(letter); ++i) {
+	for (int i = 0; i < sizeOfShip(letter); ++i)
+	{
 		for (int j = 0; j < 3; ++j)
 		{
 			this->position[i][j] = s.position[i][j];
 		}
-	}	
+	}
 }
 
-char Ship::getLetter() {
+char Ship::getLetter()
+{
 	return letter;
 }
-void Ship::setLetter(char l) {
+
+void Ship::setLetter(char l)
+{
 	letter = l;
 }
-int Ship::getNumberOfPoints() {
+
+int Ship::getNumberOfPoints()
+{
 	return numberOfPoints;
 }
-void Ship::setNumberOfPoints(int nop) {
+
+void Ship::setNumberOfPoints(int nop)
+{
 	numberOfPoints = nop;
 }
 
 // Array of size of the ship, 
 // has 3 properties: 1. row ; 2. column ; 3. is hit - 1 for hit, 0 otherwise
-int ** position;
+int** position;
 
 bool Ship::isShip(char c)
 {
@@ -99,7 +110,7 @@ int Ship::sizeOfShip(char c)
 
 bool Ship::isSunk()
 {
-	for(int i = 0; i < sizeOfShip(this->getLetter()); i++)
+	for (int i = 0; i < sizeOfShip(this->getLetter()); i++)
 	{
 		if (this->position[i][2] == 0)
 			return false;
@@ -111,6 +122,7 @@ int** Ship::getPosition()
 {
 	return position;
 }
+
 int Ship::getShipSize()
 {
 	return Ship::sizeOfShip(letter);
@@ -119,10 +131,10 @@ int Ship::getShipSize()
 void Ship::setPosition(int pos, int row, int col, int state)
 {
 	if (pos < 0 || pos >= this->getShipSize() || row < 0 || col < 0) return;
-	
+
 	this->position[pos][0] = row;
 	this->position[pos][1] = col;
-	this->position[pos][2] = state;	
+	this->position[pos][2] = state;
 }
 
 void Ship::printShipInfo()

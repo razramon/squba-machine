@@ -13,7 +13,6 @@
 //#include <string>
 
 
-
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -26,13 +25,14 @@ int main(int argc, char* argv[])
 		delete filesFound;
 		return 1;
 	}
-		
+
 
 	char** board = nullptr;
 	try
 	{
 		board = BoardCreator::getBoardFromFile(((*filesFound).at(Utilities::INDEX_BOARD_PATH)).c_str());
-	} catch (std::exception& e)
+	}
+	catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
 		delete filesFound;
@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
 		Game* firstGame = new Game(board, *filesFound);
 		firstGame->game();
 		delete firstGame;
-	} catch (std::exception& e)
+	}
+	catch (std::exception& e)
 	{
 		if (strcmp(e.what(), "PRINT_NOTHING") != 0)
 		{

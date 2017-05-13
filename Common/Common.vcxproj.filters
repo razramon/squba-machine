@@ -15,39 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Macros.h">
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\submarinesGame\IBattleshipGameAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="..\submarinesGame\BoardCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NaiveAlgo.h">
+    <ClInclude Include="..\submarinesGame\Ship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SmartAlgo.h">
+    <ClInclude Include="..\submarinesGame\Sizes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ISmarterAlgo.h">
+    <ClInclude Include="..\submarinesGame\Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUIBoard.h">
+    <ClInclude Include="..\submarinesGame\Exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="submarinesGame.cpp">
+    <ClCompile Include="..\submarinesGame\BoardCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="..\submarinesGame\Ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NaiveAlgo.cpp">
+    <ClCompile Include="..\submarinesGame\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SmartAlgo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUIBoard.cpp">
+    <ClCompile Include="..\submarinesGame\Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

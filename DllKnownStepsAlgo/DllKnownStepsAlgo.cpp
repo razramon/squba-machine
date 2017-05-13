@@ -90,7 +90,8 @@ bool DllKnownStepsAlgo::init(const std::string & path)
 	if (!(Utilities::find2FilesWithSuf(path.c_str(), path.size(), attackFiles, Utilities::ATTACK_SUFF))) return false;
 	
 	//If gets here, attackFiles conatin 1-2 attack files found in path
-	std::string pathToFile = path + "\\" + getFullPathToAttackFile(attackFiles);
+	//std::string pathToFile = path + "\\" + getFullPathToAttackFile(attackFiles);
+	std::string pathToFile = getFullPathToAttackFile(attackFiles);
 
 	try
 	{
@@ -100,6 +101,7 @@ bool DllKnownStepsAlgo::init(const std::string & path)
 	{
 		//no use of e: getting the attack file failed.
 		e.what();
+		std::cout << "attack file failed" << std::endl;
 		return false;
 	}
 	attackNumber = 0;
