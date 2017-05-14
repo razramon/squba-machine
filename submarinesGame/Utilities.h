@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdio.h>
 #include "Sizes.h"
+#include <cctype>
 #pragma comment(lib, "User32.lib")
 
 class Utilities
@@ -52,4 +53,39 @@ public:
 	* The ones which are first lexicographically.
 	*/
 	static void addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path);
+	/*
+	 * Depicts types of arguments of argv
+	 */
+	enum Arguments
+	{
+		Path,
+		Quiet,
+		Delay,
+		Number
+	};
+	/*
+	 * Return true if string s is numeric
+	 * (all letters are digits)
+	 * NOTE: isdigit() might throw an exception
+	 */
+	static bool isNumeric(std::string& s);
+	/*
+	* Gets a string: checks if it is:
+	*	"-quiet" / "-delay" / a number / otherwise - the default is to recognize it as a path
+	*/
+	static Arguments getTypeOfArg(std::string argu);
+
+	//initialize delayMS to be negative before calling this function!
+	/*
+	* Initializes arguments:
+	*			path - if it was delivered! (or something that can be regognized as one)
+	*					NOTE: user will have to check if path haven't been change in this function
+	*						(if it's still of length 0) - if it wasn't - user should, as required,
+	*						take working directory as a path!!
+	*			delay - updates value to "true" if "-delay" flag was found
+	*			quiet - updates value to "true" if "-quiet" flag was found
+	*			delayMS - updates to the mili-sec found (only if it's in format: "-delal <delay in ms>"
+	*					NOTE: if a "-delay" flag was found, without <delay in ms>, we'll use default one
+	*/
+	static void setArguments(int argc, char* argv[], std::string& path, bool& delay, int& delayMS, bool& quiet);
 };
