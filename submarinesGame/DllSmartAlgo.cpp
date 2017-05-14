@@ -1,11 +1,14 @@
 #include "DllSmartAlgo.h"
 
+const int DllSmartAlgo::NOT_INITIALIZED = -1;
+const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard = { { -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
+const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 } };
 std::pair<int, int> DllSmartAlgo::attack()
 {
 	std::pair<int, int> hit;
 
 	// Checking if there is already possible move - if so, rand over the moves, if not, rand over the board till found place that can place a ship
-	if(this->possibleMoves.size() > 0)
+	if((this->possibleMoves).size() == 0)
 	{
 		bool hitFound = false;
 
@@ -23,7 +26,7 @@ std::pair<int, int> DllSmartAlgo::attack()
 	// Existing possible moves, choose randomly between them
 	else {
 
-		hit = this->possibleMoves[rand() % (this->possibleMoves.size() - 1)];
+		hit = this->possibleMoves[rand() % ((this->possibleMoves).size() - 1)];
 	}
 
 	return hit;
@@ -149,10 +152,8 @@ std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
 	return positionToHit;
 }
 
-
-//TODO : add ctor dtor
-
-DllSmartAlgo::DllSmartAlgo()
+DllSmartAlgo::DllSmartAlgo():board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
+	player(NOT_INITIALIZED)
 {
 }
 

@@ -9,7 +9,7 @@
 class DllNaiveAlgo : public IBattleshipGameAlgo
 {
 	static const int DllNaiveAlgo::NOT_INITIALIZED;
-	static const std::vector<std::pair<int, int>> placesToCheck;
+	static const std::vector<std::pair<int, int>> DllNaiveAlgo::placesToCheck;
 	char** board;
 	int numRows;
 	int numCols;
