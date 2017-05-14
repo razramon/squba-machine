@@ -199,15 +199,16 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
 std::vector<std::string>* Utilities::buildPath(int argc, char* argv[])
 {
 	std::string path;
-	if (argc == 1)
+	bool delay = false;
+	int delayMS = -1;
+	bool quiet = false;
+	setArguments(argc, argv, path, delay, delayMS, quiet);
+	if (path.size() == 0) //
 	{
 		path = workingDirectory();
 	}
-	else
-	{
-		//TODO:: need to edit this, so that if there are more than 1 parameters it will choose the right "argv[i]"!
-		path = argv[1];
-	}
+
+	//TODO:: need to edit this, to support printing!
 
 	std::string boardFilePtr, fullPathToBoard;
 	bool pathIsValid = false;
@@ -317,5 +318,69 @@ void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string 
 	if (filesFound.size() < 2) //means: there was only 1 file in "filesFound" which was smaller (lexicographically) than "filename"
 	{
 		filesFound.push_back(path + "\\" + filename);
+	}
+}
+
+bool Utilities::isNumeric(std::string & s)
+{
+	for (size_t i = 0; i < s.length(); ++i)
+	{
+		if (!(std::isdigit(s.at(i)))) return false;
+	}
+	return true;
+}
+
+Utilities::Arguments Utilities::getTypeOfArg(std::string argu)
+{
+	if (argu.compare("-quiet") == 0)
+	{
+		return Quiet;
+	}
+	if (argu.compare("-delay") == 0)
+	{
+		return Delay;
+	}
+	try { //isNumeric might through exception...(if isDigit() failes)
+		if (isNumeric(argu))
+		{
+			return Number;
+		}
+	}
+	catch (std::exception& e)
+	{
+	}
+	return Path;
+}
+
+void Utilities::setArguments(int argc, char * argv[], std::string & path, bool & delay, int & delayMS, bool & quiet)
+{
+	for (int i = 1; i < argc; ++i)
+	{
+		switch (getTypeOfArg(argv[i]))
+		{
+		case(Path):
+			if (path.size() == 0)//means: path wasn't initialized yet
+			{
+				path = argv[i];
+			}
+			break;
+		case (Quiet):
+			quiet = true;
+			break;
+		case (Delay):
+			delay = true;
+			if (i < argc - 1)
+			{
+				if (getTypeOfArg(argv[i + 1]) == Number)
+				{
+					i++;
+					delayMS = std::atoi(argv[i]);
+				}
+			}
+			break;
+		case (Number):
+		default:
+			break;
+		}
 	}
 }
