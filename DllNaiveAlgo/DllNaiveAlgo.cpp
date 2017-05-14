@@ -1,6 +1,8 @@
-#include "NaiveAlgo.h"
+#include "DllNaiveAlgo.h"
 
-std::pair<int, int> NaiveAlgo::attack()
+const int DllNaiveAlgo::NOT_INITIALIZED = -1;
+
+std::pair<int, int> DllNaiveAlgo::attack()
 {
 	bool found = false;
 
@@ -14,7 +16,7 @@ std::pair<int, int> NaiveAlgo::attack()
 				found = true;
 
 				// Checking if still in the range of the board
-				if (NaiveAlgo::inBoard(curCol + 1)) {
+				if (DllNaiveAlgo::inBoard(curCol + 1)) {
 
 					this->indexCol = curCol + 1;
 					this->indexRow = curRow;
@@ -23,7 +25,7 @@ std::pair<int, int> NaiveAlgo::attack()
 					this->indexCol = 0;
 
 					// Checking if still in the range of the board
-					if(NaiveAlgo::inBoard(curRow + 1))
+					if (DllNaiveAlgo::inBoard(curRow + 1))
 
 						this->indexRow = curRow + 1;
 					else {
@@ -43,20 +45,20 @@ std::pair<int, int> NaiveAlgo::attack()
 }
 
 // Check if the position is in the range of the board
-bool NaiveAlgo::inBoard(int place) {
+bool DllNaiveAlgo::inBoard(int place) {
 
 	return place < BOARD_LENGTH && place >= 0;
 }
 
-bool NaiveAlgo::hasNeighbor(int row, int col) {
+bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 
 	bool hasNeighbor = false;
-	for (std::pair<int, int> pair: this->placesToCheck) {
+	for (std::pair<int, int> pair : this->placesToCheck) {
 
 		// Checking if:
 		// the position is in the board, after it, checking if is a ship / is a hit on the enemy. if one of them does not exist, returning false.
-		hasNeighbor = NaiveAlgo::inBoard(row + pair.first) && NaiveAlgo::inBoard(col + pair.second) 
-			&& (NaiveAlgo::isShip(this->board[row + pair.first][col + pair.second]) || this->board[row + pair.first][col + pair.second] != HIT_ENEMY);
+		hasNeighbor = DllNaiveAlgo::inBoard(row + pair.first) && DllNaiveAlgo::inBoard(col + pair.second)
+			&& (DllNaiveAlgo::isShip(this->board[row + pair.first][col + pair.second]) || this->board[row + pair.first][col + pair.second] != HIT_ENEMY);
 		if (hasNeighbor)
 			break;
 	}
@@ -64,7 +66,7 @@ bool NaiveAlgo::hasNeighbor(int row, int col) {
 
 }
 
-void NaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+void DllNaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
 	if (result == AttackResult::Hit || result == AttackResult::Sink) {
 
@@ -72,13 +74,23 @@ void NaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult 
 	}
 }
 
-void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCols)
+//TODO: add ctor and dtor
+
+DllNaiveAlgo::DllNaiveAlgo()
+{
+}
+
+DllNaiveAlgo::~DllNaiveAlgo()
+{
+}
+
+void DllNaiveAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->board = new char*[numRows];
-	for(int indexRow = 0; indexRow < numRows; indexRow++)
+	for (int indexRow = 0; indexRow < numRows; indexRow++)
 	{
 		this->board[indexRow] = new char[numCols];
-		for(int indexCol = 0; indexCol < numCols; indexCol++)
+		for (int indexCol = 0; indexCol < numCols; indexCol++)
 		{
 			this->board[indexRow][indexCol] = board[indexRow][indexCol];
 		}
@@ -88,13 +100,20 @@ void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCol
 	this->numCols = numCols;
 }
 
-bool NaiveAlgo::init(const std::string& path)
+bool DllNaiveAlgo::init(const std::string& path)
 {
 	return true;
 }
 
-bool NaiveAlgo::isShip(char c)
+bool DllNaiveAlgo::isShip(char c)
 {
 	c = tolower(c);
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
+
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	IBattleshipGameAlgo* ptrToAlg = new DllNaiveAlgo();
+	return ptrToAlg;
+}
+

@@ -1,10 +1,11 @@
 #pragma once
-#include "IBattleshipGameAlgo.h"
+#include "../submarinesGame/IBattleshipGameAlgo.h"
+#include "../submarinesGame/BoardCreator.h"
+#include "../submarinesGame/Sizes.h"
 #include <vector>
-#include "Sizes.h"
 #define HIT_ENEMY '@'
 
-class NaiveAlgo : public IBattleshipGameAlgo
+class DllNaiveAlgo : public IBattleshipGameAlgo
 {
 	char** board;
 	int numRows;
@@ -15,6 +16,8 @@ class NaiveAlgo : public IBattleshipGameAlgo
 	std::vector<std::pair<int, int>> placesToCheck = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 },{ -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
 
 public:
+	DllNaiveAlgo();
+	~DllNaiveAlgo();
 	void setBoard(int player, const char** board, int numRows, int numCols) override;		// called once to notify player on his board
 	bool init(const std::string& path) override;		// called once to allow init from files if needed returns whether the init succeeded or failed
 	bool isShip(char c);
