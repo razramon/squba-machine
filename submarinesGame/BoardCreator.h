@@ -13,6 +13,10 @@ class BoardCreator
 {
 	static const std::string BoardCreator::BOARD_SUFF;
 	static char** getBoardFromShips(std::vector<Ship*>* ships);
+	/*
+	 * Gets a vector of ships, updated board to conatin all letters representing ships
+	 */
+	static void updateShipsInBoard(char** board, std::vector<Ship*>* ships);
 	//static const char DEFAULT_LETTER = 'a';
 	BoardCreator() = delete;
 	~BoardCreator() = delete;
@@ -30,4 +34,9 @@ public:
 	static char** createBoard(int numRows, int numCols);
 	static char** copyBoard(const char** board, int numRows, int numCols);
 	static void printBoard(const char** board, int numRows, int numCols);
+	/*
+	 * Returns a clean (without unnecessary letters) board represnting both players' ships.
+	 * NOTE: need to use freeBoard on the board returned!
+	 */
+	static char** createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB);
 };

@@ -20,6 +20,7 @@ class Game
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
 	std::vector<HINSTANCE> dlls;
+	char** commonBoard;
 	/*
 	* Deletes all memory allocations of playerShips
 	*/

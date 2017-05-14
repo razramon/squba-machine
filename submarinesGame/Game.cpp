@@ -103,13 +103,17 @@ void Game::notifyPlayers(std::pair<int, int>& currAttack, AttackResult& result) 
 Game::Game(char** board, std::vector<std::string>& filesFound): //large init list, don't panic! :)
 	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A),
 	playerA(nullptr), playerB(nullptr), points(std::make_pair(0, 0)),
-	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>())
+	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>()), commonBoard(nullptr)
 {
 	if (playersShips == nullptr)
 	{
 		throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
 	}
 	std::pair<char **, char**> boards = BoardCreator::getInitBoardForEachPlayer(playersShips);
+	commonBoard = BoardCreator::createCommonBoard(playersShips->first, playersShips->second);
+	//TODO:: delete printing!!
+	BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);
+	//ENDOF TODO
 	try
 	{
 		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));

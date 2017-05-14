@@ -19,7 +19,13 @@ class Utilities
 	Utilities() = delete;
 	~Utilities() = delete;
 	static const int MAX_BUFFER = 4096;
-
+	enum Arguments
+	{
+		Path,
+		Quiet,
+		Delay,
+		Number
+	};
 public:
 	static const std::string ATTACK_SUFF, BOARD_SUFF, DLL_SUFF;
 	static const int NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
@@ -56,13 +62,7 @@ public:
 	/*
 	 * Depicts types of arguments of argv
 	 */
-	enum Arguments
-	{
-		Path,
-		Quiet,
-		Delay,
-		Number
-	};
+	
 	/*
 	 * Return true if string s is numeric
 	 * (all letters are digits)
