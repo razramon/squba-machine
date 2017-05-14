@@ -1,7 +1,7 @@
 #include "DllNaiveAlgo.h"
 
 const int DllNaiveAlgo::NOT_INITIALIZED = -1;
-const std::vector<std::pair<int, int>> placesToCheck = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 },{ -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
+const std::vector<std::pair<int, int>> DllNaiveAlgo::placesToCheck = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 },{ -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
 
 std::pair<int, int> DllNaiveAlgo::attack()
 {
@@ -48,7 +48,7 @@ std::pair<int, int> DllNaiveAlgo::attack()
 bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 
 	bool hasNeighbor = false;
-	for (std::pair<int, int> pair : this->placesToCheck) {
+	for (std::pair<int, int> pair : DllNaiveAlgo::placesToCheck) {
 
 		// Checking if:
 		// the position is in the board, after it, checking if is a ship / is a hit on the enemy. if one of them does not exist, returning false.
@@ -65,13 +65,13 @@ void DllNaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 {
 	if (result == AttackResult::Hit || result == AttackResult::Sink) {
 
-		this->board[row][col] = HIT_ENEMY;
+		this->board[row - 1][col - 1] = HIT_ENEMY;
 	}
 }
 
 
 DllNaiveAlgo::DllNaiveAlgo() :board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
-				indexRow(NOT_INITIALIZED), indexCol(NOT_INITIALIZED), player(NOT_INITIALIZED)
+				indexRow(0), indexCol(0), player(NOT_INITIALIZED)
 {
 
 }

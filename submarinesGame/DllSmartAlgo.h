@@ -3,6 +3,7 @@
 #include "../submarinesGame/BoardCreator.h"
 #include "../submarinesGame/Sizes.h"
 #include "../submarinesGame/Ship.h"
+#include <stdlib.h>
 #include <vector>
 #define HIT_WRONG 'c'
 #define HIT_ENEMY '@'
@@ -10,15 +11,16 @@
 
 class DllSmartAlgo : public IBattleshipGameAlgo
 {
+	static const int DllSmartAlgo::NOT_INITIALIZED;
+	static const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard;
+	static const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete;
 	char** board;
 	int numRows;
 	int numCols;
-	int moveNum = 0;
-	int player = -1;
+	int player;
 	std::vector<std::pair<int, int>> possibleMoves;
 	std::vector<std::pair<int, int>> shipPositionHit;
-	std::vector<std::pair<int, int>> placesToCheckBoard = { {-1, 0}, {1, 0}, {0, 1},{0, -1} };
-	std::vector<std::pair<int, int>> placesToDelete = { {-1, -1}, {-1 ,1}, {1, -1}, {1, 1} };
+
 
 public:
 
