@@ -1,7 +1,9 @@
 #pragma once
-#include "IBattleshipGameAlgo.h"
+#include "../submarinesGame/IBattleshipGameAlgo.h"
+#include "../submarinesGame/BoardCreator.h"
+#include "../submarinesGame/Sizes.h"
+#include "../submarinesGame/Ship.h"
 #include <vector>
-#include "Sizes.h"
 #define HIT_WRONG 'c'
 #define HIT_ENEMY '@'
 
@@ -25,7 +27,7 @@ public:
 	void changeSurrounding(int row, int col, bool initBoard);
 	void setBoard(int player, const char** board, int numRows, int numCols) override;		// called once to notify player on his board
 	bool init(const std::string& path) override;		// called once to allow init from files if needed returns whether the init succeeded or failed
-	bool isShip(char c);
+
 	std::pair<int, int> attack() override;													// ask player for his move
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;	// notify on last move result
 
@@ -39,9 +41,6 @@ public:
 
 	std::vector<std::pair<int, int>> getPossibleMoves(int row, int col);
 
-
 	std::pair<int, int> checkPosition(int col, int row);
-
-	static bool inBoard(int place);
 
 };

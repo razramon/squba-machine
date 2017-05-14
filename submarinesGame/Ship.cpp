@@ -74,6 +74,12 @@ bool Ship::isShip(char c)
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
 
+// Check if the position is in the range of the board
+bool Ship::inBoard(int place) {
+
+	return place < BOARD_LENGTH && place >= 0;
+}
+
 int Ship::pointsOfShip(char c)
 {
 	c = tolower(c);

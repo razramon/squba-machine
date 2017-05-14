@@ -15,7 +15,7 @@ std::pair<int, int> DllSmartAlgo::attack()
 			hit = std::make_pair(rand() % 10, rand() % 10);
 
 			// Checking if wasn't already hit or is my ship
-			if (board[hit.first][hit.second] != HIT_WRONG || !isShip(board[hit.first][hit.second]) || board[hit.first][hit.second] != HIT_ENEMY) {
+			if (board[hit.first][hit.second] != HIT_WRONG || !Ship::isShip(board[hit.first][hit.second]) || board[hit.first][hit.second] != HIT_ENEMY) {
 				hitFound = true;
 			}
 		}
@@ -139,7 +139,7 @@ std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
 
 	std::pair<int, int> positionToHit;
 
-	if (DllSmartAlgo::inBoard(row) && DllSmartAlgo::inBoard(col) && this->board[row][col] != HIT_WRONG) { // TODO: add if the position is my ship
+	if (Ship::inBoard(row) && Ship::inBoard(col) && this->board[row][col] != HIT_WRONG) { // TODO: add if the position is my ship
 		positionToHit = std::make_pair(row, col);
 
 	}
@@ -149,14 +149,7 @@ std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
 	return positionToHit;
 }
 
-// Check if the position is in the range of the board
-bool DllSmartAlgo::inBoard(int place) {
 
-	return place < BOARD_LENGTH && place >= 0;
-}
-
-
-// To do: להעיף את כל מה שלא צריך להיות פה לקומון - כולל IsShip וכו
 //TODO : add ctor dtor
 
 DllSmartAlgo::DllSmartAlgo()
@@ -176,8 +169,8 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 		for (std::pair<int, int> toDelete : this->placesToCheckBoard) {
 
 			// Checking in range and not my ship
-			if (DllSmartAlgo::inBoard(row + toDelete.first) && DllSmartAlgo::inBoard(col + toDelete.second)
-				&& !DllSmartAlgo::isShip(this->board[row + toDelete.first][col +toDelete.second])
+			if (Ship::inBoard(row + toDelete.first) && Ship::inBoard(col + toDelete.second)
+				&& !Ship::isShip(this->board[row + toDelete.first][col +toDelete.second])
 				&& this->board[row + toDelete.first][col + toDelete.second] != HIT_ENEMY){
 
 				this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
@@ -187,7 +180,7 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 	// Delete from the board all the wrong position if found a hit
 	for (std::pair<int, int> toDelete : this->placesToDelete) {
 
-		if (DllSmartAlgo::inBoard(row + toDelete.first) && DllSmartAlgo::inBoard(col + toDelete.second)) {
+		if (Ship::inBoard(row + toDelete.first) && Ship::inBoard(col + toDelete.second)) {
 
 			this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
 		}
@@ -221,7 +214,7 @@ bool DllSmartAlgo::init(const std::string& path)
 		this->board[indexRow] = new char[numCols];
 		for (int indexCol = 0; indexCol < numCols; indexCol++)
 		{
-			if (isShip(this->board[indexRow][indexCol]))
+			if (Ship::isShip(this->board[indexRow][indexCol]))
 			{
 				DllSmartAlgo::changeSurrounding(indexRow, indexCol, true);
 			}
@@ -230,13 +223,6 @@ bool DllSmartAlgo::init(const std::string& path)
 
 	return success;
 }
-
-bool DllSmartAlgo::isShip(char c)
-{
-	c = tolower(c);
-	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
-}
-
 
 IBattleshipGameAlgo* GetAlgorithm()
 {

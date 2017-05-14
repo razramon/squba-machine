@@ -20,6 +20,7 @@ public:
 	int getNumberOfPoints();
 	void setNumberOfPoints(int nop);
 	static bool isShip(char c);
+	static bool inBoard(int place);
 	static int pointsOfShip(char c);
 	static int sizeOfShip(char c);
 	bool isSunk();

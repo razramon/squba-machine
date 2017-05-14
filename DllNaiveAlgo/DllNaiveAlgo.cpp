@@ -1,6 +1,7 @@
 #include "DllNaiveAlgo.h"
 
 const int DllNaiveAlgo::NOT_INITIALIZED = -1;
+const std::vector<std::pair<int, int>> placesToCheck = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 },{ -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
 
 std::pair<int, int> DllNaiveAlgo::attack()
 {
@@ -16,7 +17,7 @@ std::pair<int, int> DllNaiveAlgo::attack()
 				found = true;
 
 				// Checking if still in the range of the board
-				if (DllNaiveAlgo::inBoard(curCol + 1)) {
+				if (Ship::inBoard(curCol + 1)) {
 
 					this->indexCol = curCol + 1;
 					this->indexRow = curRow;
@@ -25,7 +26,7 @@ std::pair<int, int> DllNaiveAlgo::attack()
 					this->indexCol = 0;
 
 					// Checking if still in the range of the board
-					if (DllNaiveAlgo::inBoard(curRow + 1))
+					if (Ship::inBoard(curRow + 1))
 
 						this->indexRow = curRow + 1;
 					else {
@@ -44,12 +45,6 @@ std::pair<int, int> DllNaiveAlgo::attack()
 	return std::make_pair(this->indexRow, this->indexCol);
 }
 
-// Check if the position is in the range of the board
-bool DllNaiveAlgo::inBoard(int place) {
-
-	return place < BOARD_LENGTH && place >= 0;
-}
-
 bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 
 	bool hasNeighbor = false;
@@ -57,8 +52,8 @@ bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 
 		// Checking if:
 		// the position is in the board, after it, checking if is a ship / is a hit on the enemy. if one of them does not exist, returning false.
-		hasNeighbor = DllNaiveAlgo::inBoard(row + pair.first) && DllNaiveAlgo::inBoard(col + pair.second)
-			&& (DllNaiveAlgo::isShip(this->board[row + pair.first][col + pair.second]) || this->board[row + pair.first][col + pair.second] != HIT_ENEMY);
+		hasNeighbor = Ship::inBoard(row + pair.first) && Ship::inBoard(col + pair.second)
+			&& (Ship::isShip(this->board[row + pair.first][col + pair.second]) || this->board[row + pair.first][col + pair.second] != HIT_ENEMY);
 		if (hasNeighbor)
 			break;
 	}
@@ -74,14 +69,16 @@ void DllNaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 	}
 }
 
-//TODO: add ctor and dtor
 
-DllNaiveAlgo::DllNaiveAlgo()
+DllNaiveAlgo::DllNaiveAlgo() :board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
+				indexRow(NOT_INITIALIZED), indexCol(NOT_INITIALIZED), player(NOT_INITIALIZED)
 {
+
 }
 
 DllNaiveAlgo::~DllNaiveAlgo()
 {
+	BoardCreator::freeBoard(board, numRows);
 }
 
 void DllNaiveAlgo::setBoard(int player, const char** board, int numRows, int numCols)
@@ -103,12 +100,6 @@ void DllNaiveAlgo::setBoard(int player, const char** board, int numRows, int num
 bool DllNaiveAlgo::init(const std::string& path)
 {
 	return true;
-}
-
-bool DllNaiveAlgo::isShip(char c)
-{
-	c = tolower(c);
-	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
 
 IBattleshipGameAlgo* GetAlgorithm()
