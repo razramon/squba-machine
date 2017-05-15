@@ -2,16 +2,6 @@
 #include <stdlib.h>
 #include "Game.h"
 #include "BoardCreator.h"
-//#include <windows.h>
-//#include "Ship.h"
-//#include "Sizes.h"
-//#include <iostream>
-//#include "Exception.h"
-//#include "Macros.h"
-//#include <fstream>
-//#include <set>
-//#include <string>
-
 
 using namespace std;
 
@@ -20,7 +10,7 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
 	bool delay = false;
-	int delayMS = -1;
+	int delayMS = DEFAULT_DELAY;
 	bool quiet = false;
 	std::vector<std::string>* filesFound = Utilities::buildPath(argc, argv, delay, delayMS, quiet);
 	if ((*filesFound).size() != 3)
