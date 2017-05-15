@@ -719,8 +719,15 @@ char** BoardCreator::copyBoard(const char** board, int numRows, int numCols)
 
 void BoardCreator::printBoard(const char ** board, int numRows, int numCols)
 {
+	std::cout << " ";
+	for (int col = 1; col <=numCols; col++)
+	{
+		std::cout << col << " ";
+	}
+	std::cout << std::endl;
 	for (int row = 0; row < numRows; row++)
 	{
+		std::cout << row+1 << " ";
 		for (int col = 0; col < numCols; col++)
 		{
 			std::cout << board[row][col] << " ";
