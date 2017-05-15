@@ -16,19 +16,19 @@ std::pair<int, int> DllSmartAlgo::attack()
 	}
 	// Existing possible moves, choose randomly between them
 	else {
-		std::cout << "possible moves are: ";
-		for (int i = 0; i <(this->possibleMoves).size(); ++i)
-		{
-			 std::cout << "("<< ((this->possibleMoves).at(i)).first + 1 << "," << ((this->possibleMoves).at(i)).second + 1 << "), ";
-		}
-		std::cout << std::endl;
+		//PRINT std::cout << "possible moves are: ";
+		//for (int i = 0; i <(this->possibleMoves).size(); ++i)
+		//{
+		//	 std::cout << "("<< ((this->possibleMoves).at(i)).first + 1 << "," << ((this->possibleMoves).at(i)).second + 1 << "), ";
+		//}
+		//std::cout << std::endl;
 		int r = rand() % (this->possibleMoves).size();
 		hit = std::make_unique<std::pair<int,int>>(this->possibleMoves[r]);
 		possibleMoves.erase(possibleMoves.begin() + r);
 	}
 	if((*hit).first!=-1)
 	{
-		std::cout << "hit returned from smartDLL is: (" << (*hit).first+1 << "," << (*hit).second+1 << ") "<<std::endl;
+		//PRINT std::cout << "hit returned from smartDLL is: (" << (*hit).first+1 << "," << (*hit).second+1 << ") "<<std::endl;
 		return std::make_pair((*hit).first + 1, (*hit).second + 1);
 	}
 	return std::make_pair(-1, -1);
@@ -163,42 +163,43 @@ std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col
 	std::vector<std::pair<int, int>> positions;
 	std::pair<int, int> positionToHit;
 
-	std::cout << "INSIDE getPossibleMoves()" << std::endl;
+	//PRINT std::cout << "INSIDE getPossibleMoves()" << std::endl;
 	for (std::pair<int, int> pair : placesToCheckBoard)
 	{
-		std::cout << "\nrow + pair.first, col + pair.second are: " << row + pair.first << "," << col + pair.second << " \n";
+		//PRINT std::cout << "\nrow + pair.first, col + pair.second are: " << row + pair.first << "," << col + pair.second << " \n";
 		positionToHit = (checkPosition(row + pair.first, col + pair.second))? std::make_pair(row + pair.first, col + pair.second) : std::make_pair(-1,-1);
-		std::cout << "position checked to add is: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
+		//PRINT std::cout << "position checked to add is: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
 		if (positionToHit.first != -1 && positionToHit.second != -1) {
-			std::cout << "position added: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
+			//PRINT std::cout << "position added: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
 			positions.push_back(positionToHit);
 		}
 	}
-	std::cout << "positions are: ";
-	for (std::pair<int, int> pair: positions)
-	{
-		std::cout << "(" << pair.first << "," << pair.second << ")    " << std::endl;
-	}
-	std::cout << std::endl;
+	//PRINT 
+	//std::cout << "positions are: ";
+	//for (std::pair<int, int> pair: positions)
+	//{
+	//	std::cout << "(" << pair.first << "," << pair.second << ")    " << std::endl;
+	//}
+	//std::cout << std::endl;
 	return positions;
 }
 
 // Checking if the position in range and was not hit before
 bool DllSmartAlgo::checkPosition(int row, int col) const {
 
-	std::cout << "*****************************\n";
-	BoardCreator::printBoard(const_cast<const char**>(board), numRows, numCols);
+	//PRINT std::cout << "*****************************\n";
+	//PRINT BoardCreator::printBoard(const_cast<const char**>(board), numRows, numCols);
 	if (Ship::inBoard(row) && Ship::inBoard(col))
 	{
-		std::cout << "REAL (0-9) row and col are: " << row << "," << col << " and board[row][col] is: " << board[row][col] << std::endl;
+		//PRINT std::cout << "REAL (0-9) row and col are: " << row << "," << col << " and board[row][col] is: " << board[row][col] << std::endl;
 		if(board[row][col] != HIT_WRONG)
 		{
 			if (!(Ship::isShip(board[row][col])))
 			{
-				std::cout << "got here!" << std::endl;
+				//PRINT std::cout << "got here!" << std::endl;
 				if (board[row][col] != HIT_ENEMY)
 				{
-					std::cout << "returning true!" << std::endl;
+					//PRINT std::cout << "returning true!" << std::endl;
 					return true;
 				}
 			}
@@ -306,7 +307,7 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 			k = getPositionOfMove(row + toDelete.first, col + toDelete.second);
 			if (k!=-1)
 			{
-				std::cout << "Deleting position: " << row + toDelete.first << "," << col + toDelete.second << std::endl;
+				//PRINT std::cout << "Deleting position: " << row + toDelete.first << "," << col + toDelete.second << std::endl;
 				possibleMoves.erase(possibleMoves.begin() + k);
 			}
 		}
