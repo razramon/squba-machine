@@ -166,33 +166,46 @@ std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col
 	std::cout << "INSIDE getPossibleMoves()" << std::endl;
 	for (std::pair<int, int> pair : placesToCheckBoard)
 	{
-		positionToHit = DllSmartAlgo::checkPosition(row + pair.first, col + pair.second);
+		std::cout << "\nrow + pair.first, col + pair.second are: " << row + pair.first << "," << col + pair.second << " \n";
+		positionToHit = (checkPosition(row + pair.first, col + pair.second))? std::make_pair(row + pair.first, col + pair.second) : std::make_pair(-1,-1);
+		std::cout << "position checked to add is: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
 		if (positionToHit.first != -1 && positionToHit.second != -1) {
 			std::cout << "position added: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
 			positions.push_back(positionToHit);
 		}
 	}
+	std::cout << "positions are: ";
 	for (std::pair<int, int> pair: positions)
 	{
-		std::cout << "position is: (" << pair.first << "," << pair.second << ")" << std::endl;
+		std::cout << "(" << pair.first << "," << pair.second << ")    " << std::endl;
 	}
+	std::cout << std::endl;
 	return positions;
 }
 
 // Checking if the position in range and was not hit before
-std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
+bool DllSmartAlgo::checkPosition(int row, int col) const {
 
-	std::pair<int, int> positionToHit;
 	std::cout << "*****************************\n";
 	BoardCreator::printBoard(const_cast<const char**>(board), numRows, numCols);
-	if (Ship::inBoard(row) && Ship::inBoard(col) && this->board[row][col] != HIT_WRONG && !Ship::isShip(this->board[row][col]) && this->board[row][col] != HIT_ENEMY) {
-		std::cout << "created position inside function checkPosition: ("<<row<<","<<col<<")" << std::endl;
-		positionToHit = std::make_pair(row, col);
+	if (Ship::inBoard(row) && Ship::inBoard(col))
+	{
+		std::cout << "REAL (0-9) row and col are: " << row << "," << col << " and board[row][col] is: " << board[row][col] << std::endl;
+		if(board[row][col] != HIT_WRONG)
+		{
+			if (!(Ship::isShip(board[row][col])))
+			{
+				std::cout << "got here!" << std::endl;
+				if (board[row][col] != HIT_ENEMY)
+				{
+					std::cout << "returning true!" << std::endl;
+					return true;
+				}
+			}
+		}
 	}
-	else {
-		positionToHit = std::make_pair(-1, -1);
-	}
-	return positionToHit;
+
+	return false;
 }
 
 std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
@@ -213,7 +226,7 @@ std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
 
  std::unique_ptr<std::vector<std::pair<int, int>>> DllSmartAlgo::getAllPossiblePoints()
  {
-	 std::unique_ptr<std::vector<std::pair<int, int>>> retVector = std::make_unique<std::vector<std::pair<int, int>>>();
+	std::unique_ptr<std::vector<std::pair<int, int>>> retVector = std::make_unique<std::vector<std::pair<int, int>>>();
 	for (int row = 0; row < numRows; ++row)
 	{
 		for (int col = 0; col < numCols; ++col)
