@@ -7,7 +7,7 @@
 #include "Sizes.h"
 #include "BoardCreator.h"
 #include "GUIBoard.h"
-
+#define DEFAULT_DELAY 750
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
@@ -67,7 +67,7 @@ class Game
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
-	Game(char** board, std::vector<std::string>& filesFound, bool _delay = true, int _delayMS = 2000, bool _quiet = false);
+	Game(char** board, std::vector<std::string>& filesFound, bool _delay = true, int _delayMS = DEFAULT_DELAY, bool _quiet = false);
 	~Game();
 
 	int isHit(int row, int col, char& letter) const;

@@ -66,15 +66,20 @@ void GUIBoard::updateGUIBoard(char ** board, int damaged, int row, int col, Ship
 		}
 		break;
 	case(MISS):
-		//TODO:: delete these lines
 		if (!quiet)
 		{
-			updateCor(row, col, Utilities::MISS_SIGN, player);
+			gotoxy(BOARD_LENGTH + 2 * OFFSET - 2, 0);
+			setTextColor(getColor(Utilities::MISS_SIGN, player));
+			std::cout << "Player " << (player == PLAYER_A ? "A" : "B") << " missed when hitting position (" << row + 1 << "," << col + 1 << ")" << std::endl;
 		}
 	default:
 		break;
 	}
-	if (!quiet) Sleep(delayMS);
+	if (!quiet) {
+		Sleep(delayMS);
+		gotoxy(BOARD_LENGTH + 2 * OFFSET - 2, 0);
+		std::cout << "\t\t\t\t\t\t\t";
+	}
 }
 
 void GUIBoard::printInitialGame()
