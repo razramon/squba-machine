@@ -19,6 +19,9 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 	int numRows;
 	int numCols;
 	int player;
+	/*
+	 * Contains pairs of variables 1-10! 
+	 */
 	std::vector<std::pair<int, int>> possibleMoves;
 	std::vector<std::pair<int, int>> shipPositionHit;
 	std::vector<std::pair<int, int>> enemyHitSelf;
@@ -49,6 +52,6 @@ public:
 
 	std::vector<std::pair<int, int>> getPossibleMoves(int row, int col);
 
-	std::pair<int, int> checkPosition(int col, int row);
+	bool checkPosition(int col, int row) const;
 
 };
