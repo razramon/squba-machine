@@ -44,7 +44,6 @@ int main(int argc, char* argv[])
 	try
 	{
 		Game* firstGame = new Game(board, *filesFound, delay, delayMS, quiet);
-		//PRINT BoardCreator::printBoard(const_cast<const char**>(board), BOARD_LENGTH, BOARD_LENGTH);
 		firstGame->game();
 		delete firstGame;
 	}

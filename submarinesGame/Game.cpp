@@ -251,19 +251,11 @@ void Game::game()
 		row = curAttack.first - 1;
 		col = curAttack.second - 1;
 		damaged = isHit(row, col, letter);
-		//if (playerPlaying==PLAYER_B)
-		//{
-		//	std::cout << "Attack of player " << (playerPlaying == PLAYER_A ? "A" : "B") << " attacks: (" << curAttack.first << "," << curAttack.second << ")\n";
-		//	std::cout << "attack result is: " << damaged << std::endl;
-		//}
 		GUIBoard::updateGUIBoard(commonBoard, damaged, row, col, getShipAtPosition(row, col), quiet, delayMS, playerPlaying);
-		//std::cout << "\n*********BOARD AFTER ATTACK OF PLAYER "<< (playerPlaying==0? "A":"B") <<" AT POSITION: (" << curAttack.first << "," << curAttack.second<< ") IS:***********\n";
-		//BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);
 		switch (damaged)
 		{
 		case SELF_DESTRUCT: // Player destroyed his own ship
 			result = AttackResult::Sink;
-			//PRINT std::cout << "SELF_DESTRUCT of player " << (playerPlaying == PLAYER_A ? "A" : "B") << " attacks: (" << curAttack.first << "," << curAttack.second << ")\n";
 			if (playerPlaying == PLAYER_A)
 			{
 				points.second += Ship::pointsOfShip(letter);
@@ -278,13 +270,11 @@ void Game::game()
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			break;
 		case BAD_HIT: // Hit before \ hit myself
-			//PRINT std::cout << "BAD_HIT of player " << (playerPlaying == PLAYER_A ? "A" : "B") << " attacks: (" << curAttack.first << "," << curAttack.second << ")\n";
 			result = AttackResult::Hit;
 			notifyPlayers(curAttack, result); // Send hit, change playerPlaying
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			break;
 		case SUNK: // Sink
-			//PRINT std::cout << "player " << (playerPlaying == PLAYER_A ? "A" : "B") << " SANK his rival! attack is: (" << curAttack.first << "," << curAttack.second << ")\n";
 			result = AttackResult::Sink;
 			if (playerPlaying == PLAYER_A)
 			{
@@ -299,7 +289,6 @@ void Game::game()
 			notifyPlayers(curAttack, result);
 			break;
 		case HIT:
-			//PRINT std::cout << "player " << (playerPlaying == PLAYER_A ? "A" : "B") << " HIT! attack is: (" << curAttack.first << "," << curAttack.second << ")\n";
 			result = AttackResult::Hit;
 			notifyPlayers(curAttack, result);
 			break;
