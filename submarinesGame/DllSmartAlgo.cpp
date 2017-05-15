@@ -112,11 +112,7 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 		default:
 			break;
 		}
-
-
-
-	}
-	 
+	} 
 }
 
 void DllSmartAlgo::sinkBigShip(int row, int col) {
