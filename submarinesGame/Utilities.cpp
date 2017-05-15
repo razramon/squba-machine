@@ -8,7 +8,8 @@ const int Utilities::FILE_NOT_FOUND_ERROR = -1;
 const int Utilities::INDEX_PATH_DLL_A = 0;
 const int Utilities::INDEX_PATH_DLL_B = 1;
 const int Utilities::INDEX_BOARD_PATH = 2;
-
+const char Utilities::HIT_SIGN = '*';
+const char Utilities::SINK_SIGN = '@';
 
 void Utilities::getFullPath(std::string& path)
 {
@@ -196,12 +197,10 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
  *				index 2 = INDEX_BOARD_PATH = full path to board.
  *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
  */
-std::vector<std::string>* Utilities::buildPath(int argc, char* argv[])
+std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], bool& delay, int& delayMS, bool&quiet)
 {
 	std::string path;
-	bool delay = false;
-	int delayMS = -1;
-	bool quiet = false;
+
 	setArguments(argc, argv, path, delay, delayMS, quiet);
 	if (path.size() == 0) //
 	{

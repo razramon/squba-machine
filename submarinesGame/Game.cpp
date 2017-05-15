@@ -56,6 +56,28 @@ bool Game::isValAttack(std::pair<int, int>& attackOfPlayer)
 		noAttacksLeft(attackOfPlayer);
 }
 
+Ship * Game::getShipAtPosition(int row, int col) const
+{
+	if (row < 0 || row >= BOARD_LENGTH || col < 0 || col >= BOARD_LENGTH) return nullptr;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		std::vector<Ship*>* ps = (i == 0) ? (*playersShips).first : (*playersShips).second;
+		for (std::vector<Ship*>::iterator iter = (*ps).begin(); iter!=(*ps).end(); ++iter)
+		{
+			for (int j = 0; j < (**iter).getShipSize(); ++j)
+			{
+				if (row == (**iter).getPosition()[j][0] && col == (**iter).getPosition()[j][1])
+				{
+					return *iter;
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 
 /*
 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer
@@ -100,10 +122,12 @@ void Game::notifyPlayers(std::pair<int, int>& currAttack, AttackResult& result) 
 	(*playerB).notifyOnAttackResult(playerPlaying, currAttack.first, currAttack.second, result);
 }
 
-Game::Game(char** board, std::vector<std::string>& filesFound): //large init list, don't panic! :)
+
+Game::Game(char** board, std::vector<std::string>& filesFound, bool _delay, int _delayMS, bool _quiet): //large init list, don't panic! :)
 	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A),
 	playerA(nullptr), playerB(nullptr), points(std::make_pair(0, 0)),
-	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>()), commonBoard(nullptr)
+	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>()), commonBoard(nullptr),
+	delay(_delay), delayMS(_delayMS), quiet(_quiet)
 {
 	if (playersShips == nullptr)
 	{
@@ -111,9 +135,6 @@ Game::Game(char** board, std::vector<std::string>& filesFound): //large init lis
 	}
 	std::pair<char **, char**> boards = BoardCreator::getInitBoardForEachPlayer(playersShips);
 	commonBoard = BoardCreator::createCommonBoard(playersShips->first, playersShips->second);
-	//TODO:: delete printing!!
-	BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);
-	//ENDOF TODO
 	try
 	{
 		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
@@ -153,6 +174,11 @@ Game::Game(char** board, std::vector<std::string>& filesFound): //large init lis
 		deletePlayerShips();
 		throw e;
 	}
+	if (!quiet)
+	{
+		GUIBoard::printGUI(commonBoard, playerPlaying);
+		Sleep(delayMS);
+	}
 }
 
 Game::~Game()
@@ -161,7 +187,10 @@ Game::~Game()
 	delete playerA;
 	delete playerB;
 	freeDlls();
+	BoardCreator::freeBoard(commonBoard, BOARD_LENGTH);
 }
+
+
 
 int Game::isHit(int row, int col, char& letter) const
 {
@@ -218,6 +247,9 @@ void Game::game()
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
 		damaged = isHit(curAttack.first - 1, curAttack.second - 1, letter);
+		GUIBoard::updateGUIBoard(commonBoard, damaged, curAttack.first - 1, curAttack.second - 1, getShipAtPosition(curAttack.first-1, curAttack.second-1), quiet, delayMS, playerPlaying);
+		//std::cout << "\n*********BOARD AFTER ATTACK OF PLAYER "<< (playerPlaying==0? "A":"B") <<" AT POSITION: (" << curAttack.first << "," << curAttack.second<< ") IS:***********\n";
+		//BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);
 		switch (damaged)
 		{
 		case SELF_DESTRUCT: // Player destroyed his own ship
@@ -266,6 +298,11 @@ void Game::game()
 			throw Exception("Error: got error result");
 		}
 		win = checkWin();
+	}
+
+	if(!quiet)
+	{
+		GUIBoard::updatePosAfterPrint();
 	}
 
 	if (win != -1)

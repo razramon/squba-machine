@@ -5,63 +5,54 @@
 #include <stdlib.h>
 #include "sizes.h"
 #include "ship.h"
-//handle console = getstdhandle(std_output_handle);
+#include "Utilities.h"
+
 
 class GUIBoard
 {
+	static const HANDLE console;
+	static const int OFFSET = 5;
+
 	enum textColor {
 		
-		// dark green
-		SHIP_P_SMALL_COLOR = 2,
+		//player A's color - blue
+		A_COLOR = 9,
 
-		// light green
-		SHIP_D_SMALL_COLOR = 10,
-
-		// dark green blue
-		SHIP_B_SMALL_COLOR = 18,
-
-		// light green blue
-		SHIP_M_SMALL_COLOR = 26,
-
-		// dark red
-		SHIP_P_BIG_COLOR = 4,
-
-		// light red
-		SHIP_D_BIG_COLOR = 12,
-
-		// dark red blue
-		SHIP_B_BIG_COLOR = 20,
-
-		// light red blue
-		SHIP_M_BIG_COLOR = 28,
+		//player B's color - tourqize
+		B_COLOR = 11,
 		
-		// hit
-		HIT_COLOR = 15,
+		// hit - yellow
+		HIT_COLOR = 14,
 		
-		// blue  - sink color
-		SINK_COLOR = 17
+		// sink color - red
+		SINK_COLOR = 12,
 
-		// hit enemy color
-		//hit_enemy = 8,
+		// default color - white
+		DEFAULT_COLOR = 15
 
 	};
 
 
-	static void gotoxy(int column, int line);
+	static void gotoxy(int row, int col);
 
 	static void setTextColor(textColor color);
 
 	static void setVisibilityOfCursor(bool show);
 
-	static void clearScreenForNextMove();
-
 	static textColor getColor(char letter, int player);
-
+	
+	static void GUIBoard::printChar(char ch, int player);
+	static void GUIBoard::updateCor(int row, int col, char ch, int player);
 	GUIBoard() = delete;
 	~GUIBoard() = delete;
 public:
 
 	static void printGUI(char ** board, int player);
-
+	/*
+	 * Updates board, according to damage resault - to represent hits, sinks and ships.
+	 */
+	static void updateGUIBoard(char** board, int damaged, int row, int col, Ship* damagedShip, bool quiet, int delayMS, int player);
+	
+	static void updatePosAfterPrint();
 };
 

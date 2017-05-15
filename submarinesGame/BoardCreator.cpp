@@ -678,6 +678,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
  */
 void BoardCreator::freeBoard(char** board, int numRows)
 {
+	if (board == nullptr) return;
 	for (int row = 0; row < numRows; row++)
 	{
 		delete[] board[row];

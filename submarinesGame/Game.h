@@ -6,6 +6,8 @@
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
+#include "GUIBoard.h"
+
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
@@ -20,7 +22,10 @@ class Game
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
 	std::vector<HINSTANCE> dlls;
-	char** commonBoard;
+	char** commonBoard; //conatins the GUIBoard to represent prints during the game
+	bool delay;
+	int delayMS;
+	bool quiet;
 	/*
 	* Deletes all memory allocations of playerShips
 	*/
@@ -54,10 +59,15 @@ class Game
 	*/
 	static bool isValAttack(std::pair<int, int>& attackOfPlayer);
 
+	/*
+	 *Returns the ship which in position board[row][col]
+	 */
+	Ship* getShipAtPosition(int row, int col) const;
+
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
-	Game(char** board, std::vector<std::string>& filesFound);
+	Game(char** board, std::vector<std::string>& filesFound, bool _delay = true, int _delayMS = 2000, bool _quiet = false);
 	~Game();
 
 	int isHit(int row, int col, char& letter) const;

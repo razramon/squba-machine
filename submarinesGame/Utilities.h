@@ -29,6 +29,7 @@ class Utilities
 public:
 	static const std::string ATTACK_SUFF, BOARD_SUFF, DLL_SUFF;
 	static const int NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
+	static const char HIT_SIGN, SINK_SIGN;
 
 	static void getFullPath(std::string& path);
 
@@ -46,7 +47,7 @@ public:
 	*				index 2 - full path to board.
 	*	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
 	*/
-	static std::vector<std::string>* buildPath(int argc, char* argv[]);
+	static std::vector<std::string>* buildPath(int argc, char* argv[], bool& delay, int& delayMS, bool&quiet);
 	/*
 	* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files
 	* that end with suffix - oredered lexicographically.
