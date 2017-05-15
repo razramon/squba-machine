@@ -20,6 +20,7 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 	int player;
 	std::vector<std::pair<int, int>> possibleMoves;
 	std::vector<std::pair<int, int>> shipPositionHit;
+	std::vector<std::pair<int, int>> enemyHitSelf;
 
 
 public:
