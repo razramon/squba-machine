@@ -15,7 +15,7 @@ std::pair<int, int> DllSmartAlgo::attack()
 		// Looping on the board with rand in order to find a position to hit
 		while (!hitFound) {
 
-			hit = std::make_pair(rand() % 10, rand() % 10);
+			hit = std::make_pair(rand() % numRows, rand() % numCols);
 
 			// Checking if wasn't already hit or is my ship
 			if (board[hit.first][hit.second] != HIT_WRONG && !Ship::isShip(board[hit.first][hit.second]) && board[hit.first][hit.second] != HIT_ENEMY) {
@@ -26,8 +26,7 @@ std::pair<int, int> DllSmartAlgo::attack()
 	}
 	// Existing possible moves, choose randomly between them
 	else {
-
-		hit = this->possibleMoves[rand() % ((this->possibleMoves).size() - 1)];
+		hit = this->possibleMoves[rand() % (this->possibleMoves).size()];
 	}
 
 	return std::make_pair(hit.first + 1, hit.second + 1);
@@ -37,52 +36,87 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 {
 	row--;
 	col--;
-	switch (result)
-	{
-	case AttackResult::Hit:
+	if (player != this->player) {
+		switch (result)
+		{
+		case AttackResult::Hit:
 
-		this->shipPositionHit.push_back(std::make_pair(row, col));
-		this->board[row][col] = HIT_ENEMY;
+			this->shipPositionHit.push_back(std::make_pair(row, col));
+			this->board[row][col] = HIT_ENEMY;
 
-		// If first hit of the ship
-		if (this->possibleMoves.size() != 0) {
+			// If first hit of the ship
+			if (this->possibleMoves.size() != 0) {
 
-			// Create the vector for possible moves
-			DllSmartAlgo::firstHit(row, col);
+				// Create the vector for possible moves
+				DllSmartAlgo::firstHit(row, col);
+			}
+			else {
+
+				// Continue the vector 
+				DllSmartAlgo::hitShip(row, col);
+			}
+			break;
+
+		case AttackResult::Sink:
+
+			this->shipPositionHit.clear();
+			this->board[row][col] = HIT_ENEMY;
+
+			// First hit first sink, small ship
+			if (this->possibleMoves.size() != 0) {
+
+				DllSmartAlgo::sinkSmallShip(row, col);
+			}
+			else {
+				// Big ship, need to check all the ship
+				DllSmartAlgo::sinkBigShip(row, col);
+			}
+
+			this->possibleMoves.clear();
+			break;
+
+		case AttackResult::Miss:
+
+			this->board[row][col] = HIT_WRONG;
+
+			break;
+
+		default:
+			break;
 		}
-		else {
-
-			// Continue the vector 
-			DllSmartAlgo::hitShip(row, col);
-		}
-		break;
-
-	case AttackResult::Sink:
-
-		this->shipPositionHit.clear();
-		this->board[row][col] = HIT_ENEMY;
-
-		// First hit first sink, small ship
-		if (this->possibleMoves.size() != 0) {
-
-			DllSmartAlgo::sinkSmallShip(row, col);
-		}
-		else {
-			// Big ship, need to check all the ship
-			DllSmartAlgo::sinkBigShip(row, col);
-		}
-
-		this->possibleMoves.clear();
-		break;
-
-	case AttackResult::Miss:
-
-		this->board[row][col] = HIT_WRONG;
-		break;
-
-	default:
-		break;
 	}
+	else {
+		switch (result)
+		{
+		case AttackResult::Hit:
+
+			if (!Ship::isShip(this->board[row][col])) {
+
+				this->board[row][col] = HIT_ENEMY;
+				enemyHitSelf.push_back(std::make_pair(row, col));
+				DllSmartAlgo::changeSurrounding(row, col, false);
+			}
+			break;
+
+		case AttackResult::Sink:
+
+			this->board[row][col] = HIT_ENEMY;
+			DllSmartAlgo::changeSurrounding(row, col, true);
+			break;
+
+		case AttackResult::Miss:
+
+			this->board[row][col] = HIT_WRONG;
+			break;
+
+		default:
+			break;
+		}
+
+
+
+	}
+	 
 }
 
 void DllSmartAlgo::sinkBigShip(int row, int col) {
@@ -147,9 +181,9 @@ std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
 
 	std::pair<int, int> positionToHit;
 
-	if (Ship::inBoard(row) && Ship::inBoard(col) && this->board[row][col] != HIT_WRONG) { // TODO: add if the position is my ship
-		positionToHit = std::make_pair(row, col);
+	if (Ship::inBoard(row) && Ship::inBoard(col) && this->board[row][col] != HIT_WRONG && !Ship::isShip(this->board[row][col]) && this->board[row][col] != HIT_ENEMY) {
 
+		positionToHit = std::make_pair(row, col);
 	}
 	else {
 		positionToHit = std::make_pair(-1, -1);
