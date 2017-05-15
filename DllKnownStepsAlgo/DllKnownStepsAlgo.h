@@ -14,7 +14,7 @@ class DllKnownStepsAlgo : public IBattleshipGameAlgo
 	std::vector<std::pair<int, int>>* attacks;
 	
 	static void getAttackFromLine(std::string & line, std::pair<int, int>& attack);
-	static std::vector<std::pair<int, int>>* getAttackFile(const char* attackFile);
+	std::vector<std::pair<int, int>>* getAttackFile(const char* attackFile);
 	/*
 	 * Returns the relevant full path to attack file - according to playerNumber
 	 */

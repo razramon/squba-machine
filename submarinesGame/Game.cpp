@@ -51,8 +51,8 @@ bool Game::noAttacksLeft(std::pair<int, int>& attackOfPlayer)
  */
 bool Game::isValAttack(std::pair<int, int>& attackOfPlayer)
 {
-	return ((1 <= attackOfPlayer.first && attackOfPlayer.first <= 10) &&
-			(1 <= attackOfPlayer.second && attackOfPlayer.second <= 10)) ||
+	return ((1 <= attackOfPlayer.first && attackOfPlayer.first <= BOARD_LENGTH) &&
+			(1 <= attackOfPlayer.second && attackOfPlayer.second <= BOARD_LENGTH)) ||
 		noAttacksLeft(attackOfPlayer);
 }
 

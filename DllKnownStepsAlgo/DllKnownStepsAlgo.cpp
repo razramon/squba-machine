@@ -48,7 +48,7 @@ std::vector<std::pair<int, int>>* DllKnownStepsAlgo::getAttackFile(const char * 
 		getAttackFromLine(line, attack);
 
 		// Check if in range
-		if (attack.first > 10 || attack.first < 1 || attack.second > 10 || attack.second < 1)
+		if (attack.first > rows || attack.first < 1 || attack.second > cols || attack.second < 1)
 		{
 			continue;
 		}
