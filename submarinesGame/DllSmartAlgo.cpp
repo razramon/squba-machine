@@ -36,8 +36,8 @@ std::pair<int, int> DllSmartAlgo::attack()
 
 void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	row--;
-	col--;
+	row -= 1;
+	col -= 1;
 	if (player == this->player) {
 		switch (result)
 		{
