@@ -176,6 +176,7 @@ Game::Game(char** board, std::vector<std::string>& filesFound, bool _delay, int 
 	}
 	if (!quiet)
 	{
+		GUIBoard::printInitialGame();
 		GUIBoard::printGUI(commonBoard, playerPlaying);
 		Sleep(delayMS);
 	}
@@ -250,6 +251,11 @@ void Game::game()
 		row = curAttack.first - 1;
 		col = curAttack.second - 1;
 		damaged = isHit(row, col, letter);
+		if (playerPlaying==PLAYER_B)
+		{
+			std::cout << "Attack of player " << (playerPlaying == PLAYER_A ? "A" : "B") << " attacks: (" << curAttack.first << "," << curAttack.second << ")\n";
+			std::cout << "attack result is: " << damaged << std::endl;
+		}
 		GUIBoard::updateGUIBoard(commonBoard, damaged, row, col, getShipAtPosition(row, col), quiet, delayMS, playerPlaying);
 		//std::cout << "\n*********BOARD AFTER ATTACK OF PLAYER "<< (playerPlaying==0? "A":"B") <<" AT POSITION: (" << curAttack.first << "," << curAttack.second<< ") IS:***********\n";
 		//BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);

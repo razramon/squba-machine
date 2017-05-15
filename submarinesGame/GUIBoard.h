@@ -24,17 +24,11 @@ class GUIBoard
 		// hit - yellow
 		HIT_COLOR_A = 14,
 
-		// hit - 
-		HIT_COLOR_B = 13,
-		
-		// sink color - red
-		SINK_COLOR_A = 12,
-
-		// sink color - 
-		SINK_COLOR_B = 7,
+		// hit - res
+		HIT_COLOR_B = 12,
 
 		// default color - white
-		DEFAULT_COLOR = 15
+		DEFAULT_COLOR = 15,
 
 	};
 
@@ -58,7 +52,7 @@ public:
 	 * Updates board, according to damage resault - to represent hits, sinks and ships.
 	 */
 	static void updateGUIBoard(char** board, int damaged, int row, int col, Ship* damagedShip, bool quiet, int delayMS, int player);
-	
+	static void printInitialGame();
 	static void updatePosAfterPrint();
 };
 

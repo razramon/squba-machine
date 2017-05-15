@@ -10,7 +10,8 @@ const int Utilities::INDEX_PATH_DLL_B = 1;
 const int Utilities::INDEX_BOARD_PATH = 2;
 const char Utilities::HIT_SIGN = '*';
 const char Utilities::SINK_SIGN = '@';
-
+const char Utilities::MISS_SIGN = '~';
+//TODO delete miss sign!
 void Utilities::getFullPath(std::string& path)
 {
 	char path_c[MAX_BUFFER];

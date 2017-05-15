@@ -77,15 +77,7 @@ DllNaiveAlgo::~DllNaiveAlgo()
 
 void DllNaiveAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
-	this->board = new char*[numRows];
-	for (int indexRow = 0; indexRow < numRows; indexRow++)
-	{
-		this->board[indexRow] = new char[numCols];
-		for (int indexCol = 0; indexCol < numCols; indexCol++)
-		{
-			this->board[indexRow][indexCol] = board[indexRow][indexCol];
-		}
-	}
+	this->board = BoardCreator::copyBoard(board, numRows, numCols);
 	this->player = player;
 	this->numRows = numRows;
 	this->numCols = numCols;

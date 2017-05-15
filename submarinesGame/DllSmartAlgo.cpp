@@ -36,7 +36,7 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 {
 	row--;
 	col--;
-	if (player != this->player) {
+	if (player == this->player) {
 		switch (result)
 		{
 		case AttackResult::Hit:
@@ -198,6 +198,7 @@ DllSmartAlgo::DllSmartAlgo():board(nullptr), numRows(NOT_INITIALIZED), numCols(N
 
 DllSmartAlgo::~DllSmartAlgo()
 {
+	BoardCreator::freeBoard(this->board, numRows);
 }
 
 // Changing the board to the new surrounding
@@ -230,16 +231,7 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 
 void DllSmartAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
-	this->board = new char*[numRows];
-
-	for (int indexRow = 0; indexRow < numRows; indexRow++)
-	{
-		this->board[indexRow] = new char[numCols];
-		for (int indexCol = 0; indexCol < numCols; indexCol++)
-		{
-			this->board[indexRow][indexCol] = board[indexRow][indexCol];
-		}
-	}
+	this->board = BoardCreator::copyBoard(board, numRows, numCols);
 	this->player = player;
 	this->numRows = numRows;
 	this->numCols = numCols;
@@ -251,7 +243,6 @@ bool DllSmartAlgo::init(const std::string& path)
 
 	for (int indexRow = 0; indexRow < numRows; indexRow++)
 	{
-		this->board[indexRow] = new char[numCols];
 		for (int indexCol = 0; indexCol < numCols; indexCol++)
 		{
 			if (Ship::isShip(this->board[indexRow][indexCol]))

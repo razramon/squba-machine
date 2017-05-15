@@ -66,10 +66,28 @@ void GUIBoard::updateGUIBoard(char ** board, int damaged, int row, int col, Ship
 		}
 		break;
 	case(MISS):
+		//TODO:: delete these lines
+		if (!quiet)
+		{
+			updateCor(row, col, Utilities::MISS_SIGN, player);
+		}
 	default:
 		break;
 	}
 	if (!quiet) Sleep(delayMS);
+}
+
+void GUIBoard::printInitialGame()
+{
+	setTextColor(textColor::A_COLOR);
+	std::cout << "Player A plays with this color, and hits with ";
+	setTextColor(textColor::HIT_COLOR_A);
+	std::cout << "this color." <<std::endl;
+	setTextColor(textColor::B_COLOR);
+	std::cout << "Player B plays with this color, and hits with ";
+	setTextColor(textColor::HIT_COLOR_B);
+	std::cout << "this color." << std::endl;
+	setTextColor(textColor::DEFAULT_COLOR);
 }
 
 GUIBoard::textColor GUIBoard::getColor(char letter, int player) {
@@ -96,15 +114,16 @@ GUIBoard::textColor GUIBoard::getColor(char letter, int player) {
 		{
 			return textColor::HIT_COLOR_B;
 		}
-		
+	case '~':
+			return textColor::DEFAULT_COLOR;
 	default:
 		if (player == PLAYER_A)
 		{
-			return textColor::SINK_COLOR_A;
+			return textColor::HIT_COLOR_A;
 		}
 		else
 		{
-			return textColor::SINK_COLOR_B;
+			return textColor::HIT_COLOR_B;
 		}
 	}
 }
