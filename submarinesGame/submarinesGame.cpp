@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-
 	char** board = nullptr;
 	try
 	{

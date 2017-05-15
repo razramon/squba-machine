@@ -89,11 +89,23 @@ GUIBoard::textColor GUIBoard::getColor(char letter, int player) {
 		return textColor::A_COLOR;
 
 	case '*':
-		return textColor::HIT_COLOR;
-
+		if (player==PLAYER_A)
+		{
+			return textColor::HIT_COLOR_A;
+		} else
+		{
+			return textColor::HIT_COLOR_B;
+		}
+		
 	default:
-		return textColor::SINK_COLOR;
-
+		if (player == PLAYER_A)
+		{
+			return textColor::SINK_COLOR_A;
+		}
+		else
+		{
+			return textColor::SINK_COLOR_B;
+		}
 	}
 }
 

@@ -242,14 +242,15 @@ void Game::game()
 	int win = -1;
 	char letter = 'a';
 	std::pair<int, int> curAttack(-1, -1);
+	int row, col;
 	while (win == -1 && playersHaveAttack(curAttack))
 	{
-		if(playerPlaying == PLAYER_B)
-			std::cout << "curAttack " << curAttack.first << "," << curAttack.second << std::endl;
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
-		damaged = isHit(curAttack.first - 1, curAttack.second - 1, letter);
-		GUIBoard::updateGUIBoard(commonBoard, damaged, curAttack.first - 1, curAttack.second - 1, getShipAtPosition(curAttack.first-1, curAttack.second-1), quiet, delayMS, playerPlaying);
+		row = curAttack.first - 1;
+		col = curAttack.second - 1;
+		damaged = isHit(row, col, letter);
+		GUIBoard::updateGUIBoard(commonBoard, damaged, row, col, getShipAtPosition(row, col), quiet, delayMS, playerPlaying);
 		//std::cout << "\n*********BOARD AFTER ATTACK OF PLAYER "<< (playerPlaying==0? "A":"B") <<" AT POSITION: (" << curAttack.first << "," << curAttack.second<< ") IS:***********\n";
 		//BoardCreator::printBoard(const_cast<const char**>(commonBoard), BOARD_LENGTH, BOARD_LENGTH);
 		switch (damaged)

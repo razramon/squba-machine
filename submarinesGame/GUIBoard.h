@@ -22,10 +22,16 @@ class GUIBoard
 		B_COLOR = 11,
 		
 		// hit - yellow
-		HIT_COLOR = 14,
+		HIT_COLOR_A = 14,
+
+		// hit - 
+		HIT_COLOR_B = 13,
 		
 		// sink color - red
-		SINK_COLOR = 12,
+		SINK_COLOR_A = 12,
+
+		// sink color - 
+		SINK_COLOR_B = 7,
 
 		// default color - white
 		DEFAULT_COLOR = 15
