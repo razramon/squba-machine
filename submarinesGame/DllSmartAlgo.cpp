@@ -3,33 +3,35 @@
 const int DllSmartAlgo::NOT_INITIALIZED = -1;
 const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard = { { -1, 0 },{ 1, 0 },{ 0, 1 },{ 0, -1 } };
 const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete = { { -1, -1 },{ -1 ,1 },{ 1, -1 },{ 1, 1 } };
+
 std::pair<int, int> DllSmartAlgo::attack()
 {
-	std::pair<int, int> hit;
+	std::unique_ptr<std::pair<int, int>> hit;
 
 	// Checking if there is already possible move - if so, rand over the moves, if not, rand over the board till found place that can place a ship
 	if((this->possibleMoves).size() == 0)
 	{
-		bool hitFound = false;
-
-		// Looping on the board with rand in order to find a position to hit
-		while (!hitFound) {
-
-			hit = std::make_pair(rand() % numRows, rand() % numCols);
-
-			// Checking if wasn't already hit or is my ship
-			if (board[hit.first][hit.second] != HIT_WRONG && !Ship::isShip(board[hit.first][hit.second]) && board[hit.first][hit.second] != HIT_ENEMY) {
-				
-				hitFound = true;
-			}
-		}
+		hit = getRandomAttack();
+		std::cout << "used getRandomAttack(): ";
 	}
 	// Existing possible moves, choose randomly between them
 	else {
-		hit = this->possibleMoves[rand() % (this->possibleMoves).size()];
+		std::cout << "possible moves are: ";
+		for (int i = 0; i <(this->possibleMoves).size(); ++i)
+		{
+			 std::cout << "("<< ((this->possibleMoves).at(i)).first + 1 << "," << ((this->possibleMoves).at(i)).second + 1 << "), ";
+		}
+		std::cout << std::endl;
+		int r = rand() % (this->possibleMoves).size();
+		hit = std::make_unique<std::pair<int,int>>(this->possibleMoves[r]);
+		possibleMoves.erase(possibleMoves.begin() + r);
 	}
-
-	return std::make_pair(hit.first + 1, hit.second + 1);
+	if((*hit).first!=-1)
+	{
+		std::cout << "hit returned from smartDLL is: (" << (*hit).first+1 << "," << (*hit).second+1 << ") "<<std::endl;
+		return std::make_pair((*hit).first + 1, (*hit).second + 1);
+	}
+	return std::make_pair(-1, -1);
 }
 
 void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
@@ -40,12 +42,12 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 		switch (result)
 		{
 		case AttackResult::Hit:
-
+			
 			this->shipPositionHit.push_back(std::make_pair(row, col));
 			this->board[row][col] = HIT_ENEMY;
 
 			// If first hit of the ship
-			if (this->possibleMoves.size() != 0) {
+			if (this->shipPositionHit.size() == 1) {
 
 				// Create the vector for possible moves
 				DllSmartAlgo::firstHit(row, col);
@@ -132,19 +134,20 @@ void DllSmartAlgo::sinkSmallShip(int row, int col)
 	DllSmartAlgo::changeSurrounding(row, col, true);
 }
 
+
 void DllSmartAlgo::hitShip(int row, int col) {
 
 	DllSmartAlgo::changeSurrounding(row, col, false);
 	std::vector<std::pair<int, int>> attacks;
-	this->possibleMoves = DllSmartAlgo::getPossibleMoves(row, col);
+	this-> addToPossibleMove(DllSmartAlgo::getPossibleMoves(row, col));
 
-	// Getting all the possible moves after the board change, suppose to be only 2 possible moves - left right or up down
-	for (std::pair<int, int> attacked : this->shipPositionHit) {
+	//// Getting all the possible moves after the board change, suppose to be only 2 possible moves - left right or up down
+	//for (std::pair<int, int> attacked : this->shipPositionHit) {
 
-		attacks = getPossibleMoves(attacked.first, attacked.second);
-		this->possibleMoves.reserve((this->possibleMoves).size() + attacks.size());
-		(this->possibleMoves).insert(std::end(this->possibleMoves), std::begin(attacks), std::end(attacks));
-	}
+	//	attacks = getPossibleMoves(attacked.first, attacked.second);
+	//	this->possibleMoves.reserve((this->possibleMoves).size() + attacks.size());
+	//	(this->possibleMoves).insert(std::end(this->possibleMoves), std::begin(attacks), std::end(attacks));
+	//}
 }
 
 void DllSmartAlgo::firstHit(int row, int col) {
@@ -160,11 +163,11 @@ std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col
 	std::vector<std::pair<int, int>> positions;
 	std::pair<int, int> positionToHit;
 
-	for (std::pair<int, int> pair : this->placesToCheckBoard)
+	for (std::pair<int, int> pair : placesToCheckBoard)
 	{
 		positionToHit = DllSmartAlgo::checkPosition(row + pair.first, col + pair.second);
 		if (positionToHit.first != -1 && positionToHit.second != -1) {
-
+			std::cout << "position added: (" << positionToHit.first << "," << positionToHit.second << ")" << std::endl;
 			positions.push_back(positionToHit);
 		}
 	}
@@ -186,6 +189,67 @@ std::pair<int,int> DllSmartAlgo::checkPosition(int col, int row) {
 	}
 	return positionToHit;
 }
+
+std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
+{
+	std::unique_ptr<std::vector<std::pair<int, int>>> retVector = getAllPossiblePoints();
+	//std::cout << "potential moves: ";
+	//for (std::vector<std::pair<int, int>>::iterator iter = retVector->begin(); iter != retVector->end(); ++iter) {
+	//	 std::cout <<"("<< (*iter).first <<","<< (*iter).second <<"), ";
+	//}
+	//std::cout << std::endl;
+	if(retVector->size()==0)
+	{
+		return std::make_unique<std::pair<int, int>>(std::make_pair(-1, -1));
+	}
+	int k = rand() % (retVector->size());
+	return std::make_unique<std::pair<int, int>>(retVector->at(k)) ;
+}
+
+ std::unique_ptr<std::vector<std::pair<int, int>>> DllSmartAlgo::getAllPossiblePoints()
+ {
+	 std::unique_ptr<std::vector<std::pair<int, int>>> retVector = std::make_unique<std::vector<std::pair<int, int>>>();
+	for (int row = 0; row < numRows; ++row)
+	{
+		for (int col = 0; col < numCols; ++col)
+		{
+			if (board[row][col]!= HIT_WRONG && !Ship::isShip(board[row][col]) && board[row][col] != HIT_ENEMY)
+			{
+				retVector->push_back(std::make_pair(row, col)); //returning values 0-9!
+			}
+		}
+	}
+	return retVector;
+ }
+
+
+
+ void DllSmartAlgo::addToPossibleMove(std::vector<std::pair<int, int>> pm)
+ {
+
+	for (std::pair<int, int> p: pm)
+	{
+		if ((this->getPositionOfMove(p.first,p.second))==-1)//meaning it isn't in possibleMoves
+		{
+			(this->possibleMoves).push_back(std::make_pair(p.first, p.second));
+		}
+	}
+
+ }
+
+ int DllSmartAlgo::getPositionOfMove(int p1, int p2)
+ {
+	 std::pair<int, int> p;
+	for(int i = 0; i < possibleMoves.size(); ++i)
+	{
+		p = possibleMoves.at(i);
+		if (p.first==p1 && p.second==p2)
+		{
+			return i;
+		}
+	}
+	return -1;
+ }
 
 DllSmartAlgo::DllSmartAlgo():board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
 	player(NOT_INITIALIZED)
@@ -215,12 +279,19 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 		}
 	}
 	// Delete from the board all the wrong position if found a hit
+	int k = -1;
 	for (std::pair<int, int> toDelete : this->placesToDelete) {
 
 		if (Ship::inBoard(row + toDelete.first) && Ship::inBoard(col + toDelete.second)) {
 
 			this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
+			k = getPositionOfMove(row + toDelete.first, col + toDelete.second);
+			if (k!=-1)
+			{
+				possibleMoves.erase(possibleMoves.begin() + k);
+			}
 		}
+		
 	}
 	
 }

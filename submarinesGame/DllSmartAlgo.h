@@ -5,15 +5,16 @@
 #include "../submarinesGame/Ship.h"
 #include <stdlib.h>
 #include <vector>
+#include <memory>
 #define HIT_WRONG 'c'
 #define HIT_ENEMY '@'
 
 
 class DllSmartAlgo : public IBattleshipGameAlgo
 {
-	static const int DllSmartAlgo::NOT_INITIALIZED;
-	static const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard;
-	static const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete;
+	static const int NOT_INITIALIZED;
+	static const std::vector<std::pair<int, int>> placesToCheckBoard;
+	static const std::vector<std::pair<int, int>> placesToDelete;
 	char** board;
 	int numRows;
 	int numCols;
@@ -22,7 +23,11 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 	std::vector<std::pair<int, int>> shipPositionHit;
 	std::vector<std::pair<int, int>> enemyHitSelf;
 
+	std::unique_ptr<std::pair<int, int>> getRandomAttack();
+	std::unique_ptr<std::vector<std::pair<int, int>>> getAllPossiblePoints();
 
+	void addToPossibleMove(std::vector<std::pair<int, int>> pm);
+	int getPositionOfMove(int p1, int p2);
 public:
 
 	DllSmartAlgo();
