@@ -6,43 +6,40 @@ const std::vector<std::pair<int, int>> DllNaiveAlgo::placesToCheck = { { -1, -1 
 std::pair<int, int> DllNaiveAlgo::attack()
 {
 	bool found = false;
+	std::pair<int, int> posToAttack;
+	// Looping over the indexes of the row and col
+	while (Ship::inBoard(this->indexRow)) {
 
-	for (int curRow = this->indexRow; curRow < BOARD_LENGTH; curRow++) {
+		while (Ship::inBoard(this->indexCol)) {
 
-		for (int curCol = this->indexCol; curRow < BOARD_LENGTH; curCol++) {
+			// Searching where there isn't a neighbor or position that was attacked
+			if (this->board[this->indexRow][this->indexCol] != HIT_ENEMY && !DllNaiveAlgo::hasNeighbor(this->indexRow, this->indexCol) 
+				&& !Ship::isShip(this->board[this->indexRow][this->indexCol])) {
 
-			// Checking if one of the neighbors is a ship or hit on enemy (still ship), if so, dont let it be an attack 
-			if (!hasNeighbor(curRow, curCol)) {
-
+				// Saving the position to attack, we need that all will be + 1 for the gameManager
+				posToAttack = std::make_pair(this->indexRow + 1, this->indexCol + 1);
+				this->indexCol += 1;
 				found = true;
-
-				// Checking if still in the range of the board
-				if (Ship::inBoard(curCol + 1)) {
-
-					this->indexCol = curCol + 1;
-					this->indexRow = curRow;
-				}
-				else {
-					this->indexCol = 0;
-
-					// Checking if still in the range of the board
-					if (Ship::inBoard(curRow + 1))
-
-						this->indexRow = curRow + 1;
-					else {
-
-						this->indexCol = -1;
-						this->indexRow = -1;
-					}
-				}
 				break;
 			}
+			this->indexCol += 1;
+		}
+
+		// Checking if still in range, if not, reset the col and going down a row
+		if (this->indexCol >= BOARD_LENGTH) {
+
+			this->indexCol = 0;
+			this->indexRow += 1;
 		}
 		if (found)
 			break;
-	}
 
-	return std::make_pair(this->indexRow, this->indexCol);
+	}
+	// Was not found - meaning we went over the whole board and there isn't a play left
+	if (!found)
+		return std::make_pair(-1, -1);
+
+	return posToAttack;
 }
 
 bool DllNaiveAlgo::hasNeighbor(int row, int col) {
@@ -53,7 +50,7 @@ bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 		// Checking if:
 		// the position is in the board, after it, checking if is a ship / is a hit on the enemy. if one of them does not exist, returning false.
 		hasNeighbor = Ship::inBoard(row + pair.first) && Ship::inBoard(col + pair.second)
-			&& (Ship::isShip(this->board[row + pair.first][col + pair.second]) || this->board[row + pair.first][col + pair.second] != HIT_ENEMY);
+			&& Ship::isShip(this->board[row + pair.first][col + pair.second]);
 		if (hasNeighbor)
 			break;
 	}
@@ -63,10 +60,7 @@ bool DllNaiveAlgo::hasNeighbor(int row, int col) {
 
 void DllNaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	if (result == AttackResult::Hit || result == AttackResult::Sink) {
-
-		this->board[row - 1][col - 1] = HIT_ENEMY;
-	}
+	this->board[row - 1][col - 1] = HIT_ENEMY;
 }
 
 
@@ -99,6 +93,16 @@ void DllNaiveAlgo::setBoard(int player, const char** board, int numRows, int num
 
 bool DllNaiveAlgo::init(const std::string& path)
 {
+	for (int indexRow = 0; indexRow < numRows; indexRow++)
+	{
+		for (int indexCol = 0; indexCol < numCols; indexCol++)
+		{
+			if (DllNaiveAlgo::hasNeighbor(indexRow, indexCol) && !Ship::isShip(this->board[indexRow][indexCol]) ){
+
+				this->board[indexRow][indexCol] = HIT_ENEMY;
+			}
+		}
+	}
 	return true;
 }
 

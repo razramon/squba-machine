@@ -32,6 +32,15 @@ char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
 			board[positions[pos][0]][positions[pos][1]] = letter;
 		}
 	}
+	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
+	{
+		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
+		{
+			std::cout << board[indexRow][indexCol];
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "------------------" << std::endl;
 	return board;
 }
 

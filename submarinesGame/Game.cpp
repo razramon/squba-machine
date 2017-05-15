@@ -211,6 +211,8 @@ void Game::game()
 	std::pair<int, int> curAttack(-1, -1);
 	while (win == -1 && playersHaveAttack(curAttack))
 	{
+		if(playerPlaying == PLAYER_B)
+			std::cout << "curAttack " << curAttack.first << "," << curAttack.second << std::endl;
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
 		damaged = isHit(curAttack.first - 1, curAttack.second - 1, letter);

@@ -18,7 +18,8 @@ std::pair<int, int> DllSmartAlgo::attack()
 			hit = std::make_pair(rand() % 10, rand() % 10);
 
 			// Checking if wasn't already hit or is my ship
-			if (board[hit.first][hit.second] != HIT_WRONG || !Ship::isShip(board[hit.first][hit.second]) || board[hit.first][hit.second] != HIT_ENEMY) {
+			if (board[hit.first][hit.second] != HIT_WRONG && !Ship::isShip(board[hit.first][hit.second]) && board[hit.first][hit.second] != HIT_ENEMY) {
+				
 				hitFound = true;
 			}
 		}
@@ -29,11 +30,13 @@ std::pair<int, int> DllSmartAlgo::attack()
 		hit = this->possibleMoves[rand() % ((this->possibleMoves).size() - 1)];
 	}
 
-	return hit;
+	return std::make_pair(hit.first + 1, hit.second + 1);
 }
 
 void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
+	row--;
+	col--;
 	switch (result)
 	{
 	case AttackResult::Hit:
@@ -55,6 +58,7 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 		break;
 
 	case AttackResult::Sink:
+
 		this->shipPositionHit.clear();
 		this->board[row][col] = HIT_ENEMY;
 
@@ -108,7 +112,8 @@ void DllSmartAlgo::hitShip(int row, int col) {
 	for (std::pair<int, int> attacked : this->shipPositionHit) {
 
 		attacks = getPossibleMoves(attacked.first, attacked.second);
-		this->possibleMoves.insert(this->possibleMoves.end(), attacks.begin(), attacks.end());
+		this->possibleMoves.reserve((this->possibleMoves).size() + attacks.size());
+		(this->possibleMoves).insert(std::end(this->possibleMoves), std::begin(attacks), std::end(attacks));
 	}
 }
 
