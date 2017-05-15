@@ -170,7 +170,6 @@ std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col
 // Checking if the position in range and was not hit before
 bool DllSmartAlgo::checkPosition(int row, int col) const {
 
-	BoardCreator::printBoard(const_cast<const char**>(board), numRows, numCols);
 	if (Ship::inBoard(row) && Ship::inBoard(col))
 	{
 		if(board[row][col] != HIT_WRONG)

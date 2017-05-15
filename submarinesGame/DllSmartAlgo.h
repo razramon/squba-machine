@@ -31,16 +31,7 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 
 	void addToPossibleMove(std::vector<std::pair<int, int>> pm);
 	int getPositionOfMove(int p1, int p2);
-public:
-
-	DllSmartAlgo();
-	~DllSmartAlgo();
 	void changeSurrounding(int row, int col, bool initBoard);
-	void setBoard(int player, const char** board, int numRows, int numCols) override;		// called once to notify player on his board
-	bool init(const std::string& path) override;		// called once to allow init from files if needed returns whether the init succeeded or failed
-
-	std::pair<int, int> attack() override;													// ask player for his move
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;	// notify on last move result
 
 	void sinkBigShip(int row, int col);
 
@@ -54,4 +45,14 @@ public:
 
 	bool checkPosition(int col, int row) const;
 
+public:
+
+	DllSmartAlgo();
+	~DllSmartAlgo();
+	
+	void setBoard(int player, const char** board, int numRows, int numCols) override;		// called once to notify player on his board
+	bool init(const std::string& path) override;		// called once to allow init from files if needed returns whether the init succeeded or failed
+
+	std::pair<int, int> attack() override;													// ask player for his move
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;	// notify on last move result
 };
