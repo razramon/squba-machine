@@ -284,6 +284,7 @@ void Game::game()
 			playerPlaying = playerPlaying == PLAYER_A ? PLAYER_B : PLAYER_A;
 			break;
 		case SUNK: // Sink
+			std::cout << "player " << (playerPlaying == PLAYER_A ? "A" : "B") << " SANK his rival! attack is: (" << curAttack.first << "," << curAttack.second << ")\n";
 			result = AttackResult::Sink;
 			if (playerPlaying == PLAYER_A)
 			{
@@ -298,6 +299,7 @@ void Game::game()
 			notifyPlayers(curAttack, result);
 			break;
 		case HIT:
+			std::cout << "player " << (playerPlaying == PLAYER_A ? "A" : "B") << " HIT! attack is: (" << curAttack.first << "," << curAttack.second << ")\n";
 			result = AttackResult::Hit;
 			notifyPlayers(curAttack, result);
 			break;
