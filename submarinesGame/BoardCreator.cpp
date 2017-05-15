@@ -19,6 +19,12 @@ char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
 			board[indexRow][indexCol] = EMPTY_LETTER;
 		}
 	}
+	updateShipsInBoard(board, ships);
+	return board;
+}
+
+void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
+{
 	std::vector<Ship*>* ps = ships;
 	for (int i = 0; i < (*ps).size(); ++i)
 	{
@@ -32,17 +38,8 @@ char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
 			board[positions[pos][0]][positions[pos][1]] = letter;
 		}
 	}
-	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
-	{
-		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
-		{
-			std::cout << board[indexRow][indexCol];
-		}
-		std::cout << std::endl;
-	}
-	std::cout << "------------------" << std::endl;
-	return board;
 }
+
 
 
 /*
@@ -681,6 +678,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
  */
 void BoardCreator::freeBoard(char** board, int numRows)
 {
+	if (board == nullptr) return;
 	for (int row = 0; row < numRows; row++)
 	{
 		delete[] board[row];
@@ -729,4 +727,11 @@ void BoardCreator::printBoard(const char ** board, int numRows, int numCols)
 		}
 		std::cout << std::endl;
 	}
+}
+
+char ** BoardCreator::createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB)
+{
+	char** commonBoard = getBoardFromShips(shipsA);
+	updateShipsInBoard(commonBoard, shipsB);
+	return commonBoard;
 }

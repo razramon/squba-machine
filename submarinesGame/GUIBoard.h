@@ -1,63 +1,58 @@
-//#pragma once
-//#include <conio.h>
-//#include <Windows.h>
-//#include <iostream>
-//#include <stdlib.h>
-//#include "Sizes.h"
-//#include "Ship.h"
-//HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-//
-//class GUIBoard {
-//	enum class textColor : int {
-//		// Dark green
-//		SHIP_P_SMALL_COLOR = 2,
-//
-//		// Dark red
-//		SHIP_P_BIG_COLOR = 4,
-//		
-//		// Hit enemy color
-//		HIT_ENEMY = 8,
-//
-//		// Light green
-//		SHIP_D_SMALL_COLOR = 10,
-//
-//		// Light red
-//		SHIP_D_BIG_COLOR = 12,
-//
-//		// Self hit
-//		SELF_HIT = 15,
-//
-//		// Blue for the sea
-//		BLUE_SEA = 17,
-//
-//		// Dark green blue
-//		SHIP_B_SMALL_COLOR = 18,
-//
-//		// Dark red blue
-//		SHIP_B_BIG_COLOR = 20,
-//
-//		// Light green blue
-//		SHIP_M_SMALL_COLOR = 26,
-//	
-//		// Light red blue
-//		SHIP_M_BIG_COLOR = 28
-//
-//	};
-//
-//	void printWithQuiet(char ** board, int player);
-//
-//	textColor getColor(char letter, int player);
-//
-//	GUIBoard::textColor getColorForShip(char letter, int player);
-//
-//	void setVisibilityOfCursor(bool show);
-//
-//	void clearScreenForNextMove();
-//
-//	void gotoxy(int column, int line);
-//
-//	void setTextColor(textColor color);
-//
-//
-//};
-//
+#pragma once
+#include <conio.h>
+#include <windows.h>
+#include <iostream>
+#include <stdlib.h>
+#include "sizes.h"
+#include "ship.h"
+#include "Utilities.h"
+
+
+class GUIBoard
+{
+	static const HANDLE console;
+	static const int OFFSET = 5;
+
+	enum textColor {
+		
+		//player A's color - blue
+		A_COLOR = 9,
+
+		//player B's color - tourqize
+		B_COLOR = 11,
+		
+		// hit - yellow
+		HIT_COLOR = 14,
+		
+		// sink color - red
+		SINK_COLOR = 12,
+
+		// default color - white
+		DEFAULT_COLOR = 15
+
+	};
+
+
+	static void gotoxy(int row, int col);
+
+	static void setTextColor(textColor color);
+
+	static void setVisibilityOfCursor(bool show);
+
+	static textColor getColor(char letter, int player);
+	
+	static void GUIBoard::printChar(char ch, int player);
+	static void GUIBoard::updateCor(int row, int col, char ch, int player);
+	GUIBoard() = delete;
+	~GUIBoard() = delete;
+public:
+
+	static void printGUI(char ** board, int player);
+	/*
+	 * Updates board, according to damage resault - to represent hits, sinks and ships.
+	 */
+	static void updateGUIBoard(char** board, int damaged, int row, int col, Ship* damagedShip, bool quiet, int delayMS, int player);
+	
+	static void updatePosAfterPrint();
+};
+
