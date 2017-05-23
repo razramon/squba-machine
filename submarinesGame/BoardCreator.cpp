@@ -51,24 +51,24 @@ void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
 *		badLetterIndexes - if it's not a ship, adds the Letters "bad" indexes to a list
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
-void BoardCreator::checkShipBorders(char** board, int numRows, int numCols, int currRow, int currCol,
-                                    char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
-                                    bool& wrongSizeOrShape, std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes)
+void BoardCreator::checkShipBorders(char*** board, int numRows, int numCols, int numDepth, int currRow, int currCol,
+	int currDepth, char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
+	bool& wrongSizeOrShape, std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes)
 {
-	if ((currRow >= numRows) || (currCol >= numCols)) //never supposed to get here,just to check ourselves
+	if ((currRow >= numRows) || (currCol >= numCols) || (currDepth >= numDepth)) //never supposed to get here,just to check ourselves
 	{
 		std::cout << "Error: wrong index was passed to function:\"checkShipBorders\", index: (" << currRow <<
 			"," << currCol << ")" << std::endl;
 		return;
 	}
 
-	if (board[currRow][currCol] != letter) //never supposed to get here
+	if (board[currRow][currCol][currDepth] != letter) //never supposed to get here
 		return;
 
 	int shipCells = 1;
 	int row = currRow;
 	int col = currCol;
-	board[currRow][currCol] = DEFAULT_LETTER;
+	board[currRow][currCol][currDepth] = DEFAULT_LETTER;
 	//check for ship cells on next columns:
 	if ((currCol < numCols - 1) && (board[currRow][currCol + 1]) == letter)
 	{
@@ -166,6 +166,9 @@ void BoardCreator::checkShipBorders(char** board, int numRows, int numCols, int 
 				(*badLetterIndexes).push_back(p1);
 			}
 		}
+	} else if ((dep < numDepth - 1) && (board[row + 1][currCol]) == letter)
+	{
+		
 	}
 	else // Ship has only one (the current) cell
 	{
