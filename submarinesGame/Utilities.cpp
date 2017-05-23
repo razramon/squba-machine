@@ -198,11 +198,11 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
  *				index 2 = INDEX_BOARD_PATH = full path to board.
  *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
  */
-std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], bool& delay, int& delayMS, bool&quiet)
+std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& threadsNum)
 {
 	std::string path;
 
-	setArguments(argc, argv, path, delay, delayMS, quiet);
+	setArguments(argc, argv, path, threadsNum);
 	if (path.size() == 0) //
 	{
 		path = workingDirectory();
@@ -291,9 +291,54 @@ int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<s
 	return filesFound.size();
 }
 
+int Utilities::findAllFilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix)
+{
+	WIN32_FIND_DATAA ffd;
+	char szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	// Check that the input path plus 3 is not longer than MAX_PATH.
+	// Three characters are for the "\*" plus NULL appended below.
+	StringCchLengthA(path, MAX_PATH, &pathLen);
+	if (pathLen > (MAX_PATH - 3))
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// Prepare string for use with FindFile functions.  First, copy the
+	// string to a buffer, then append '\*' to the directory name.
+	StringCchCopyA(szDir, MAX_PATH, path);
+	StringCchCatA(szDir, MAX_PATH, "\\*");
+
+	// Find the first file in the directory.
+	hFind = FindFirstFileA(szDir, &ffd);
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+
+	// checks all files in the directory in search for files that end with suffix.
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
+		{
+			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(suffix)))
+			{
+				addFileToList(filesFound, std::string(ffd.cFileName), path);
+			}
+		}
+	} while (FindNextFileA(hFind, &ffd) != 0);
+	if (GetLastError() != ERROR_NO_MORE_FILES)
+	{
+		return FILE_NOT_FOUND_ERROR;
+	}
+	FindClose(hFind);
+	return filesFound.size();
+}
+
 /*
-* Maintains "filesFound" to hold at most 2 files,
-* The ones which are first lexicographically.
+* Maintains "filesFound"
 */
 void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path)
 {
@@ -305,19 +350,8 @@ void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string 
 	std::vector<std::string>::iterator iter;
 	for (iter = filesFound.begin(); iter != filesFound.end(); ++iter)
 	{
-		if (*iter >= filename)
-		{
-			filesFound.insert(iter, path + "\\" + filename);
-			if (filesFound.size() > 2) //deletes the "largest" file (lexicographically)
-			{
-				filesFound.pop_back();
-			}
-			break; //To avoid inserting "filename" twice.
-		}
-	}
-	if (filesFound.size() < 2) //means: there was only 1 file in "filesFound" which was smaller (lexicographically) than "filename"
-	{
-		filesFound.push_back(path + "\\" + filename);
+		filesFound.insert(iter, path + "\\" + filename);
+
 	}
 }
 
@@ -352,7 +386,7 @@ Utilities::Arguments Utilities::getTypeOfArg(std::string argu)
 	return Path;
 }
 
-void Utilities::setArguments(int argc, char * argv[], std::string & path, bool & delay, int & delayMS, bool & quiet)
+void Utilities::setArguments(int argc, char * argv[], std::string & path, int & threadsNum)
 {
 	for (int i = 1; i < argc; ++i)
 	{
@@ -364,21 +398,9 @@ void Utilities::setArguments(int argc, char * argv[], std::string & path, bool &
 				path = argv[i];
 			}
 			break;
-		case (Quiet):
-			quiet = true;
-			break;
-		case (Delay):
-			delay = true;
-			if (i < argc - 1)
-			{
-				if (getTypeOfArg(argv[i + 1]) == Number)
-				{
-					i++;
-					delayMS = std::atoi(argv[i]);
-				}
-			}
-			break;
 		case (Number):
+			threadsNum = *argv[i];
+			break;
 		default:
 			break;
 		}

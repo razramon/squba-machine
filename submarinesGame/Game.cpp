@@ -123,11 +123,11 @@ void Game::notifyPlayers(std::pair<int, int>& currAttack, AttackResult& result) 
 }
 
 
-Game::Game(char** board, std::vector<std::string>& filesFound, bool _delay, int _delayMS, bool _quiet): //large init list, don't panic! :)
+Game::Game(char** board, std::vector<std::string>& filesFound, int _threadsNum): //large init list, don't panic! :)
 	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A),
 	playerA(nullptr), playerB(nullptr), points(std::make_pair(0, 0)),
 	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>()), commonBoard(nullptr),
-	delay(_delay), delayMS(_delayMS), quiet(_quiet)
+	threadsNum(_threadsNum)
 {
 	if (playersShips == nullptr)
 	{

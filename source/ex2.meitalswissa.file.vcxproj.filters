@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\DllKnownStepsAlgo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\DllKnownStepsAlgo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{304BEDD6-4AFA-3985-BCAA-D286E7366969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{1E387E12-3CE5-3ABD-93FB-76FB20FBAF16}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -314,8 +314,8 @@ bool DllSmartAlgo::init(const std::string& path)
 	return success;
 }
 
-IBattleshipGameAlgo* GetAlgorithm()
+std::unique_ptr<IBattleshipGameAlgo> GetAlgorithm()
 {
 	IBattleshipGameAlgo* ptrToAlg = new DllSmartAlgo();
-	return ptrToAlg;
+	return std::make_unique<IBattleshipGameAlgo>(ptrToAlg);
 }

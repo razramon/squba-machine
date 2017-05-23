@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\GUIBoard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\submarinesGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\BoardCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Ship.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\GUIBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\BoardCreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\IBattleshipGameAlgo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Ship.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Sizes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\Utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\RazRamon\Documents\Visual Studio 2015\Projects\submarinesGame\source\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{5EAD2D28-7EF5-32C2-A37C-7D4893157EFA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0D7BF868-0851-3BA8-AADE-4396D8FC8DCA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
