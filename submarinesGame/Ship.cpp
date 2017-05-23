@@ -2,19 +2,12 @@
 
 using namespace std;
 
-Ship::Ship(char letter)
+Ship::Ship(char letter): letter(letter), numberOfPoints(pointsOfShip(letter)), position(new int*[sizeOfShip(letter)])
 {
-	this->letter = letter;
-	this->numberOfPoints = Ship::pointsOfShip(letter);
-	this->position = new int*[sizeOfShip(letter)];
 	for (int i = 0; i < sizeOfShip(letter); ++i)
 	{
-		position[i] = new int[3];
+		position[i] = new int[LEN_OF_POS_AND_RESULT];
 	}
-}
-
-Ship::Ship()
-{
 }
 
 Ship::~Ship()
@@ -29,22 +22,22 @@ Ship::~Ship()
 Ship::Ship(const Ship& s)
 {
 	this->letter = s.letter;
-	this->numberOfPoints = Ship::pointsOfShip(letter);
+	this->numberOfPoints = pointsOfShip(letter);
 	this->position = new int*[sizeOfShip(letter)];
 	for (int i = 0; i < sizeOfShip(letter); ++i)
 	{
-		position[i] = new int[3];
+		position[i] = new int[LEN_OF_POS_AND_RESULT];
 	}
 	for (int i = 0; i < sizeOfShip(letter); ++i)
 	{
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < LEN_OF_POS_AND_RESULT; ++j)
 		{
 			this->position[i][j] = s.position[i][j];
 		}
 	}
 }
 
-char Ship::getLetter()
+char Ship::getLetter() const
 {
 	return letter;
 }
@@ -54,7 +47,7 @@ void Ship::setLetter(char l)
 	letter = l;
 }
 
-int Ship::getNumberOfPoints()
+int Ship::getNumberOfPoints() const
 {
 	return numberOfPoints;
 }
@@ -64,9 +57,6 @@ void Ship::setNumberOfPoints(int nop)
 	numberOfPoints = nop;
 }
 
-// Array of size of the ship, 
-// has 3 properties: 1. row ; 2. column ; 3. is hit - 1 for hit, 0 otherwise
-int** position;
 
 bool Ship::isShip(char c)
 {
@@ -114,11 +104,11 @@ int Ship::sizeOfShip(char c)
 	}
 }
 
-bool Ship::isSunk()
+bool Ship::isSunk() const
 {
 	for (int i = 0; i < sizeOfShip(this->getLetter()); i++)
 	{
-		if (this->position[i][2] == 0)
+		if (this->position[i][3] == 0)
 			return false;
 	}
 	return true;
@@ -129,38 +119,39 @@ int** Ship::getPosition()
 	return position;
 }
 
-int Ship::getShipSize()
+int Ship::getShipSize() const
 {
 	return Ship::sizeOfShip(letter);
 }
 
-void Ship::setPosition(int pos, int row, int col, int state)
+void Ship::setPosition(int pos, int row, int col, int dep, int state)
 {
 	if (pos < 0 || pos >= this->getShipSize() || row < 0 || col < 0) return;
 
 	this->position[pos][0] = row;
 	this->position[pos][1] = col;
-	this->position[pos][2] = state;
+	this->position[pos][2] = dep;
+	this->position[pos][3] = state;
 }
 
-void Ship::printShipInfo()
+void Ship::printShipInfo() const
 {
 	std::cout << "This is ship: " << letter << " of player " << (islower(letter) ? "B" : "A") << std::endl;
 	for (int k = 0; k < Ship::sizeOfShip(letter) - 1; ++k)
 	{
-		std::cout << "(" << position[k][0] << "," << position[k][1] << ")  ,  ";
+		std::cout << "(" << position[k][0] << "," << position[k][1] << "," << position[k][2] << ")  ,  ";
 	}
-	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")" << std::endl;
+	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << "," << position[Ship::sizeOfShip(letter) - 1][2] << ")" << std::endl;
 }
 
 
-int Ship::numOfHits()
+int Ship::numOfHits() const
 {
 	int hits = 0;
 	//counts number of hits in ship s
 	for (int i = 0; i < this->getShipSize(); ++i)
 	{
-		if (position[i][2] == 1)
+		if (position[i][3] == 1)
 		{
 			hits++;
 		}

@@ -4,30 +4,30 @@
 
 class Ship
 {
+	static const int LEN_OF_POS_AND_RESULT = 4;
 	char letter;
 	int numberOfPoints;
-	int** position; // Array of size of the ship, has 3 properties: 1. row ; 2. column ; 3. is hit - 1 for hit, 0 otherwise
+	int** position; // Array of size of the ship, has 4 properties: 0. row ; 1. column ; 2. depth ; 3. is hit - 1 for hit, 0 otherwise
 	Ship& operator=(const Ship& s) = delete;//assignments operator - disabeled
 
 public:
 
-	Ship(char letter);
-	Ship();
+	explicit Ship(char letter);
 	~Ship();
 	Ship(const Ship& s);//copy constructor
-	char getLetter();
+	char getLetter() const;
 	void setLetter(char l);
-	int getNumberOfPoints();
+	int getNumberOfPoints() const;
 	void setNumberOfPoints(int nop);
 	static bool isShip(char c);
 	static bool inBoard(int place);
 	static int pointsOfShip(char c);
 	static int sizeOfShip(char c);
-	bool isSunk();
+	bool isSunk() const;
 	int** getPosition();
-	int getShipSize();
-	void setPosition(int pos, int row, int col, int state);
-	void printShipInfo();
-	int numOfHits();
+	int getShipSize() const;
+	void setPosition(int pos, int row, int col,int dep, int state);
+	void printShipInfo() const;
+	int numOfHits() const;
 	int shipOfPlayer() const;
 };
