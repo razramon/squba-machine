@@ -1,6 +1,5 @@
 #include "Utilities.h"
 
-const std::string Utilities::ATTACK_SUFF = ".attack";
 const std::string Utilities::BOARD_SUFF = ".sboard";
 const std::string Utilities::DLL_SUFF = ".dll";
 const int Utilities::NUMBER_DLLS = 2;
@@ -134,7 +133,7 @@ std::string Utilities::workingDirectory()
 /*Checks if the path exists,
 *that the board file is there,
 *And if it is- updates its names */
-bool Utilities::isValidPath(const std::string path, std::string& boardFile)
+bool Utilities::isValidPath(const std::string path, std::string& boardFile)	
 {
 	// Change working directory to reletive path if needed
 	if (_chdir(path.c_str()) != 0)
@@ -225,7 +224,7 @@ std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& thre
 		return filesFound;
 	}
 
-	find2FilesWithSuf(path.c_str(), path.size(), *filesFound, DLL_SUFF);
+	findAllFilesWithSuf(path.c_str(), path.size(), *filesFound, DLL_SUFF);
 	if (((*filesFound).size() != NUMBER_DLLS) || (!pathIsValid))
 	{
 		printNotFoundFileErrors(pathIsValid, path, *filesFound);
@@ -241,55 +240,9 @@ std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& thre
 
 /*
 * Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files - oredered lexicographically
-* Returns:  number of files found (1 or 2) in path, which are inerted to "filesFound" vector,
+* Returns:  number of files found in path, which are inerted to "filesFound" vector,
 *			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
 */
-int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix)
-{
-	WIN32_FIND_DATAA ffd;
-	char szDir[MAX_PATH];
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-
-	// Check that the input path plus 3 is not longer than MAX_PATH.
-	// Three characters are for the "\*" plus NULL appended below.
-	StringCchLengthA(path, MAX_PATH, &pathLen);
-	if (pathLen > (MAX_PATH - 3))
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-
-	// Prepare string for use with FindFile functions.  First, copy the
-	// string to a buffer, then append '\*' to the directory name.
-	StringCchCopyA(szDir, MAX_PATH, path);
-	StringCchCatA(szDir, MAX_PATH, "\\*");
-
-	// Find the first file in the directory.
-	hFind = FindFirstFileA(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-
-	// checks all files in the directory in search for files that end with suffix.
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
-		{
-			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(suffix)))
-			{
-				addFileToList(filesFound, std::string(ffd.cFileName), path);
-			}
-		}
-	}
-	while (FindNextFileA(hFind, &ffd) != 0);
-	if (GetLastError() != ERROR_NO_MORE_FILES)
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-	FindClose(hFind);
-	return filesFound.size();
-}
 
 int Utilities::findAllFilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix)
 {
@@ -403,6 +356,22 @@ void Utilities::setArguments(int argc, char * argv[], std::string & path, int & 
 			break;
 		default:
 			break;
+		}
+	}
+}
+
+
+void Utilities::divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles) {
+
+	for (std::string file : *allFiles) {
+
+		if (Utilities::endsWith(file, std::string(Utilities::BOARD_SUFF))) {
+
+			(*boardFiles).push_back(file);
+		}
+		else if (Utilities::endsWith(file, std::string(Utilities::BOARD_SUFF))) {
+
+			(*DLLFiles).push_back(file);
 		}
 	}
 }

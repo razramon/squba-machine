@@ -123,11 +123,10 @@ void Game::notifyPlayers(std::pair<int, int>& currAttack, AttackResult& result) 
 }
 
 
-Game::Game(char** board, std::vector<std::string>& filesFound, int _threadsNum): //large init list, don't panic! :)
+Game::Game(std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattleshipGameAlgo> playerB, std::shared_ptr<boardType> board): //large init list, don't panic! :)
 	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A),
 	playerA(nullptr), playerB(nullptr), points(std::make_pair(0, 0)),
-	shipSunk(std::make_pair(0, 0)), dlls(std::vector<HINSTANCE>()), commonBoard(nullptr),
-	threadsNum(_threadsNum)
+	shipSunk(std::make_pair(0, 0))
 {
 	if (playersShips == nullptr)
 	{
@@ -174,12 +173,6 @@ Game::Game(char** board, std::vector<std::string>& filesFound, int _threadsNum):
 		deletePlayerShips();
 		throw e;
 	}
-	if (!quiet)
-	{
-		GUIBoard::printInitialGame();
-		GUIBoard::printGUI(commonBoard, playerPlaying);
-		Sleep(delayMS);
-	}
 }
 
 Game::~Game()
@@ -187,7 +180,6 @@ Game::~Game()
 	deletePlayerShips();
 	delete playerA;
 	delete playerB;
-	freeDlls();
 	BoardCreator::freeBoard(commonBoard, BOARD_LENGTH);
 }
 
@@ -300,11 +292,6 @@ void Game::game()
 			throw Exception("Error: got error result");
 		}
 		win = checkWin();
-	}
-
-	if(!quiet)
-	{
-		GUIBoard::updatePosAfterPrint();
 	}
 
 	if (win != -1)

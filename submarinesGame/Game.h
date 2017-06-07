@@ -6,12 +6,10 @@
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
-#include "GUIBoard.h"
-#define DEFAULT_DELAY 750
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
-
+typedef std::vector<std::vector<std::vector<char>>> boardType;
 
 class Game
 {
@@ -21,19 +19,12 @@ class Game
 	IBattleshipGameAlgo* playerB;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
-	std::vector<HINSTANCE> dlls;
-	char** commonBoard; //conatins the GUIBoard to represent prints during the game
-	bool delay;
-	int delayMS;
-	bool quiet;
+
 	/*
 	* Deletes all memory allocations of playerShips
 	*/
 	void deletePlayerShips() const;
-	/*
-	* Frees all dlls' libraries
-	*/
-	void freeDlls();
+
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer
 	 * If he doesn't - updates playerPlaying to other player and if it has an attack updates attackOfPlayer
@@ -67,7 +58,7 @@ class Game
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
-	Game(char** board, std::vector<std::string>& filesFound, bool _delay = true, int _delayMS = DEFAULT_DELAY, bool _quiet = false);
+	Game(std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattleshipGameAlgo> playerB, std::shared_ptr<boardType> board);
 	~Game();
 
 	int isHit(int row, int col, char& letter) const;

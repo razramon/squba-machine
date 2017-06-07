@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include "Sizes.h"
 #include <cctype>
+#include <stdlib.h>
+#include <thread>
+
+
 #pragma comment(lib, "User32.lib")
 
 class Utilities
@@ -90,4 +94,7 @@ public:
 	*					NOTE: if a "-delay" flag was found, without <delay in ms>, we'll use default one
 	*/
 	static void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
+
+	static void Utilities::divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
+
 };
