@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Ship.h"
 #include "Utilities.h"
 #include <vector>
@@ -10,33 +11,69 @@
 #define DEFAULT_LETTER 'a';
 #define EMPTY_LETTER ' ';
 
+
+typedef std::vector<std::vector<std::vector<char>>> boardType;
+typedef std::shared_ptr<std::vector<std::shared_ptr<Ship>>> ptrToShipsVector;
+
 class BoardCreator
 {
-	static const std::string BoardCreator::BOARD_SUFF;
-	static char** getBoardFromShips(std::vector<Ship*>* ships);
-	/*
-	 * Gets a vector of ships, updated board to conatin all letters representing ships
-	 */
-	static void updateShipsInBoard(char** board, std::vector<Ship*>* ships);
 	BoardCreator() = delete;
 	~BoardCreator() = delete;
+	static const std::string BOARD_SUFF;
+	static const char DELIMETER;
+	//static char** getBoardFromShips(std::vector<Ship*>* ships);
+	/*
+	* Gets a vector of ships, updated board to conatin all letters representing ships
+	*/
+	//static void updateShipsInBoard(char** board, std::vector<Ship*>* ships);
+
+	enum INDEX_3D
+	{
+		row_index = 0,
+		column_index = 1,
+		depth_index = 2
+	};
+
+	static int getIndexOfRelevantBadCoordsVector(char letter);
+
 public:
-	static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
-	static void checkShipBorders(char*** board, int numRows, int numCols, int numDepth, int currRow, int currCol,
-	                             int currDepth, char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
-	                             bool& wrongSizeOrShape, std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes);
-	static bool checkShipShape(Ship* ship, char letter, std::shared_ptr<std::vector<std::pair<int, int>>>badLetterIndexes, std::vector<Ship*>& shipsOfPlayer);
-	static bool checkNeighbourShips(char** board, int currentRow, int currentCol, int currentDepth, int numRows, int numCols, int numDepth);
-	static std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* checkBoard(char** board, int numRows, int numCols, int numDepth);
-	static char** getBoardFromFile(const char* boardFile);
+	//static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
+
+	struct Coordinate //TODO:: delete this! to avoid double declaration
+	{
+		int row, col, depth;
+		Coordinate(int row_, int col_, int depth_) : row(row_), col(col_), depth(depth_) {}
+	};
+
+	static void printCoord(Coordinate c);
+	static int& updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, INDEX_3D dimentionToCheck);
+	static int checkSequence(const Coordinate& currPos, INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter);
+	static void insertBadCoords(int shipCells, bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords,
+		int row, int col, int depth, INDEX_3D dimentionToUpdate);
+	static void createShipAtCoord(char letter, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer, int& numShipsForCurrPlayer,
+		int row, int col, int depth, INDEX_3D dimentionToUpdate);
+	static void checkShipBorders(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
+		char letter, int& numShipsForCurrPlayer, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer,
+		bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords);
+	static bool twoCoordsNeighbours(Coordinate c1, Coordinate c2);
+	static bool checkShipShape(std::shared_ptr<Ship>& ship, char letter, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer);
+	static bool checkNeighbourShips(std::shared_ptr<boardType> board, int currentRow, int currentCol, int currentDepth, int numRows, int numCols, int numDepth);
+	static std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> checkBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
+	static void getDimentions(int& numRows, int& numCols, int& numDepth, std::string line);
+	static std::shared_ptr<boardType> getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth);
+
+
 	static bool findBoardFile(const char* path, size_t pathLen, char** boardFile);
 	static void freeBoard(char** board, int numRows);
-	static char*** createBoard(int numRows, int numCols, int numDepth);
-	static char*** copyBoard(const char** board, int numRows, int numCols, int numDepth);
-	static void printBoard(const char** board, int numRows, int numCols, int numDepth);
+	static std::shared_ptr<boardType> createBoard(int numRows, int numCols, int numDepth);
+	//static char*** copyBoard(const char** board, int numRows, int numCols, int numDepth);
+	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
 	/*
-	 * Returns a clean (without unnecessary letters) board represnting both players' ships.
-	 * NOTE: need to use freeBoard on the board returned!
-	 */
-	static char*** createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB);
+	* Returns a clean (without unnecessary letters) board represnting both players' ships.
+	* NOTE: need to use freeBoard on the board returned!
+	*/
+	//static char*** createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB);
+private:
+	//static Coordinate getBoardMeasures(std::string line); //TODO:: delete this probably...
 };
+
