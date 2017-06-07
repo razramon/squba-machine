@@ -150,12 +150,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GUIBoard.h" />
     <ClInclude Include="Macros.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GUIBoard.cpp" />
     <ClCompile Include="submarinesGame.cpp" />
   </ItemGroup>
   <ItemGroup>

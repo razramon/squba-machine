@@ -9,11 +9,9 @@ int main(int argc, char* argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
 
-	bool delay = false;
-	int delayMS = DEFAULT_DELAY;
-	bool quiet = false;
-	std::vector<std::string>* filesFound = Utilities::buildPath(argc, argv, delay, delayMS, quiet);
-	if ((*filesFound).size() != 3)
+	int threadsNum = DEFAULT_DELAY;
+	std::vector<std::string>* filesFound = Utilities::buildPath(argc, argv, threadsNum);
+	if ((*filesFound).size() != 2)
 	{
 		delete filesFound;
 		return 1;
@@ -33,7 +31,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		Game* firstGame = new Game(board, *filesFound, delay, delayMS, quiet);
+		Game* firstGame = new Game(board, *filesFound, threadsNum);
 		firstGame->game();
 		delete firstGame;
 	}

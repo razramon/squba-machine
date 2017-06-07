@@ -47,7 +47,7 @@ public:
 	*				index 2 - full path to board.
 	*	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
 	*/
-	static std::vector<std::string>* buildPath(int argc, char* argv[], bool& delay, int& delayMS, bool&quiet);
+	static std::vector<std::string>* buildPath(int argc, char* argv[], int& threadsNum);
 	/*
 	* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files
 	* that end with suffix - oredered lexicographically.
@@ -55,6 +55,7 @@ public:
 	*			1/2 if 1/2 files where found
 	*/
 	static int find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix);
+	static int findAllFilesWithSuf(const char * path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix);
 	/*
 	* Maintains "filesFound" to hold at most 2 files,
 	* The ones which are first lexicographically.

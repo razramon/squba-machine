@@ -137,7 +137,6 @@
     <ClInclude Include="..\submarinesGame\BoardCreator.h" />
     <ClInclude Include="..\submarinesGame\Exception.h" />
     <ClInclude Include="..\submarinesGame\IBattleshipGameAlgo.h" />
-    <ClInclude Include="..\submarinesGame\ISmarterAlgo.h" />
     <ClInclude Include="..\submarinesGame\Ship.h" />
     <ClInclude Include="..\submarinesGame\Sizes.h" />
     <ClInclude Include="..\submarinesGame\Utilities.h" />

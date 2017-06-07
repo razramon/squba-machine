@@ -1,0 +1,6 @@
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ex2.meitalswissa.dir
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ex2.meitalswissa.file.dir
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ex2.meitalswissa.naive.dir
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ex2.meitalswissa.smart.dir
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ALL_BUILD.dir
+C:/Users/RazRamon/Documents/Visual Studio 2015/Projects/submarinesGame/source/CMakeFiles/CMakeFiles/ZERO_CHECK.dir
