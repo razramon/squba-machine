@@ -26,3 +26,6 @@
 #define SUNK 2
 #define BAD_HIT 3
 #define SELF_DESTRUCT 4
+
+//number of total (little+big) letters that represent a ship
+#define VALID_LETTERS 8

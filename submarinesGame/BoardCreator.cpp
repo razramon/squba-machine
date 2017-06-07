@@ -1,43 +1,155 @@
 #include "BoardCreator.h"
 
+
 const std::string BoardCreator::BOARD_SUFF = ".sboard";
+const char BoardCreator::DELIMETER = 'x';
 
-std::pair<char **, char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips)
+//std::pair<char **, char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips)
+//{
+//	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
+//}
+
+//char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
+//{
+//	char** board = new char*[BOARD_LENGTH];
+//
+//	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
+//	{
+//		board[indexRow] = new char[BOARD_LENGTH];
+//		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
+//		{
+//			board[indexRow][indexCol] = EMPTY_LETTER;
+//		}
+//	}
+//	updateShipsInBoard(board, ships);
+//	return board;
+//}
+
+//void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
+//{
+//	std::vector<Ship*>* ps = ships;
+//	for (int i = 0; i < (*ps).size(); ++i)
+//	{
+//		Ship* s = (*ps).at(i);
+//
+//		int** positions = (*s).getPosition();
+//		char letter = (*s).getLetter();
+//
+//		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
+//		{
+//			board[positions[pos][0]][positions[pos][1]] = letter;
+//		}
+//	}
+//}
+
+/*
+* Returns the relevant index of the "bad coodinates vector"
+*/
+int BoardCreator::getIndexOfRelevantBadCoordsVector(char letter)
 {
-	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
+	switch (letter)
+	{
+	case 'B': return 0;
+	case 'b': return 1;
+	case 'P': return 2;
+	case 'p': return 3;
+	case 'M': return 4;
+	case 'm': return 5;
+	case 'D': return 6;
+	case 'd': return 7;
+	default: return -1;
+	}
 }
 
-char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
+void BoardCreator::printCoord(Coordinate c)
 {
-	char** board = new char*[BOARD_LENGTH];
-
-	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
+	std::cout << "Row: " << c.row << ", Column: " << c.col << ", Depth: " << c.depth << std::endl;
+}
+/*
+* Gets:
+*		indexes of row, colomn and depth, a dimentionToCheck
+* Updates:
+*		adds +1 to the relrevant coordinate, as transffered by dimentionToCheck
+* Returns:
+*		the (actual) updated index
+*/
+int& BoardCreator::updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, INDEX_3D dimentionToCheck)
+{
+	switch (dimentionToCheck)
 	{
-		board[indexRow] = new char[BOARD_LENGTH];
-		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
-		{
-			board[indexRow][indexCol] = EMPTY_LETTER;
-		}
+	case (INDEX_3D::row_index):
+		row_ind++;
+		return row_ind;
+	case (INDEX_3D::column_index):
+		col_ind++;
+		return col_ind;
+	default: //dimentionToCheck == INDEX_3D::depth_index
+		depth_ind++;
+		return depth_ind;
 	}
-	updateShipsInBoard(board, ships);
-	return board;
 }
 
-void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
+/*
+*	Gets:
+*		currPos - current position
+*		dimentionToCheck - tells us whether we need to search for the same letter in rows/columns/depth
+*		maxIndex - limit index to check (for exmaple: if maxIndex is 5, we'll check until 4, which is < 5)
+*		board - the board :) NOTE: changes content of board!
+*		letter - the letter we want to check for multiple appearances
+*	Returns:
+*		number of consecutive same-letter appearances in dimentionToCheck.
+*/
+int BoardCreator::checkSequence(const Coordinate& currPos, INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter)
 {
-	std::vector<Ship*>* ps = ships;
-	for (int i = 0; i < (*ps).size(); ++i)
+	int shipCells = 1;
+	int row_ind = currPos.row;
+	int col_ind = currPos.col;
+	int depth_ind = currPos.depth;
+
+	while ((updateCoordinate(row_ind, col_ind, depth_ind, dimentionToCheck) < maxIndex) && ((*board)[depth_ind][row_ind][col_ind] == letter))
 	{
-		Ship* s = (*ps).at(i);
-
-		int** positions = (*s).getPosition();
-		char letter = (*s).getLetter();
-
-		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
-		{
-			board[positions[pos][0]][positions[pos][1]] = letter;
-		}
+		shipCells++;
+		(*board)[depth_ind][row_ind][col_ind] = DEFAULT_LETTER;
 	}
+	return shipCells;
+}
+
+/*
+* Gets:
+*		shipCells = number of not-valid-ship-cells that should be inserted to "badLetterCoords"
+*		int row, col, depth = the current coordinate that from it and on the bad coords appear
+*		updates wrongSizeOrShape to be "true"
+*/
+void BoardCreator::insertBadCoords(int shipCells, bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords,
+	int row, int col, int depth, INDEX_3D dimentionToUpdate)
+{
+	wrongSizeOrShape = true;
+	for (int i = 0; i < shipCells; ++i) //insert all "bad indexes" letter appearences into the list
+	{
+		Coordinate c1 = Coordinate(row, col, depth);
+		(*badLetterCoords).push_back(c1);
+		updateCoordinate(row, col, depth, dimentionToUpdate);
+	}
+}
+
+/*
+* Creates a ship of relevant size (sizeOfShip(letter)),
+* Inserts it to shipsOfPlayer, and updates numShipsForCurrPlayer.
+*/
+void BoardCreator::createShipAtCoord(char letter, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer, int& numShipsForCurrPlayer,
+	int row, int col, int depth, INDEX_3D dimentionToUpdate)
+{
+	std::shared_ptr<Ship> ship = std::make_shared<Ship>(letter);
+	for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
+	{
+
+		(*ship).setPosition(i, row, col, depth, 0);
+		//last line used to be: (*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, row, col, depth, 0);
+		updateCoordinate(row, col, depth, dimentionToUpdate);
+
+	}
+	shipsOfPlayer.push_back(ship);
+	numShipsForCurrPlayer++;
 }
 
 /*
@@ -48,168 +160,101 @@ void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
 *		numShipsForCurrPlayer - (+1) if a ship was added
 *		wrongSizeOrShape - to "true" if the current letter is from a deformed ship
 *		shipsOfPlayer - adds a ship to the players' ships (if ship might be valid)
-*		badLetterIndexes - if it's not a ship, adds the Letters "bad" indexes to a list
+*		badLetterCoords - if it's not a ship, adds the "bad" coordinates of this letter to a list
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
-void BoardCreator::checkShipBorders(char*** board, int numRows, int numCols, int numDepth, int currRow, int currCol,
-	int currDepth, char letter, int& numShipsForCurrPlayer, std::vector<Ship*>& shipsOfPlayer,
-	bool& wrongSizeOrShape, std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes)
+void BoardCreator::checkShipBorders(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
+	char letter, int& numShipsForCurrPlayer, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer,
+	bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords)
 {
-	if ((currRow >= numRows) || (currCol >= numCols) || (currDepth >= numDepth)) //never supposed to get here,just to check ourselves
-	{
-		std::cout << "Error: wrong index was passed to function:\"checkShipBorders\", index: (" << currRow <<
-			"," << currCol << ")" << std::endl;
-		return;
-	}
-
-	if (board[currRow][currCol][currDepth] != letter) //never supposed to get here
-		return;
-
 	int shipCells = 1;
-	int row = currRow;
-	int col = currCol;
-	board[currRow][currCol][currDepth] = DEFAULT_LETTER;
+	int row = currPos.row;
+	int col = currPos.col;
+	int depth = currPos.depth;
+
+	(*board)[depth][row][col] = DEFAULT_LETTER;
+
 	//check for ship cells on next columns:
-	if ((currCol < numCols - 1) && (board[currRow][currCol + 1]) == letter)
+	if ((col < numCols - 1) && ((*board)[depth][row][col + 1]) == letter)
 	{
-		col++;
-		while (shipCells < Ship::sizeOfShip(letter) && (col <= numCols - 1) && (board[currRow][col]) == letter)
+		shipCells = checkSequence(currPos, INDEX_3D::column_index, numCols, board, letter);
+		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
 		{
-			board[currRow][col] = DEFAULT_LETTER;
-			shipCells++;
-			col++;
-		}
-
-		if (shipCells < Ship::sizeOfShip(letter)) //ship has a wrong size (too small)
-		{
-			wrongSizeOrShape = true;
-			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes" letter appearences into the list
-			{
-				std::pair<int, int> p1 = std::make_pair(currRow, currCol + i);
-				(*badLetterIndexes).push_back(p1);
-			}
-			return;
-		}
-		//If gets here,shipCells == Ship::sizeOfShip(letter):
-		if (((col <= numCols - 1) && board[currRow][col] != letter) || (col == numCols)) //Makes sure the ship is of right size (not too large)
-		{
-			Ship* ship = new Ship(letter);
-			shipsOfPlayer.push_back(ship);
-			for (int i = 0; i < shipCells; ++i)
-			{
-				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, currRow, currCol + i, 0);
-			}
-			numShipsForCurrPlayer++;
-		}
-		else //wrong size - ship's too big
-		{
-			while ((col <= numCols - 1) && (board[currRow][col]) == letter) //turns all letters to the default one
-			{
-				std::pair<int, int> p1 = std::make_pair(currRow, col);
-				(*badLetterIndexes).push_back(p1);
-				board[currRow][col] = DEFAULT_LETTER;
-				col++;
-			}
-			wrongSizeOrShape = true;
-			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes"
-			{
-				std::pair<int, int> p1 = std::make_pair(currRow, currCol + i);
-				(*badLetterIndexes).push_back(p1);
-			}
-		}
-		// Searching rows for the rest of the ship
-	}
-	else if ((row < numRows - 1) && (board[row + 1][currCol]) == letter)
-	{
-		row++;
-		while (shipCells < Ship::sizeOfShip(letter) && (row <= numRows - 1) && (board[row][currCol]) == letter)
-		{
-			board[row][currCol] = DEFAULT_LETTER;
-			shipCells++;
-			row++;
-		}
-
-		if (shipCells < Ship::sizeOfShip(letter)) //ship has a wrong size (too small)
-		{
-			wrongSizeOrShape = true;
-			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes" letter appearences into the list
-			{
-				std::pair<int, int> p1 = std::make_pair(currRow + i, currCol);
-				(*badLetterIndexes).push_back(p1);
-			}
-			return;
-		}
-		//If gets here,shipCells == Ship::sizeOfShip(letter):
-		if (((row <= numRows - 1) && board[row][currCol] != letter) || (row == numRows)) //Makes sure the ship is of right size (not too large)
-		{
-			Ship* ship = new Ship(letter);
-			shipsOfPlayer.push_back(ship);
-			for (int i = 0; i < shipCells; ++i)
-			{
-				(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, currRow + i, currCol, 0);
-			}
-			numShipsForCurrPlayer++;
-		}
-		else //wrong size - ship's too big
-		{
-			while ((row <= numRows - 1) && (board[row][currCol]) == letter) //turns all letter to the default one
-			{
-				std::pair<int, int> p1 = std::make_pair(row, currCol);
-				(*badLetterIndexes).push_back(p1);
-				board[row][currCol] = DEFAULT_LETTER;
-				row++;
-			}
-			wrongSizeOrShape = true;
-			for (int i = 0; i < shipCells; ++i)//insert all "bad indexes"
-			{
-				std::pair<int, int> p1 = std::make_pair(currRow + i, currCol);
-				(*badLetterIndexes).push_back(p1);
-			}
-		}
-	} else if ((dep < numDepth - 1) && (board[row + 1][currCol]) == letter)
-	{
-		
-	}
-	else // Ship has only one (the current) cell
-	{
-		if (Ship::sizeOfShip(letter) != 1)
-		{
-			std::pair<int, int> p1 = std::make_pair(currRow, col);
-			(*badLetterIndexes).push_back(p1);
-			wrongSizeOrShape = true;
-			return;
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::column_index);
 		}
 		else
 		{
-			Ship* ship = new Ship(letter);
-			shipsOfPlayer.push_back(ship);
-			(*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(0, currRow, currCol, 0);
-			numShipsForCurrPlayer++;
+			//If gets here,shipCells == Ship::sizeOfShip(letter):
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::column_index);
 		}
 	}
+	// Searching rows for the rest of the ship
+	else if ((row < numRows - 1) && ((*board)[depth][row + 1][col]) == letter)
+	{
+		shipCells = checkSequence(currPos, INDEX_3D::row_index, numRows, board, letter);
+		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
+		{
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::row_index);
+		}
+		else //If gets here,shipCells == Ship::sizeOfShip(letter):
+		{
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::row_index);
+		}
+
+	}
+	// Searching depth for the rest of the ship
+	else if ((depth < numDepth - 1) && ((*board)[depth + 1][row][col]) == letter)
+	{
+		shipCells = checkSequence(currPos, INDEX_3D::depth_index, numDepth, board, letter);
+		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
+		{
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::depth_index);
+		}
+		else //shipCells == Ship::sizeOfShip(letter):
+		{
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::depth_index);
+		}
+	}
+	else //It's here because the 3 "if"s checked the "next"cell, so we still need to check the case of 1 cell ship
+	{
+		if (Ship::sizeOfShip(letter) != 1)
+		{
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::depth_index);
+		}
+		else
+		{
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::depth_index);
+		}
+	}
+}
+
+
+bool BoardCreator::twoCoordsNeighbours(Coordinate c1, Coordinate c2)
+{
+	bool neighbourXY = (c1.col == c2.col && c1.row == c2.row) && (c1.depth - 1 == c2.depth || c1.depth + 1 == c2.depth);
+	bool neighbourYZ = (c1.row == c2.row && c1.depth == c2.depth) && (c1.col - 1 == c2.col || c1.col + 1 == c2.col);
+	bool neighbourXZ = (c1.col == c2.col && c1.depth == c2.depth) && (c1.row - 1 == c2.row || c1.row + 1 == c2.row);
+	return neighbourXY || neighbourYZ || neighbourXZ;
 }
 
 /*
 * Returns true if ship is next to another ship/"bad index", of the same letter! (==wrong shape)
 * @Params:
-*		badLetterIndexes - a vector containing all indexes in which the letter appeard in, and weren't valid
+*		badLetterCoords - a vector containing all coordinates in which the letter appeard in, and weren't valid
 *		ship - the ship we're checking
 *		letter - the ship's letter
 */
-bool BoardCreator::checkShipShape(Ship* ship, char letter, std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes, std::vector<Ship*>& shipsOfPlayer)
+bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
+	std::shared_ptr<std::vector<Coordinate>>& badLetterCoords, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer)
 {
 	bool res = false;
 	int** pos = (*ship).getPosition();
-	int row = -1;
-	int col = -1;
 	for (int i = 0; i < (*ship).getShipSize(); ++i)
 	{
-		row = pos[i][0];
-		col = pos[i][1];
-		for (int k = 0; k < (*badLetterIndexes).size(); ++k)
+		Coordinate c1 = Coordinate(pos[i][INDEX_3D::row_index], pos[i][INDEX_3D::column_index], pos[i][INDEX_3D::depth_index]);
+		for (int k = 0; k < (*badLetterCoords).size(); ++k)
 		{
-			if (((row == ((*badLetterIndexes).at(k)).first) && (col - 1 == ((*badLetterIndexes).at(k)).second || col + 1 == ((*badLetterIndexes).at(k)).second))
-				|| ((col == ((*badLetterIndexes).at(k)).second) && (row - 1 == ((*badLetterIndexes).at(k)).first || row + 1 == ((*badLetterIndexes).at(k)).first)))
+			if (twoCoordsNeighbours(c1, (*badLetterCoords).at(i)))
 			{
 				res = true;
 				break;
@@ -222,19 +267,21 @@ bool BoardCreator::checkShipShape(Ship* ship, char letter, std::shared_ptr<std::
 	{
 		for (int i = 0; i < shipsOfPlayer.size(); ++i)
 		{
-			if (!(pos[0][0] == (*(shipsOfPlayer.at(i))).getPosition()[0][0] && pos[0][1] == (*(shipsOfPlayer.at(i))).getPosition()[0][1])) //makes sure it's NOT the same ship
+			//makes sure it's NOT the same ship: 
+			if (!(pos[0][INDEX_3D::row_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::row_index] &&
+				pos[0][INDEX_3D::column_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::column_index]) &&
+				pos[0][INDEX_3D::depth_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::depth_index])
 			{
 				if ((*(shipsOfPlayer.at(i))).getLetter() == letter)
 				{
-					Ship* shipToCompare = shipsOfPlayer.at(i);
 					for (int j = 0; j < (*ship).getShipSize(); ++j)
 					{
-						row = pos[j][0];
-						col = pos[j][1];
-						for (int k = 0; k < (*shipToCompare).getShipSize(); ++k)
+						Coordinate c1 = Coordinate(pos[j][INDEX_3D::row_index], pos[j][INDEX_3D::column_index], pos[j][INDEX_3D::depth_index]);
+						for (int k = 0; k < (*shipsOfPlayer.at(i)).getShipSize(); ++k)
 						{
-							if (((row == (*shipToCompare).getPosition()[k][0]) && (col - 1 == (*shipToCompare).getPosition()[k][1] || col + 1 == (*shipToCompare).getPosition()[k][1]))
-								|| ((col == (*shipToCompare).getPosition()[k][1]) && (row - 1 == (*shipToCompare).getPosition()[k][0] || row + 1 == (*shipToCompare).getPosition()[k][0])))
+							int** position = (*shipsOfPlayer.at(i)).getPosition();
+							Coordinate c2 = Coordinate(position[k][INDEX_3D::row_index], position[k][INDEX_3D::column_index], position[k][INDEX_3D::depth_index]);
+							if (twoCoordsNeighbours(c1, c2))
 							{
 								res = true;
 								break;
@@ -251,42 +298,58 @@ bool BoardCreator::checkShipShape(Ship* ship, char letter, std::shared_ptr<std::
 	{
 		for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
 		{
-			std::pair<int, int> badindex = std::make_pair(pos[i][0], pos[i][1]);
-			(*badLetterIndexes).push_back(badindex);
+			Coordinate badCoord = Coordinate(pos[i][INDEX_3D::row_index], pos[i][INDEX_3D::column_index], pos[i][INDEX_3D::depth_index]);
+			(*badLetterCoords).push_back(badCoord);
 		}
 	}
 	return res;
 }
 
 /*
-*Returns true if there IS an adjacent (different) ship.
+*Returns true if there IS an adjacent (different) ship (next to (currentRow,currentCol,currentDepth)).
 */
-bool BoardCreator::checkNeighbourShips(char** board, int currentRow, int currentCol, int numRows, int numCols)
+bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int currentRow, int currentCol,
+	int currentDepth, int numRows, int numCols, int numDepth)
 {
+	char letter = (*board)[currentDepth][currentRow][currentCol];
 	if (currentRow - 1 >= 0)
 	{
-		if (Ship::isShip(board[currentRow - 1][currentCol]) && (board[currentRow - 1][currentCol] != board[currentRow][currentCol]))
+		if (Ship::isShip((*board)[currentDepth][currentRow - 1][currentCol]) && ((*board)[currentDepth][currentRow - 1][currentCol] != letter))
 		{
 			return true;
 		}
 	}
 	if (currentCol - 1 >= 0)
 	{
-		if (Ship::isShip(board[currentRow][currentCol - 1]) && (board[currentRow][currentCol - 1] != board[currentRow][currentCol]))
+		if (Ship::isShip((*board)[currentDepth][currentRow][currentCol - 1]) && ((*board)[currentDepth][currentRow][currentCol - 1] != letter))
+		{
+			return true;
+		}
+	}
+	if (currentDepth - 1 >= 0)
+	{
+		if (Ship::isShip((*board)[currentDepth - 1][currentRow][currentCol]) && ((*board)[currentDepth - 1][currentRow][currentCol] != letter))
 		{
 			return true;
 		}
 	}
 	if (currentRow + 1 < numRows)
 	{
-		if (Ship::isShip(board[currentRow + 1][currentCol]) && (board[currentRow + 1][currentCol] != board[currentRow][currentCol]))
+		if (Ship::isShip((*board)[currentDepth][currentRow + 1][currentCol]) && ((*board)[currentDepth][currentRow + 1][currentCol] != letter))
 		{
 			return true;
 		}
 	}
 	if (currentCol + 1 < numCols)
 	{
-		if (Ship::isShip(board[currentRow][currentCol + 1]) && (board[currentRow][currentCol + 1] != board[currentRow][currentCol]))
+		if (Ship::isShip((*board)[currentDepth][currentRow][currentCol + 1]) && ((*board)[currentDepth][currentRow][currentCol + 1] != letter))
+		{
+			return true;
+		}
+	}
+	if (currentDepth + 1 < numDepth)
+	{
+		if (Ship::isShip((*board)[currentDepth + 1][currentRow][currentCol]) && ((*board)[currentDepth + 1][currentRow][currentCol] != letter))
 		{
 			return true;
 		}
@@ -294,20 +357,16 @@ bool BoardCreator::checkNeighbourShips(char** board, int currentRow, int current
 	return false;
 }
 
-std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(char** board, int numRows, int numCols)
+std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::checkBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth)
 {
-	std::vector<Ship*>* shipsA = new std::vector<Ship*>;
-	std::vector<Ship*>* shipsB = new std::vector<Ship*>;
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_B = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_b = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_P = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_p = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_M = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_m = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_D = std::make_shared<std::vector<std::pair<int, int>>>();
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes_d = std::make_shared<std::vector<std::pair<int, int>>>();
-	//Initialized to an arbitrary "badLetterIndex" in order to prevent error:
-	std::shared_ptr<std::vector<std::pair<int, int>>> badLetterIndexes;
+	ptrToShipsVector shipsA = std::make_shared<std::vector<std::shared_ptr<Ship>>>();
+	ptrToShipsVector shipsB = std::make_shared<std::vector<std::shared_ptr<Ship>>>();
+
+	std::vector<std::shared_ptr<std::vector<Coordinate>>> allBadCoordinates(VALID_LETTERS);
+	for (int i = 0; i < VALID_LETTERS; ++i)
+	{
+		allBadCoordinates[i] = std::make_shared<std::vector<Coordinate>>();
+	}
 
 	std::set<char> wrongSizeShapeShips;
 
@@ -323,9 +382,13 @@ std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(ch
 	{
 		for (int col = 0; col < numCols; col++)
 		{
-			if (Ship::isShip(board[row][col]))
+			for (int depth = 0; depth < numDepth; depth++)
 			{
-				adjacentShips = checkNeighbourShips(board, row, col, numRows, numCols);
+				if (Ship::isShip((*board)[depth][row][col]))
+				{
+					adjacentShips = checkNeighbourShips(board, row, col, depth, numRows, numCols, numDepth);
+				}
+				if (adjacentShips) break;
 			}
 			if (adjacentShips) break;
 		}
@@ -336,42 +399,26 @@ std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(ch
 	{
 		for (int col = 0; col < numCols; col++)
 		{
-			wrongSizeOrShape = false;
-			letter = board[row][col];
-			switch (letter)
+			for (int depth = 0; depth < numDepth; depth++)
 			{
-			case 'B': badLetterIndexes = badLetterIndexes_B;
-				break;
-			case 'b': badLetterIndexes = badLetterIndexes_b;
-				break;
-			case 'P': badLetterIndexes = badLetterIndexes_P;
-				break;
-			case 'p': badLetterIndexes = badLetterIndexes_p;
-				break;
-			case 'M': badLetterIndexes = badLetterIndexes_M;
-				break;
-			case 'm': badLetterIndexes = badLetterIndexes_m;
-				break;
-			case 'D': badLetterIndexes = badLetterIndexes_D;
-				break;
-			case 'd': badLetterIndexes = badLetterIndexes_d;
-				break;
-			default: //never supposed to get here anyway
-				break;
-			}
-			if (Ship::isShip(letter))
-			{
-				if (islower(letter))//letter is "player B"'s letter (small letters)
+				wrongSizeOrShape = false;
+				letter = (*board)[depth][row][col];
+				int ind = getIndexOfRelevantBadCoordsVector(letter);
+				if (Ship::isShip(letter))
 				{
-					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipB, *shipsB, wrongSizeOrShape, badLetterIndexes);
-				}
-				else //"player A"'s letter
-				{
-					checkShipBorders(board, numRows, numCols, row, col, letter, indexShipA, *shipsA, wrongSizeOrShape, badLetterIndexes);
-				}
-				if (wrongSizeOrShape)
-				{
-					wrongSizeShapeShips.insert(letter);
+					Coordinate c = Coordinate(row, col, depth);
+					if (islower(letter))//letter is "player B"'s letter (small letters)
+					{
+						checkShipBorders(board, numRows, numCols, numDepth, c, letter, indexShipB, *shipsB, wrongSizeOrShape, allBadCoordinates[ind]);
+					}
+					else //"player A"'s letter
+					{
+						checkShipBorders(board, numRows, numCols, numDepth, c, letter, indexShipA, *shipsA, wrongSizeOrShape, allBadCoordinates[ind]);
+					}
+					if (wrongSizeOrShape)
+					{
+						wrongSizeShapeShips.insert(letter);
+					}
 				}
 			}
 		}
@@ -380,38 +427,17 @@ std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(ch
 	//check for wrong size or shape(in near columns/rows)
 	for (int m = 0; m < 2; ++m)
 	{
-		std::vector<Ship*>* ships = (m == 0) ? shipsA : shipsB;
+		ptrToShipsVector ships = (m == 0) ? shipsA : shipsB;
 		size_t numOfShipsToCheck = (m == 0) ? (*shipsA).size() : (*shipsB).size();
 		int originalShipIndex = 0;
 		int currShipToCheck = 0;
 		while (originalShipIndex < numOfShipsToCheck)
 		{
-			switch ((*((*ships).at(currShipToCheck))).getLetter())
-			{
-			case 'B': badLetterIndexes = badLetterIndexes_B;
-				break;
-			case 'b': badLetterIndexes = badLetterIndexes_b;
-				break;
-			case 'P': badLetterIndexes = badLetterIndexes_P;
-				break;
-			case 'p': badLetterIndexes = badLetterIndexes_p;
-				break;
-			case 'M': badLetterIndexes = badLetterIndexes_M;
-				break;
-			case 'm': badLetterIndexes = badLetterIndexes_m;
-				break;
-			case 'D': badLetterIndexes = badLetterIndexes_D;
-				break;
-			case 'd': badLetterIndexes = badLetterIndexes_d;
-				break;
-			default: //never supposed to get here anyway
-				break;
-			}
-			if (checkShipShape((*ships).at(currShipToCheck), (*((*ships).at(currShipToCheck))).getLetter(), badLetterIndexes, (*ships)))//if true, it's invalid ship
+			int ind = getIndexOfRelevantBadCoordsVector((*((*ships).at(currShipToCheck))).getLetter());
+			if (checkShipShape((*ships).at(currShipToCheck), (*((*ships).at(currShipToCheck))).getLetter(), allBadCoordinates[ind], (*ships)))//if true, it's invalid ship
 			{
 				(m == 0) ? indexShipA-- : indexShipB--;
 				wrongSizeShapeShips.insert((*(*ships).at(currShipToCheck)).getLetter());
-				delete (*ships).at(currShipToCheck); //erase doesn't free allocated ship's space
 				(*ships).erase((*ships).begin() + currShipToCheck);
 				currShipToCheck--;
 			}
@@ -420,146 +446,220 @@ std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* BoardCreator::checkBoard(ch
 		}
 	}
 
-	/*Printing errors as instructed - wrong size or shape*/
+	/*As instructed, no need to print errors of the board*/
+
 	if (wrongSizeShapeShips.size() > 0)
 	{
 		boardNotValid = true;
-		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
+		/*Printing errors as instructed - wrong size or shape*/
+		/*for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
 		{
-			if (!islower(*i))
-			{
-				std::cout << "Wrong size or shape for ship " << *i << " for player A" << std::endl;
-			}
+		if (!islower(*i))
+		{
+		std::cout << "Wrong size or shape for ship " << *i << " for player A" << std::endl;
+		}
 		}
 		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
 		{
-			if (islower(*i))
-			{
-				std::cout << "Wrong size or shape for ship " << *i << " for player B" << std::endl;
-			}
+		if (islower(*i))
+		{
+		std::cout << "Wrong size or shape for ship " << *i << " for player B" << std::endl;
 		}
+		}*/
 	}
 
 	/*Printing errors as instructed - too many / to few ships*/
-	if ((*shipsA).size() > NUMBER_SHIPS)
+	/*if ((*shipsA).size() > NUMBER_SHIPS)
 	{
-		boardNotValid = true;
-		std::cout << "Too many ships for player A" << std::endl;
+	boardNotValid = true;
+	std::cout << "Too many ships for player A" << std::endl;
 	}
 	if ((*shipsA).size() < NUMBER_SHIPS)
 	{
-		boardNotValid = true;
-		std::cout << "Too few ships for player A" << std::endl;
+	boardNotValid = true;
+	std::cout << "Too few ships for player A" << std::endl;
 	}
 	if ((*shipsB).size() > NUMBER_SHIPS)
 	{
-		boardNotValid = true;
-		std::cout << "Too many ships for player B" << std::endl;
+	boardNotValid = true;
+	std::cout << "Too many ships for player B" << std::endl;
 	}
 	if ((*shipsB).size() < NUMBER_SHIPS)
 	{
-		boardNotValid = true;
-		std::cout << "Too few ships for player B" << std::endl;
-	}
+	boardNotValid = true;
+	std::cout << "Too few ships for player B" << std::endl;
+	}*/
 	if (adjacentShips)
 	{
 		boardNotValid = true;
-		std::cout << "Adjacent Ships on Board" << std::endl;
+		//std::cout << "Adjacent Ships on Board" << std::endl;
 	}
 
 	/*If board's invalid - deletes all ships and return nullptr*/
 	if (boardNotValid)
 	{
-		for (int i = 0; i < (*shipsA).size(); ++i)
-		{
-			delete (*shipsA).at(i);
-		}
-		for (int i = 0; i < (*shipsB).size(); ++i)
-		{
-			delete (*shipsB).at(i);
-		}
-		delete shipsA;
-		delete shipsB;
 		return nullptr;
 	}
 
-	std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* ret = new std::pair<std::vector<Ship*>*, std::vector<Ship*>*>(shipsA, shipsB);
+	std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> ret = std::make_shared<std::pair<ptrToShipsVector, ptrToShipsVector >>(std::pair<ptrToShipsVector, ptrToShipsVector >(shipsA, shipsB));
 	return ret;
 }
 
 /*
-* This Function returns a refference to a 2D-array of chars, representing the game board
-* BOARD HAS TO BE DELETED USING "freeBoard" FUNCTION!
+* Gets first line of the file, its format is: <number of columns>x<number of rows>x<depth>
+* Updates the values of numRows, numCols, numDepth to contain the relevant sizes
+* Because uses Utilities::isNumeric(), might throw an exception
 */
-char** BoardCreator::getBoardFromFile(const char* boardFile)
+void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, std::string line)
 {
-	char** board = createBoard(BOARD_LENGTH, BOARD_LENGTH);
+	std::transform(line.begin(), line.end(), line.begin(), std::tolower); //converts line to small-letters
+	if (2 == Utilities::countAppearances(DELIMETER, line)) //makes sure 'x' appears exactly twice in "line"
+	{
+		int firstX = line.find_first_of(DELIMETER);
+		int secondX = line.find_last_of(DELIMETER);
+		std::string cols = line.substr(0, firstX);
+		if (Utilities::isNumeric(cols))
+		{
+			std::string rows = line.substr(firstX + 1, secondX - (firstX + 1));
+			if (Utilities::isNumeric(rows))
+			{
+				std::string depth = line.substr(secondX + 1, line.length() - (secondX + 1));
+				if (Utilities::isNumeric(depth))
+				{
+					numRows = std::stoi(rows);
+					numCols = std::stoi(cols);
+					numDepth = std::stoi(depth);
+				}
+			}
+		}
+	}
+}
 
-	std::string line;
 
+
+/*
+* This Function returns a pointer to a 3D-game board
+*/
+std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
+{
 	//opening boardfile:
 	std::ifstream bfile(boardFile);
 	if (!bfile)
 	{
 		throw Exception("Error: failed opening board file.");
 	}
-	int row = 0;
-	while (row < BOARD_LENGTH)
+	numRows = -1;
+	numCols = -1;
+	numDepth = -1;
+
+	std::string line;
+	line.clear();
+
+	/*Gets first line of the file, format is: <>x<>x<>*/
+	try
 	{
-		//reads 1 line from the file:
-		line.clear();
-		try
-		{
-			Utilities::getAllKindsOfLine(bfile, line);
-		}
-		catch (std::exception& e)
-		{
-			if (bfile.eof())
-			{
-				break;
-			}
-			//Frees memory of allocated board
-			for (int i = 0; i < BOARD_LENGTH; ++i)
-			{
-				delete[] board[i];
-			}
-			delete[] board;
-			bfile.close();
-			std::string str = e.what();
-			str.insert(0, "Error: failed reading from board file: ");
-			throw Exception(str.c_str());
-		}
-		if (line.length() < BOARD_LENGTH)
-		{
-			for (size_t col = 0; col < line.length(); ++col)
-			{
-				board[row][col] = line.at(col);
-			}
-			for (size_t col = line.length(); col < BOARD_LENGTH; ++col)
-			{
-				board[row][col] = ' ';
-			}
-		}
-		else
-		{
-			for (int col = 0; col < BOARD_LENGTH; ++col)
-			{
-				board[row][col] = line.at(col);
-			}
-		}
-		++row;
+		Utilities::getAllKindsOfLine(bfile, line);
+		getDimentions(numRows, numCols, numDepth, line);
+	}
+	catch (std::exception& e)
+	{
+		bfile.close();
+		std::string str = e.what();
+		str.insert(0, "Error: failed reading from board file or first line is not of format: <number of columns>x<number of rows>x<depth>: ");
+		throw Exception(str.c_str());
+	}
+	if (numRows < 0 || numCols<0 || numDepth<0)
+	{
+		throw Exception("Error: wrong board dimentions format");
 	}
 
-	if (row < BOARD_LENGTH)
+	std::shared_ptr<boardType> board = createBoard(numRows, numCols, numDepth);
+
+	int depth = 0;
+	while (depth < numDepth)
 	{
-		for (int i = row; i < BOARD_LENGTH; ++i)
+		int row = -1; //row == -1 means it should be an empty line
+		while (row < numRows)
 		{
-			for (int j = 0; j < BOARD_LENGTH; ++j)
+			//reads 1 line from the file:
+			line.clear();
+			try
 			{
-				board[i][j] = ' ';
+				Utilities::getAllKindsOfLine(bfile, line);
+			}
+			catch (std::exception& e)
+			{
+				if (bfile.eof())
+				{
+					break;
+				}
+				bfile.close();
+				std::string str = e.what();
+				str.insert(0, "Error: failed reading from board file: ");
+				throw Exception(str.c_str());
+			}
+			if (row == -1) //makes sure there's an empty line between dimention and boards
+			{
+				if (Utilities::isLineEmpty(line))
+				{
+					row++;
+					continue;
+				}
+				else
+				{
+					throw Exception("Error: wrong board format: no empty line");
+				}
+			}
+			if (line.length() < numCols)
+			{
+				for (size_t col = 0; col < line.length(); ++col)
+				{
+					(*board)[depth][row][col] = line.at(col);
+				}
+				for (size_t col = line.length(); col < numCols; ++col)
+				{
+					(*board)[depth][row][col] = ' ';
+				}
+			}
+			else
+			{
+				for (int col = 0; col < numCols; ++col)
+				{
+					(*board)[depth][row][col] = line.at(col);
+				}
+			}
+			++row;
+		}
+
+		if (row < numRows) //file ended (got here through break) 
+		{
+			for (int i = row; i < numRows; ++i)
+			{
+				for (int j = 0; j < numCols; ++j)
+				{
+					(*board)[depth][i][j] = ' ';
+				}
+			}
+			++depth;
+			break;
+		}
+
+		++depth;
+	}
+	if (depth < numDepth) //file ended (got here through break) 
+	{
+		for (int k = depth; k < numDepth; ++k)
+		{
+			for (int i = 0; i < numRows; ++i)
+			{
+				for (int j = 0; j < numCols; ++j)
+				{
+					(*board)[k][i][j] = ' ';
+				}
 			}
 		}
 	}
+
 	bfile.close();
 	return board;
 }
@@ -624,15 +724,14 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 				break;
 			}
 		}
-	}
-	while (FindNextFileA(hFind, &ffd) != 0);
+	} while (FindNextFileA(hFind, &ffd) != 0);
 	FindClose(hFind);
 	return retVal;
 }
 
 /*
- * Deletes memory allocations of "board" including itself.
- */
+* Deletes memory allocations of "board" including itself.
+*/
 void BoardCreator::freeBoard(char** board, int numRows)
 {
 	if (board == nullptr) return;
@@ -644,58 +743,90 @@ void BoardCreator::freeBoard(char** board, int numRows)
 }
 
 /*
-* Allocates memory for a "board", returns a pointer to it.
-* User of this function should delete the memory allocated in it using "freeBoard"!
+* Initiates an empty board of size: numDepth X numRows X numCols, returns a smart pointer to it.
 */
-char** BoardCreator::createBoard(int numRows, int numCols)
+std::shared_ptr<boardType> BoardCreator::createBoard(int numRows, int numCols, int numDepth)
 {
-	char** board = new char*[numRows];
-	for (int i = 0; i < numRows; ++i)
+	boardType board;
+	board.resize(numDepth);
+	for (int d = 0; d < numDepth; d++)
 	{
-		board[i] = new char[numCols];
+		board[d].resize(numRows);
+		for (int r = 0; r < numRows; r++)
+		{
+			board[d][r].resize(numCols);
+			for (int c = 0; c < numCols; c++)
+			{
+				board[d][r][c] = ' ';
+			}
+		}
 	}
-	return board;
+	return std::make_shared<boardType>(board);
 }
 
 /*
-* Creates a copy of "board" - Allocates memory for that copy. 
+* Creates a copy of "board" - Allocates memory for that copy.
 * User of this function should delete the memory allocated in it using "freeBoard"!
 */
-char** BoardCreator::copyBoard(const char** board, int numRows, int numCols)
-{
-	char** retBoard = createBoard(numRows, numCols);
-	for (int row = 0; row < numRows; row++)
-	{
-		for (int col = 0; col < numCols; col++)
-		{
-			retBoard[row][col] = board[row][col];
-		}
-	}
-	return retBoard;
-}
+//char** BoardCreator::copyBoard(const char** board, int numRows, int numCols)
+//{
+//	char** retBoard = createBoard(numRows, numCols);
+//	for (int row = 0; row < numRows; row++)
+//	{
+//		for (int col = 0; col < numCols; col++)
+//		{
+//			retBoard[row][col] = board[row][col];
+//		}
+//	}
+//	return retBoard;
+//}
 
-void BoardCreator::printBoard(const char ** board, int numRows, int numCols)
+/*Prints board layer by layer:*/
+void BoardCreator::printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth)
 {
-	std::cout << " ";
-	for (int col = 1; col <=numCols; col++)
+	for (int d = 0; d < numDepth; d++)
 	{
-		std::cout << col << " ";
-	}
-	std::cout << std::endl;
-	for (int row = 0; row < numRows; row++)
-	{
-		std::cout << row+1 << " ";
-		for (int col = 0; col < numCols; col++)
+		std::cout << "*******Layer " << d << "is: *******" << std::endl;
+		for (int r = 0; r < numRows; r++)
 		{
-			std::cout << board[row][col] << " ";
+			for (int c = 0; c < numCols; c++)
+			{
+				std::cout << (*board)[d][r][c];
+			}
+			std::cout << std::endl;
 		}
-		std::cout << std::endl;
 	}
 }
 
-char ** BoardCreator::createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB)
-{
-	char** commonBoard = getBoardFromShips(shipsA);
-	updateShipsInBoard(commonBoard, shipsB);
-	return commonBoard;
-}
+//char ** BoardCreator::createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB)
+//{
+//	char** commonBoard = getBoardFromShips(shipsA);
+//	updateShipsInBoard(commonBoard, shipsB);
+//	return commonBoard;
+//}
+
+//BoardCreator::Coordinate BoardCreator::getBoardMeasures(std::string line) //TODO:: delete "BoardCreator::" because Coordinate isn't BoardCreator's
+//{
+//	std::vector<std::string> values(3);
+//	std::stringstream ss;
+//	ss.str(line);
+//	std::string item;
+//	int i = 0;
+//	while (std::getline(ss, item, 'x')) {
+//		if (i >= 3) {
+//			i = -1;
+//			break;
+//		}
+//		values[i] = item;
+//		++i;
+//	}
+//	if (i == 3) {//exactly 3 values were found
+//
+//		for (int k = 0; k < 3; k++) {
+//			std::cout << values[k] << std::endl;
+//		}
+//	}
+//	return Coordinate(-1,-1,-1);
+//}
+
+

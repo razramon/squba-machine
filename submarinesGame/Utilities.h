@@ -29,7 +29,7 @@ class Utilities
 public:
 	static const std::string ATTACK_SUFF, BOARD_SUFF, DLL_SUFF;
 	static const int NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
-	static const char HIT_SIGN, SINK_SIGN,MISS_SIGN;
+	static const char HIT_SIGN, SINK_SIGN, MISS_SIGN;
 
 	static void getFullPath(std::string& path);
 
@@ -61,14 +61,14 @@ public:
 	*/
 	static void addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path);
 	/*
-	 * Depicts types of arguments of argv
-	 */
-	
+	* Depicts types of arguments of argv
+	*/
+
 	/*
-	 * Return true if string s is numeric
-	 * (all letters are digits)
-	 * NOTE: isdigit() might throw an exception
-	 */
+	* Return true if string s is numeric
+	* (all letters are digits)
+	* NOTE: isdigit() might throw an exception
+	*/
 	static bool isNumeric(std::string& s);
 	/*
 	* Gets a string: checks if it is:
@@ -89,4 +89,17 @@ public:
 	*					NOTE: if a "-delay" flag was found, without <delay in ms>, we'll use default one
 	*/
 	static void setArguments(int argc, char* argv[], std::string& path, bool& delay, int& delayMS, bool& quiet);
+
+	/*
+	* Returns the number of appearances of ch in str
+	* 0 if it doesn't apper.
+	*/
+	static int countAppearances(char ch, const std::string& str);
+
+	/*
+	* Returns true if line contains only spaces
+	* NOTE: returns true for an empty string!
+	*/
+	static bool isLineEmpty(const std::string line);
+
 };

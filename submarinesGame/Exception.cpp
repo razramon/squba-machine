@@ -8,7 +8,7 @@ Exception::Exception(const char* msgInfo)
 	strcpy_s(msg, len + 1, msgInfo);
 }
 
-Exception::Exception(std::string msgInfo): Exception::Exception(msgInfo.c_str())
+Exception::Exception(std::string msgInfo) : Exception::Exception(msgInfo.c_str())
 {
 }
 

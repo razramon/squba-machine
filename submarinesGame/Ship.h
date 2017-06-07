@@ -20,14 +20,12 @@ public:
 	int getNumberOfPoints() const;
 	void setNumberOfPoints(int nop);
 	static bool isShip(char c);
-	static bool inBoard(int place);
 	static int pointsOfShip(char c);
 	static int sizeOfShip(char c);
 	bool isSunk() const;
 	int** getPosition();
 	int getShipSize() const;
-	void setPosition(int pos, int row, int col,int dep, int state);
+	void setPosition(int pos, int row, int col, int dep, int state);
 	void printShipInfo() const;
 	int numOfHits() const;
-	int shipOfPlayer() const;
 };

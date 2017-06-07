@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Ship::Ship(char letter): letter(letter), numberOfPoints(pointsOfShip(letter)), position(new int*[sizeOfShip(letter)])
+Ship::Ship(char letter) : letter(letter), numberOfPoints(pointsOfShip(letter)), position(new int*[sizeOfShip(letter)])
 {
 	for (int i = 0; i < sizeOfShip(letter); ++i)
 	{
@@ -64,11 +64,7 @@ bool Ship::isShip(char c)
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
 
-// Check if the position is in the range of the board
-bool Ship::inBoard(int place) {
 
-	return (place < BOARD_LENGTH) && (place >= 0);
-}
 
 int Ship::pointsOfShip(char c)
 {
@@ -137,11 +133,12 @@ void Ship::setPosition(int pos, int row, int col, int dep, int state)
 void Ship::printShipInfo() const
 {
 	std::cout << "This is ship: " << letter << " of player " << (islower(letter) ? "B" : "A") << std::endl;
+	std::cout << "Printing format of positions is: (depth, row, column)" << std::endl;
 	for (int k = 0; k < Ship::sizeOfShip(letter) - 1; ++k)
 	{
-		std::cout << "(" << position[k][0] << "," << position[k][1] << "," << position[k][2] << ")  ,  ";
+		std::cout << "(" << position[k][2] << "," << position[k][0] << "," << position[k][1] << ")  ,  ";
 	}
-	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << "," << position[Ship::sizeOfShip(letter) - 1][2] << ")" << std::endl;
+	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][2] << "," << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")" << std::endl;
 }
 
 
@@ -159,7 +156,3 @@ int Ship::numOfHits() const
 	return hits;
 }
 
-int Ship::shipOfPlayer() const
-{
-	return ((islower(letter)) ? PLAYER_B : PLAYER_A);
-}

@@ -18,7 +18,7 @@ void Utilities::getFullPath(std::string& path)
 	strncpy_s(path_c, path.c_str(), path.size());
 	DWORD retval = 0;
 	char buffer[MAX_BUFFER];
-	char** lppPart = {nullptr};
+	char** lppPart = { nullptr };
 
 	// Retrieve the full path name for a file. 
 	retval = GetFullPathNameA(path_c, MAX_BUFFER, buffer, lppPart);
@@ -176,8 +176,7 @@ bool Utilities::isValidPath(const std::string path, std::string& boardFile)
 				return true;
 			}
 		}
-	}
-	while (FindNextFileA(hFind, &ffd) != 0);
+	} while (FindNextFileA(hFind, &ffd) != 0);
 	FindClose(hFind);
 	return false;
 }
@@ -192,12 +191,12 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
 }
 
 /*
- * Returns a vector of size 3, containing:
- *				index 0 = INDEX_PATH_DLL_A =  full path to player A's dll
- *				index 1 = INDEX_PATH_DLL_B = full path to player B's dll
- *				index 2 = INDEX_BOARD_PATH = full path to board.
- *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
- */
+* Returns a vector of size 3, containing:
+*				index 0 = INDEX_PATH_DLL_A =  full path to player A's dll
+*				index 1 = INDEX_PATH_DLL_B = full path to player B's dll
+*				index 2 = INDEX_BOARD_PATH = full path to board.
+*	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
+*/
 std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], bool& delay, int& delayMS, bool&quiet)
 {
 	std::string path;
@@ -281,8 +280,7 @@ int Utilities::find2FilesWithSuf(const char* path, size_t pathLen, std::vector<s
 				addFileToList(filesFound, std::string(ffd.cFileName), path);
 			}
 		}
-	}
-	while (FindNextFileA(hFind, &ffd) != 0);
+	} while (FindNextFileA(hFind, &ffd) != 0);
 	if (GetLastError() != ERROR_NO_MORE_FILES)
 	{
 		return FILE_NOT_FOUND_ERROR;
@@ -383,4 +381,29 @@ void Utilities::setArguments(int argc, char * argv[], std::string & path, bool &
 			break;
 		}
 	}
+}
+
+int Utilities::countAppearances(char ch, const std::string & str)
+{
+	int counter = 0;
+	for (char c : str)
+	{
+		if (c == ch)
+		{
+			counter++;
+		}
+	}
+	return counter;
+}
+
+bool Utilities::isLineEmpty(const std::string line)
+{
+	for (char c : line)
+	{
+		if (c != ' '  && c != '\t' && c != '\n')
+		{
+			return false;
+		}
+	}
+	return true;
 }
