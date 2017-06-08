@@ -32,9 +32,11 @@ int main(int argc, char* argv[])
 
 
 	//GameInfo::divideToGames(vector of dlls, vector of boards, allGamesData);
+
+
 	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData);
 
-	int gameNumber = THREADS_DEFAULT_NUMBER - 1;
+	int gameNumber = threadsNum - 1;
 	manager->setNumberGame(gameNumber);
 
 	manager->startGames();
