@@ -7,6 +7,8 @@
 #include <fstream>
 #include <Windows.h>
 #include <memory>
+#include "IBattleshipGameAlgo.h"
+
 
 #define DEFAULT_LETTER 'a';
 #define EMPTY_LETTER ' ';
@@ -21,11 +23,11 @@ class BoardCreator
 	~BoardCreator() = delete;
 	static const std::string BOARD_SUFF;
 	static const char DELIMETER;
-	//static char** getBoardFromShips(std::vector<Ship*>* ships);
+
 	/*
 	* Gets a vector of ships, updated board to conatin all letters representing ships
 	*/
-	//static void updateShipsInBoard(char** board, std::vector<Ship*>* ships);
+	static void updateShipsInBoard(std::shared_ptr<boardType> board, ptrToShipsVector ships);
 
 	enum INDEX_3D
 	{
@@ -37,13 +39,9 @@ class BoardCreator
 	static int getIndexOfRelevantBadCoordsVector(char letter);
 
 public:
-	//static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
 
-	struct Coordinate //TODO:: delete this! to avoid double declaration
-	{
-		int row, col, depth;
-		Coordinate(int row_, int col_, int depth_) : row(row_), col(col_), depth(depth_) {}
-	};
+	static std::shared_ptr<boardType> getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth);
+	//static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
 
 	static void printCoord(Coordinate c);
 	static int& updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, INDEX_3D dimentionToCheck);
@@ -64,7 +62,6 @@ public:
 
 
 	static bool findBoardFile(const char* path, size_t pathLen, char** boardFile);
-	static void freeBoard(char** board, int numRows);
 	static std::shared_ptr<boardType> createBoard(int numRows, int numCols, int numDepth);
 	//static char*** copyBoard(const char** board, int numRows, int numCols, int numDepth);
 	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
@@ -73,7 +70,6 @@ public:
 	* NOTE: need to use freeBoard on the board returned!
 	*/
 	//static char*** createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB);
-private:
-	//static Coordinate getBoardMeasures(std::string line); //TODO:: delete this probably...
+
 };
 

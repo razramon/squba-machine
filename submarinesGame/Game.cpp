@@ -1,40 +1,13 @@
 #include "Game.h"
 
 
-/*
- * Deletes all memory allocations of playerShips
- */
-void Game::deletePlayerShips() const
-{
-	if (playersShips != nullptr)
-	{
-		if (((*playersShips).first) != nullptr)
-		{
-			for (int i = 0; i < (*(*playersShips).first).size(); ++i)
-			{
-				delete ((*((*playersShips).first)).at(i));
-			}
-			delete (*playersShips).first;
-		}
-		if (((*playersShips).second) != nullptr)
-		{
-			for (int i = 0; i < (*(*playersShips).second).size(); ++i)
-			{
-				delete ((*((*playersShips).second)).at(i));
-			}
-			delete (*playersShips).second;
-		}
-	}
-	delete playersShips;
-}
-
-void Game::freeDlls()
-{
-	for (std::vector<HINSTANCE>::iterator dllIter = dlls.begin(); dllIter != dlls.end(); ++dllIter)
-	{
-		FreeLibrary(*dllIter);
-	}
-}
+//void Game::freeDlls()
+//{
+//	for (std::vector<HINSTANCE>::iterator dllIter = dlls.begin(); dllIter != dlls.end(); ++dllIter)
+//	{
+//		FreeLibrary(*dllIter);
+//	}
+//}
 
 char Game::getLetterByNumber(int number)
 {
