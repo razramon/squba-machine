@@ -1,46 +1,41 @@
 #include "Game.h"
 
 
-//void Game::freeDlls()
-//{
-//	for (std::vector<HINSTANCE>::iterator dllIter = dlls.begin(); dllIter != dlls.end(); ++dllIter)
-//	{
-//		FreeLibrary(*dllIter);
-//	}
-//}
-
 char Game::getLetterByNumber(int number)
 {
 	return (number == 0 ? 'A' : 'B');
 }
 
-bool Game::noAttacksLeft(std::pair<int, int>& attackOfPlayer)
+bool Game::noAttacksLeft(Coordinate& attackOfPlayer)
 {
-	return (attackOfPlayer.first == -1 && attackOfPlayer.second == -1);
+	return (attackOfPlayer.row == -1 && attackOfPlayer.col == -1 && attackOfPlayer.depth == -1);
 }
 
 /*
- * Returns true if attack is of format: ([1-10],[1-10]) or (-1,-1)
+ * Returns true if attack is of format: ([1-10],[1-10],[1-10]) or (-1,-1,-1)
  */
-bool Game::isValAttack(std::pair<int, int>& attackOfPlayer)
+bool Game::isValAttack(Coordinate& attackOfPlayer) const
 {
-	return ((1 <= attackOfPlayer.first && attackOfPlayer.first <= BOARD_LENGTH) &&
-			(1 <= attackOfPlayer.second && attackOfPlayer.second <= BOARD_LENGTH)) ||
+	return ((1 <= attackOfPlayer.row && attackOfPlayer.row <= numRows) &&
+			(1 <= attackOfPlayer.col && attackOfPlayer.col <= numCols) &&
+			(1 <= attackOfPlayer.depth && attackOfPlayer.depth <= numDepth)) ||
 		noAttacksLeft(attackOfPlayer);
 }
 
-Ship * Game::getShipAtPosition(int row, int col) const
+std::shared_ptr<Ship> Game::getShipAtPosition(int row, int col, int depth) const
 {
-	if (row < 0 || row >= BOARD_LENGTH || col < 0 || col >= BOARD_LENGTH) return nullptr;
+	if (row < 0 || row >= numRows || col < 0 || col >= numCols || depth < 0 || depth >= numDepth) return nullptr;
 
 	for (int i = 0; i < 2; ++i)
 	{
-		std::vector<Ship*>* ps = (i == 0) ? (*playersShips).first : (*playersShips).second;
-		for (std::vector<Ship*>::iterator iter = (*ps).begin(); iter!=(*ps).end(); ++iter)
+		ptrToShipsVector ps = (i == 0) ? (*playersShips).first : (*playersShips).second;
+		for (std::vector<std::shared_ptr<Ship>>::iterator iter = (*ps).begin(); iter!=(*ps).end(); ++iter)
 		{
 			for (int j = 0; j < (**iter).getShipSize(); ++j)
 			{
-				if (row == (**iter).getPosition()[j][0] && col == (**iter).getPosition()[j][1])
+				if (row == (**iter).getPosition()[j][Ship::INDEX_3D::row_index] && 
+					col == (**iter).getPosition()[j][Ship::INDEX_3D::column_index] && 
+					depth == (**iter).getPosition()[j][Ship::INDEX_3D::depth_index])
 				{
 					return *iter;
 				}
@@ -59,7 +54,7 @@ Ship * Game::getShipAtPosition(int row, int col) const
 * According to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=52667
 * If a player gave an attack that is not legit, Game should ignore it!
 */
-bool Game::playersHaveAttack(std::pair<int, int>& attackOfPlayer)
+bool Game::playersHaveAttack(Coordinate& attackOfPlayer)
 {
 	do
 	{
@@ -88,18 +83,19 @@ bool Game::playersHaveAttack(std::pair<int, int>& attackOfPlayer)
  * Notifies both players on last result of the attack,
  * Function should be called before updating "playerPlaying"! 
  */
-void Game::notifyPlayers(std::pair<int, int>& currAttack, AttackResult& result) const
+void Game::notifyPlayers(Coordinate& currAttack, AttackResult& result) const
 {
-	if (currAttack.first == -1) return;
-	(*playerA).notifyOnAttackResult(playerPlaying, currAttack.first, currAttack.second, result);
-	(*playerB).notifyOnAttackResult(playerPlaying, currAttack.first, currAttack.second, result);
+	if (currAttack.row == -1) return;
+	(*playerA).notifyOnAttackResult(playerPlaying, currAttack, result);
+	(*playerB).notifyOnAttackResult(playerPlaying, currAttack, result);
 }
 
 
-Game::Game(std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattleshipGameAlgo> playerB, std::shared_ptr<boardType> board): //large init list, don't panic! :)
-	playersShips(BoardCreator::checkBoard(board, BOARD_LENGTH, BOARD_LENGTH)), playerPlaying(PLAYER_A),
-	playerA(nullptr), playerB(nullptr), points(std::make_pair(0, 0)),
-	shipSunk(std::make_pair(0, 0))
+Game::Game(std::unique_ptr<IBattleshipGameAlgo>& playerA, std::unique_ptr<IBattleshipGameAlgo>& playerB,
+	std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth): //large init list, don't panic! :)
+	playersShips(BoardCreator::checkBoard(board, numRows, numCols,numDepth)), playerPlaying(PLAYER_A),
+	playerA(std::move(playerA)), playerB(std::move(playerB)), points(std::make_pair(0, 0)),
+	shipSunk(std::make_pair(0, 0)), numRows(numRows), numCols(numCols), numDepth(numDepth)
 {
 	if (playersShips == nullptr)
 	{
@@ -107,42 +103,77 @@ Game::Game(std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattle
 	}
 	std::pair<char **, char**> boards = BoardCreator::getInitBoardForEachPlayer(playersShips);
 	commonBoard = BoardCreator::createCommonBoard(playersShips->first, playersShips->second);
-	
+	try
+	{
+		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
+		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
+		{
+			// Load dynamic library
+			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str());
+			if (!hDll)
+			{
+				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
+			}
+			dlls.push_back(hDll);
+			GetAlgoFuncType getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
+			if (!getAlgoFunc)
+			{
+				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
+			}
+
+			IBattleshipGameAlgo** currPlayer = (i == PLAYER_A ? &playerA : &playerB);
+			*currPlayer = getAlgoFunc();
+			char** currBoard = (i == PLAYER_A ? boards.first : boards.second);
+			(**currPlayer).setBoard(i, const_cast<const char**>(currBoard), BOARD_LENGTH, BOARD_LENGTH);
+			if (!((**currPlayer).init(directoryPath)))
+			{
+				throw Exception(exceptionInfo(ALGO_INIT_FAILED, filesFound.at(i)));
+			}
+		}
+		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
+		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
+	}
+	catch (std::exception& e)
+	{
+		//free dlls, boards and ships
+		freeDlls();
+		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
+		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
+		deletePlayerShips();
+		throw e;
+	}
 }
 
 Game::~Game()
 {
-	deletePlayerShips();
-	delete playerA;
-	delete playerB;
-	BoardCreator::freeBoard(commonBoard, BOARD_LENGTH);
 }
 
 
-
-int Game::isHit(int row, int col, char& letter) const
+int Game::isHit(int row, int col, int depth, char& letter) const
 {
-	Ship* s = nullptr;
+	std::shared_ptr<Ship> s = nullptr;
 	int** posArray;
 	// Looping over all ships
 	for (int j = 0; j < 2; ++j)
 	{
-		std::vector<Ship*>* ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
+		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
 		for (int i = 0; i < (*ps).size(); ++i)
 		{
-			s = (*ps).at(i);
+			s = (*ps)[i];
 			if (s->isSunk())
 				continue;
 			posArray = ((*s).getPosition());
 			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
-				if (row == (posArray)[pos][0] && col == (posArray)[pos][1])
+				if (row == (posArray)[pos][Ship::INDEX_3D::row_index] &&
+					col == (posArray)[pos][Ship::INDEX_3D::column_index] &&
+					depth == (posArray)[pos][Ship::INDEX_3D::depth_index])
 				{
 					letter = (*s).getLetter();
-					switch (posArray[pos][2])
+					switch (posArray[pos][Ship::INDEX_3D::is_hit_index])
 					{
 					case 0:
-						(*s).setPosition(pos, row, col, HIT);
+						(*s).setPosition(pos, row, col, depth, HIT);
 						if ((playerPlaying == PLAYER_A && (*s).shipOfPlayer() == PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() != PLAYER_A))
 						{
 							return (s->numOfHits() == s->getShipSize()) ? SELF_DESTRUCT : BAD_HIT;
@@ -169,16 +200,16 @@ void Game::game()
 	int damaged = 0;;
 	int win = -1;
 	char letter = 'a';
-	std::pair<int, int> curAttack(-1, -1);
-	int row, col;
+	Coordinate curAttack(-1, -1, -1);
+	int row, col, depth;
 	while (win == -1 && playersHaveAttack(curAttack))
 	{
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
-		row = curAttack.first - 1;
-		col = curAttack.second - 1;
-		damaged = isHit(row, col, letter);
-		GUIBoard::updateGUIBoard(commonBoard, damaged, row, col, getShipAtPosition(row, col), quiet, delayMS, playerPlaying);
+		row = curAttack.row - 1;
+		col = curAttack.col - 1;
+		depth = curAttack.depth - 1;
+		damaged = isHit(row, col, depth, letter);
 		switch (damaged)
 		{
 		case SELF_DESTRUCT: // Player destroyed his own ship
@@ -244,24 +275,16 @@ void Game::game()
 
 int Game::checkWin() const
 {
-	int count = 0;
-	std::vector<Ship*>* ps = (*playersShips).first;
-	for (int i = 0; i < NUMBER_SHIPS; i++)
+	for (int j = 0; j < 2; ++j)
 	{
-		count += ps->at(i)->isSunk() ? 1 : 0;
-	}
-	if (count == 5)
-		return 1;
-	else
-	{
-		ps = (*playersShips).second;
-		count = 0;
-		for (int i = 0; i < NUMBER_SHIPS; i++)
+		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
+		int count = 0;
+		for (int i = 0; i < (*ps).size(); i++)
 		{
 			count += ps->at(i)->isSunk() ? 1 : 0;
 		}
 		if (count == 5)
-			return 0;
+			return (j == 0 ? PLAYER_B : PLAYER_A); //if j==0, we're checking A's sanked ships, and if there are 5 of those - B won.
 	}
 	return -1;
 }
