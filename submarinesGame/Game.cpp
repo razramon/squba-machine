@@ -107,45 +107,7 @@ Game::Game(std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattle
 	}
 	std::pair<char **, char**> boards = BoardCreator::getInitBoardForEachPlayer(playersShips);
 	commonBoard = BoardCreator::createCommonBoard(playersShips->first, playersShips->second);
-	try
-	{
-		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
-		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
-		{
-			// Load dynamic library
-			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str());
-			if (!hDll)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
-			}
-			dlls.push_back(hDll);
-			GetAlgoFuncType getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
-			if (!getAlgoFunc)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
-			}
-
-			IBattleshipGameAlgo** currPlayer = (i == PLAYER_A ? &playerA : &playerB);
-			*currPlayer = getAlgoFunc();
-			char** currBoard = (i == PLAYER_A ? boards.first : boards.second);
-			(**currPlayer).setBoard(i, const_cast<const char**>(currBoard), BOARD_LENGTH, BOARD_LENGTH);
-			if (!((**currPlayer).init(directoryPath)))
-			{
-				throw Exception(exceptionInfo(ALGO_INIT_FAILED, filesFound.at(i)));
-			}
-		}
-		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
-		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
-	}
-	catch (std::exception& e)
-	{
-		//free dlls, boards and ships
-		freeDlls();
-		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
-		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
-		deletePlayerShips();
-		throw e;
-	}
+	
 }
 
 Game::~Game()

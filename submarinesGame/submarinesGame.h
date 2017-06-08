@@ -14,10 +14,10 @@
 #include "Game.h"
 #include "GameInfo.h"
 #include "GameManager.h"
+#include "../Common/Logger.h"
 
 #define THREADS_DEFAULT_NUMBER 4;
 
-std::vector<HINSTANCE> dlls;
 int main(int argc, char* argv[]);
 
 
