@@ -27,7 +27,7 @@ void BoardCreator::updateShipsInBoard(std::shared_ptr<boardType> board, ptrToShi
 
 		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 		{
-			(*board)[positions[pos][2]][positions[pos][0]][positions[pos][1]] = letter;
+			(*board)[positions[pos][Ship::INDEX_3D::depth_index]][positions[pos][Ship::INDEX_3D::row_index]][positions[pos][Ship::INDEX_3D::column_index]] = letter;
 		}
 	}
 }
@@ -63,14 +63,14 @@ void BoardCreator::printCoord(Coordinate c)
 * Returns:
 *		the (actual) updated index
 */
-int& BoardCreator::updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, INDEX_3D dimentionToCheck)
+int& BoardCreator::updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, Ship::INDEX_3D dimentionToCheck)
 {
 	switch (dimentionToCheck)
 	{
-	case (INDEX_3D::row_index):
+	case (Ship::INDEX_3D::row_index):
 		row_ind++;
 		return row_ind;
-	case (INDEX_3D::column_index):
+	case (Ship::INDEX_3D::column_index):
 		col_ind++;
 		return col_ind;
 	default: //dimentionToCheck == INDEX_3D::depth_index
@@ -89,7 +89,7 @@ int& BoardCreator::updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, 
 *	Returns:
 *		number of consecutive same-letter appearances in dimentionToCheck.
 */
-int BoardCreator::checkSequence(const Coordinate& currPos, INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter)
+int BoardCreator::checkSequence(const Coordinate& currPos, Ship::INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter)
 {
 	int shipCells = 1;
 	int row_ind = currPos.row;
@@ -111,7 +111,7 @@ int BoardCreator::checkSequence(const Coordinate& currPos, INDEX_3D dimentionToC
 *		updates wrongSizeOrShape to be "true"
 */
 void BoardCreator::insertBadCoords(int shipCells, bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords,
-	int row, int col, int depth, INDEX_3D dimentionToUpdate)
+	int row, int col, int depth, Ship::INDEX_3D dimentionToUpdate)
 {
 	wrongSizeOrShape = true;
 	for (int i = 0; i < shipCells; ++i) //insert all "bad indexes" letter appearences into the list
@@ -127,7 +127,7 @@ void BoardCreator::insertBadCoords(int shipCells, bool& wrongSizeOrShape, std::s
 * Inserts it to shipsOfPlayer, and updates numShipsForCurrPlayer.
 */
 void BoardCreator::createShipAtCoord(char letter, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer, int& numShipsForCurrPlayer,
-	int row, int col, int depth, INDEX_3D dimentionToUpdate)
+	int row, int col, int depth, Ship::INDEX_3D dimentionToUpdate)
 {
 	std::shared_ptr<Ship> ship = std::make_shared<Ship>(letter);
 	for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
@@ -167,53 +167,53 @@ void BoardCreator::checkShipBorders(std::shared_ptr<boardType> board, int numRow
 	//check for ship cells on next columns:
 	if ((col < numCols - 1) && ((*board)[depth][row][col + 1]) == letter)
 	{
-		shipCells = checkSequence(currPos, INDEX_3D::column_index, numCols, board, letter);
+		shipCells = checkSequence(currPos, Ship::INDEX_3D::column_index, numCols, board, letter);
 		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
 		{
-			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::column_index);
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, Ship::INDEX_3D::column_index);
 		}
 		else
 		{
 			//If gets here,shipCells == Ship::sizeOfShip(letter):
-			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::column_index);
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, Ship::INDEX_3D::column_index);
 		}
 	}
 	// Searching rows for the rest of the ship
 	else if ((row < numRows - 1) && ((*board)[depth][row + 1][col]) == letter)
 	{
-		shipCells = checkSequence(currPos, INDEX_3D::row_index, numRows, board, letter);
+		shipCells = checkSequence(currPos, Ship::INDEX_3D::row_index, numRows, board, letter);
 		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
 		{
-			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::row_index);
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, Ship::INDEX_3D::row_index);
 		}
 		else //If gets here,shipCells == Ship::sizeOfShip(letter):
 		{
-			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::row_index);
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, Ship::INDEX_3D::row_index);
 		}
 
 	}
 	// Searching depth for the rest of the ship
 	else if ((depth < numDepth - 1) && ((*board)[depth + 1][row][col]) == letter)
 	{
-		shipCells = checkSequence(currPos, INDEX_3D::depth_index, numDepth, board, letter);
+		shipCells = checkSequence(currPos, Ship::INDEX_3D::depth_index, numDepth, board, letter);
 		if (shipCells != Ship::sizeOfShip(letter)) //ship has a wrong size (too small/too big)
 		{
-			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::depth_index);
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, Ship::INDEX_3D::depth_index);
 		}
 		else //shipCells == Ship::sizeOfShip(letter):
 		{
-			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::depth_index);
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, Ship::INDEX_3D::depth_index);
 		}
 	}
 	else //It's here because the 3 "if"s checked the "next"cell, so we still need to check the case of 1 cell ship
 	{
 		if (Ship::sizeOfShip(letter) != 1)
 		{
-			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, INDEX_3D::depth_index);
+			insertBadCoords(shipCells, wrongSizeOrShape, badLetterCoords, row, col, depth, Ship::INDEX_3D::depth_index);
 		}
 		else
 		{
-			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, INDEX_3D::depth_index);
+			createShipAtCoord(letter, shipsOfPlayer, numShipsForCurrPlayer, row, col, depth, Ship::INDEX_3D::depth_index);
 		}
 	}
 }
@@ -241,7 +241,8 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 	int** pos = (*ship).getPosition();
 	for (int i = 0; i < (*ship).getShipSize(); ++i)
 	{
-		Coordinate c1 = Coordinate(pos[i][INDEX_3D::row_index], pos[i][INDEX_3D::column_index], pos[i][INDEX_3D::depth_index]);
+		Coordinate c1 = Coordinate(pos[i][Ship::INDEX_3D::row_index], 
+						pos[i][Ship::INDEX_3D::column_index], pos[i][Ship::INDEX_3D::depth_index]);
 		for (int k = 0; k < (*badLetterCoords).size(); ++k)
 		{
 			if (twoCoordsNeighbours(c1, (*badLetterCoords).at(i)))
@@ -258,19 +259,19 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 		for (int i = 0; i < shipsOfPlayer.size(); ++i)
 		{
 			//makes sure it's NOT the same ship: 
-			if (!(pos[0][INDEX_3D::row_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::row_index] &&
-				pos[0][INDEX_3D::column_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::column_index]) &&
-				pos[0][INDEX_3D::depth_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][INDEX_3D::depth_index])
+			if (!(pos[0][Ship::INDEX_3D::row_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::row_index] &&
+				pos[0][Ship::INDEX_3D::column_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::column_index]) &&
+				pos[0][Ship::INDEX_3D::depth_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::depth_index])
 			{
 				if ((*(shipsOfPlayer.at(i))).getLetter() == letter)
 				{
 					for (int j = 0; j < (*ship).getShipSize(); ++j)
 					{
-						Coordinate c1 = Coordinate(pos[j][INDEX_3D::row_index], pos[j][INDEX_3D::column_index], pos[j][INDEX_3D::depth_index]);
+						Coordinate c1 = Coordinate(pos[j][Ship::INDEX_3D::row_index], pos[j][Ship::INDEX_3D::column_index], pos[j][Ship::INDEX_3D::depth_index]);
 						for (int k = 0; k < (*shipsOfPlayer.at(i)).getShipSize(); ++k)
 						{
 							int** position = (*shipsOfPlayer.at(i)).getPosition();
-							Coordinate c2 = Coordinate(position[k][INDEX_3D::row_index], position[k][INDEX_3D::column_index], position[k][INDEX_3D::depth_index]);
+							Coordinate c2 = Coordinate(position[k][Ship::INDEX_3D::row_index], position[k][Ship::INDEX_3D::column_index], position[k][Ship::INDEX_3D::depth_index]);
 							if (twoCoordsNeighbours(c1, c2))
 							{
 								res = true;
@@ -288,7 +289,7 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 	{
 		for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
 		{
-			Coordinate badCoord = Coordinate(pos[i][INDEX_3D::row_index], pos[i][INDEX_3D::column_index], pos[i][INDEX_3D::depth_index]);
+			Coordinate badCoord = Coordinate(pos[i][Ship::INDEX_3D::row_index], pos[i][Ship::INDEX_3D::column_index], pos[i][Ship::INDEX_3D::depth_index]);
 			(*badLetterCoords).push_back(badCoord);
 		}
 	}
