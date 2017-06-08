@@ -28,11 +28,12 @@ public:
 	void setPosition(int pos, int row, int col, int dep, int state);
 	void printShipInfo() const;
 	int numOfHits() const;
-
+	int shipOfPlayer() const;
 	enum INDEX_3D
 	{
 		row_index = 0,
 		column_index = 1,
-		depth_index = 2
+		depth_index = 2,
+		is_hit_index = 3
 	};
 };

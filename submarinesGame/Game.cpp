@@ -122,27 +122,29 @@ Game::~Game()
 
 int Game::isHit(int row, int col, int depth, char& letter) const
 {
-	Ship* s = nullptr;
+	std::shared_ptr<Ship> s = nullptr;
 	int** posArray;
 	// Looping over all ships
 	for (int j = 0; j < 2; ++j)
 	{
-		std::vector<Ship*>* ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
+		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
 		for (int i = 0; i < (*ps).size(); ++i)
 		{
-			s = (*ps).at(i);
+			s = (*ps)[i];
 			if (s->isSunk())
 				continue;
 			posArray = ((*s).getPosition());
 			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
-				if (row == (posArray)[pos][0] && col == (posArray)[pos][1])
+				if (row == (posArray)[pos][Ship::INDEX_3D::row_index] &&
+					col == (posArray)[pos][Ship::INDEX_3D::column_index] &&
+					depth == (posArray)[pos][Ship::INDEX_3D::depth_index])
 				{
 					letter = (*s).getLetter();
-					switch (posArray[pos][2])
+					switch (posArray[pos][Ship::INDEX_3D::is_hit_index])
 					{
 					case 0:
-						(*s).setPosition(pos, row, col, HIT);
+						(*s).setPosition(pos, row, col, depth, HIT);
 						if ((playerPlaying == PLAYER_A && (*s).shipOfPlayer() == PLAYER_A) || (playerPlaying == PLAYER_B && (*s).shipOfPlayer() != PLAYER_A))
 						{
 							return (s->numOfHits() == s->getShipSize()) ? SELF_DESTRUCT : BAD_HIT;
@@ -169,16 +171,16 @@ void Game::game()
 	int damaged = 0;;
 	int win = -1;
 	char letter = 'a';
-	std::pair<int, int> curAttack(-1, -1);
-	int row, col;
+	Coordinate curAttack(-1, -1, -1);
+	int row, col, depth;
 	while (win == -1 && playersHaveAttack(curAttack))
 	{
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
-		row = curAttack.first - 1;
-		col = curAttack.second - 1;
-		damaged = isHit(row, col, letter);
-		GUIBoard::updateGUIBoard(commonBoard, damaged, row, col, getShipAtPosition(row, col), quiet, delayMS, playerPlaying);
+		row = curAttack.row - 1;
+		col = curAttack.col - 1;
+		depth = curAttack.depth - 1;
+		damaged = isHit(row, col, depth, letter);
 		switch (damaged)
 		{
 		case SELF_DESTRUCT: // Player destroyed his own ship
@@ -244,24 +246,16 @@ void Game::game()
 
 int Game::checkWin() const
 {
-	int count = 0;
-	std::vector<Ship*>* ps = (*playersShips).first;
-	for (int i = 0; i < NUMBER_SHIPS; i++)
+	for (int j = 0; j < 2; ++j)
 	{
-		count += ps->at(i)->isSunk() ? 1 : 0;
-	}
-	if (count == 5)
-		return 1;
-	else
-	{
-		ps = (*playersShips).second;
-		count = 0;
-		for (int i = 0; i < NUMBER_SHIPS; i++)
+		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
+		int count = 0;
+		for (int i = 0; i < (*ps).size(); i++)
 		{
 			count += ps->at(i)->isSunk() ? 1 : 0;
 		}
 		if (count == 5)
-			return 0;
+			return (j == 0 ? PLAYER_B : PLAYER_A); //if j==0, we're checking A's sanked ships, and if there are 5 of those - B won.
 	}
 	return -1;
 }
