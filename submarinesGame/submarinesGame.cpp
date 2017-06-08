@@ -4,36 +4,6 @@
 using namespace std;
 
 
-void runGameThread(GameInfo* gameInfo) {
-
-	while (gameInfo->getPlayerWon != -1) {
-
-		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
-		unique_ptr<Game> newGame = std::make_unique<Game>(algos.first,algos.second, gameInfo->getBoard());
-
-		getGame(gameInfo);
-	}
-
-}
-
-void getGame(GameInfo* game) {
-
-	mutex lock;
-	lock.lock();
-
-	if (gameNumber > (*allGamesData).size()) {
-
-		game->setPlayerWon(-1);
-	}
-	else {
-
-		game = allGamesData[gameNumber];
-	}
-	gameNumber++;
-
-	lock.unlock();
-}
-
 int main(int argc, char* argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); //for memory leaks! :) TODO::delete before 
@@ -43,6 +13,7 @@ int main(int argc, char* argv[])
 	shared_ptr<std::vector<std::string>> filesFound = make_shared<vector<string>>(Utilities::buildPath(argc, argv, threadsNum));
 	shared_ptr<std::vector<std::string>> boardFiles;
 	shared_ptr<std::vector<std::string>> DLLFiles;
+	shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGamesData;
 
 	Utilities::divideToDLLAndBoard(filesFound, boardFiles, DLLFiles);
 
@@ -61,14 +32,12 @@ int main(int argc, char* argv[])
 
 
 	//GameInfo::divideToGames(vector of dlls, vector of boards, allGamesData);
+	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData);
 
-	gameNumber = THREADS_DEFAULT_NUMBER;
+	int gameNumber = THREADS_DEFAULT_NUMBER - 1;
+	manager->setNumberGame(gameNumber);
 
-	for (int indexThread = 0; indexThread < gameNumber; indexThread++) {
-
-		std::thread gameThread(runGameThread, (*allGamesData)[indexThread]);
-		gameThread.join();
-	}
+	manager->startGames();
 
 	try
 	{
@@ -84,9 +53,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	delete filesFound;
-	delete DLLFiles;
-	delete boardFiles;
 	return 0;
 }
 

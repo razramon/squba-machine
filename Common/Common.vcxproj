@@ -140,6 +140,7 @@
     <ClInclude Include="..\submarinesGame\Ship.h" />
     <ClInclude Include="..\submarinesGame\Sizes.h" />
     <ClInclude Include="..\submarinesGame\Utilities.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\submarinesGame\BoardCreator.cpp" />

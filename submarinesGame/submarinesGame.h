@@ -13,18 +13,16 @@
 #include <stdlib.h>
 #include "Game.h"
 #include "GameInfo.h"
+#include "GameManager.h"
 
 #define THREADS_DEFAULT_NUMBER 4;
 
 std::vector<HINSTANCE> dlls;
 int main(int argc, char* argv[]);
-int gameNumber;
-shared_ptr<std::vector<shared_ptr<GameInfo>>> allGamesData;
-typedef std::vector<std::vector<std::vector<char>>> boardType;
+
 
 /*
 * Frees all dlls' libraries
 */
 void freeDlls();
 
-void runGameThread(GameInfo* game);

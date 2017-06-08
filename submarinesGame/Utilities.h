@@ -81,6 +81,10 @@ public:
 	*/
 	static Arguments getTypeOfArg(std::string argu);
 
+	void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
+
+	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
+
 	//initialize delayMS to be negative before calling this function!
 	/*
 	* Initializes arguments:
@@ -88,12 +92,8 @@ public:
 	*					NOTE: user will have to check if path haven't been change in this function
 	*						(if it's still of length 0) - if it wasn't - user should, as required,
 	*						take working directory as a path!!
-	*			delay - updates value to "true" if "-delay" flag was found
-	*			quiet - updates value to "true" if "-quiet" flag was found
-	*			delayMS - updates to the mili-sec found (only if it's in format: "-delal <delay in ms>"
-	*					NOTE: if a "-delay" flag was found, without <delay in ms>, we'll use default one
 	*/
-	static void setArguments(int argc, char* argv[], std::string& path, bool& delay, int& delayMS, bool& quiet);
+	void Utilities::setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
 
 	/*
 	* Returns the number of appearances of ch in str
@@ -107,4 +107,5 @@ public:
 	*/
 	static bool isLineEmpty(const std::string line);
 
+	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
 };
