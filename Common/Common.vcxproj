@@ -140,12 +140,14 @@
     <ClInclude Include="..\submarinesGame\Ship.h" />
     <ClInclude Include="..\submarinesGame\Sizes.h" />
     <ClInclude Include="..\submarinesGame\Utilities.h" />
+    <ClInclude Include="Board.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\submarinesGame\BoardCreator.cpp" />
     <ClCompile Include="..\submarinesGame\Exception.cpp" />
     <ClCompile Include="..\submarinesGame\Ship.cpp" />
     <ClCompile Include="..\submarinesGame\Utilities.cpp" />
+    <ClCompile Include="Board.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

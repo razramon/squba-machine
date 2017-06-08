@@ -9,21 +9,15 @@
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
-typedef std::vector<std::vector<std::vector<char>>> boardType;
 
 class Game
 {
-	mutable std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips;
+	mutable std::unique_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips;
 	int playerPlaying;
 	IBattleshipGameAlgo* playerA;
 	IBattleshipGameAlgo* playerB;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
-
-	/*
-	* Deletes all memory allocations of playerShips
-	*/
-	void deletePlayerShips() const;
 
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer

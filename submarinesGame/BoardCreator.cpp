@@ -9,38 +9,28 @@ const char BoardCreator::DELIMETER = 'x';
 //	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
 //}
 
-//char** BoardCreator::getBoardFromShips(std::vector<Ship*>* ships)
-//{
-//	char** board = new char*[BOARD_LENGTH];
-//
-//	for (int indexRow = 0; indexRow < BOARD_LENGTH; indexRow++)
-//	{
-//		board[indexRow] = new char[BOARD_LENGTH];
-//		for (int indexCol = 0; indexCol < BOARD_LENGTH; indexCol++)
-//		{
-//			board[indexRow][indexCol] = EMPTY_LETTER;
-//		}
-//	}
-//	updateShipsInBoard(board, ships);
-//	return board;
-//}
+std::shared_ptr<boardType> BoardCreator::getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth)
+{
+	std::shared_ptr<boardType> board = createBoard(numRows, numCols, numDepth);
+	updateShipsInBoard(board, ships);
+	return board;
+}
 
-//void BoardCreator::updateShipsInBoard(char ** board, std::vector<Ship*>* ships)
-//{
-//	std::vector<Ship*>* ps = ships;
-//	for (int i = 0; i < (*ps).size(); ++i)
-//	{
-//		Ship* s = (*ps).at(i);
-//
-//		int** positions = (*s).getPosition();
-//		char letter = (*s).getLetter();
-//
-//		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
-//		{
-//			board[positions[pos][0]][positions[pos][1]] = letter;
-//		}
-//	}
-//}
+void BoardCreator::updateShipsInBoard(std::shared_ptr<boardType> board, ptrToShipsVector ships)
+{
+	for (int i = 0; i < (*ships).size(); ++i)
+	{
+		std::shared_ptr<Ship> s = (*ships)[i];
+
+		int** positions = (*s).getPosition();
+		char letter = (*s).getLetter();
+
+		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
+		{
+			(*board)[positions[pos][2]][positions[pos][0]][positions[pos][1]] = letter;
+		}
+	}
+}
 
 /*
 * Returns the relevant index of the "bad coodinates vector"
@@ -729,18 +719,6 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 	return retVal;
 }
 
-/*
-* Deletes memory allocations of "board" including itself.
-*/
-void BoardCreator::freeBoard(char** board, int numRows)
-{
-	if (board == nullptr) return;
-	for (int row = 0; row < numRows; row++)
-	{
-		delete[] board[row];
-	}
-	delete[] board;
-}
 
 /*
 * Initiates an empty board of size: numDepth X numRows X numCols, returns a smart pointer to it.
@@ -804,29 +782,3 @@ void BoardCreator::printBoard(std::shared_ptr<boardType> board, int numRows, int
 //	updateShipsInBoard(commonBoard, shipsB);
 //	return commonBoard;
 //}
-
-//BoardCreator::Coordinate BoardCreator::getBoardMeasures(std::string line) //TODO:: delete "BoardCreator::" because Coordinate isn't BoardCreator's
-//{
-//	std::vector<std::string> values(3);
-//	std::stringstream ss;
-//	ss.str(line);
-//	std::string item;
-//	int i = 0;
-//	while (std::getline(ss, item, 'x')) {
-//		if (i >= 3) {
-//			i = -1;
-//			break;
-//		}
-//		values[i] = item;
-//		++i;
-//	}
-//	if (i == 3) {//exactly 3 values were found
-//
-//		for (int k = 0; k < 3; k++) {
-//			std::cout << values[k] << std::endl;
-//		}
-//	}
-//	return Coordinate(-1,-1,-1);
-//}
-
-
