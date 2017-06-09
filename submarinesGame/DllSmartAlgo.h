@@ -13,46 +13,46 @@
 class DllSmartAlgo : public IBattleshipGameAlgo
 {
 	static const int NOT_INITIALIZED;
-	static const std::vector<std::pair<int, int>> placesToCheckBoard;
-	static const std::vector<std::pair<int, int>> placesToDelete;
-	char** board;
+	static const std::vector<Coordinate> placesToCheckBoard;
+	static const std::vector<Coordinate> placesToDelete;
+	std::unique_ptr<boardType> board;
 	int numRows;
 	int numCols;
+	int numDepth;
 	int player;
 	/*
 	 * Contains pairs of variables 1-10! 
 	 */
-	std::vector<std::pair<int, int>> possibleMoves;
-	std::vector<std::pair<int, int>> shipPositionHit;
-	std::vector<std::pair<int, int>> enemyHitSelf;
+	std::vector<Coordinate> possibleMoves;
+	std::vector<Coordinate> shipPositionHit;
+	std::vector<Coordinate> enemyHitSelf;
 
-	std::unique_ptr<std::pair<int, int>> getRandomAttack();
-	std::unique_ptr<std::vector<std::pair<int, int>>> getAllPossiblePoints();
+	std::unique_ptr<Coordinate> getRandomAttack();
+	std::unique_ptr<std::vector<Coordinate>> getAllPossiblePoints();
 
-	void addToPossibleMove(std::vector<std::pair<int, int>> pm);
-	int getPositionOfMove(int p1, int p2);
-	void changeSurrounding(int row, int col, bool initBoard);
+	void addToPossibleMove(std::vector<Coordinate> pm);
+	int getPositionOfMove(Coordinate c);
+	void changeSurrounding(Coordinate c, bool initBoard);
 
-	void sinkBigShip(int row, int col);
+	void sinkBigShip(Coordinate c);
 
-	void sinkSmallShip(int row, int col);
+	void sinkSmallShip(Coordinate c);
 
-	void hitShip(int row, int col);
+	void hitShip(Coordinate c);
 
-	void firstHit(int row, int col);
+	void firstHit(Coordinate c);
 
-	std::vector<std::pair<int, int>> getPossibleMoves(int row, int col);
+	std::vector<Coordinate> getPossibleMoves(Coordinate c);
 
-	bool checkPosition(int col, int row) const;
+	bool checkPosition(Coordinate c) const;
+	bool inBoardBoarders(Coordinate& c) const;
 
 public:
 
 	DllSmartAlgo();
 	~DllSmartAlgo();
-	
-	void setBoard(int player, const char** board, int numRows, int numCols) override;		// called once to notify player on his board
-	bool init(const std::string& path) override;		// called once to allow init from files if needed returns whether the init succeeded or failed
-
-	std::pair<int, int> attack() override;													// ask player for his move
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;	// notify on last move result
+	void setPlayer(int player) override;
+	void setBoard(const BoardData& board) override;		// called once to notify player on his board
+	Coordinate attack() override;						// ask player for his move
+	void notifyOnAttackResult(int player, Coordinate move, AttackResult result) override;	// notify on last move result
 };

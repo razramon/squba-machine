@@ -1,12 +1,22 @@
 #include "DllSmartAlgo.h"
 
 const int DllSmartAlgo::NOT_INITIALIZED = -1;
-const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard = { std::make_pair(-1, 0),std::make_pair(1, 0),std::make_pair(0, 1),std::make_pair(0, -1)};
-const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete = { std::make_pair(-1, -1),std::make_pair(-1 ,1), std::make_pair(1, -1), std::make_pair(1, 1 ) };
+const std::vector<Coordinate> DllSmartAlgo::placesToCheckBoard = { Coordinate(0, -1, 0),Coordinate(0, 1, 0), Coordinate(0, 0, -1),
+																	Coordinate(0, 0, 1),Coordinate(-1, 0, 0), Coordinate(1, 0, 0) };
+const std::vector<Coordinate> DllSmartAlgo::placesToDelete = { Coordinate(0, 1, -1),Coordinate(0, 1, 1),
+																Coordinate(0, -1, -1),Coordinate(0, -1, 1), 
+																Coordinate(-1, 1, -1),Coordinate(-1, 1, 0), 
+																Coordinate(-1, 1, 1),Coordinate(-1, 0, -1), 
+																Coordinate(-1, 0, 1),Coordinate(-1, -1, -1), 
+																Coordinate(-1, -1, 0),Coordinate(-1, -1, 1), 
+																Coordinate(1, 1, -1),Coordinate(1, 1, 0), 
+																Coordinate(1, 1, 1),Coordinate(1, -1, -1), 
+																Coordinate(1, -1, 0),Coordinate(1, -1, 1), 
+																Coordinate(1, 0, -1),Coordinate(1, 0, 1), };
 
-std::pair<int, int> DllSmartAlgo::attack()
+Coordinate DllSmartAlgo::attack()
 {
-	std::unique_ptr<std::pair<int, int>> hit;
+	std::unique_ptr<Coordinate> hit;
 
 	// Checking if there is already possible move - if so, rand over the moves, if not, rand over the board till found place that can place a ship
 	if((this->possibleMoves).size() == 0)
@@ -17,17 +27,17 @@ std::pair<int, int> DllSmartAlgo::attack()
 	else {
 
 		int r = rand() % (this->possibleMoves).size();
-		hit = std::make_unique<std::pair<int,int>>(this->possibleMoves[r]);
+		hit = std::make_unique<Coordinate>(this->possibleMoves[r]);
 		possibleMoves.erase(possibleMoves.begin() + r);
 	}
-	if((*hit).first!=-1)
+	if((*hit).row!=-1)
 	{
-		return std::make_pair((*hit).first + 1, (*hit).second + 1);
+		return Coordinate((*hit).row + 1, (*hit).col + 1, (*hit).depth + 1);
 	}
-	return std::make_pair(-1, -1);
+	return Coordinate(-1, -1,-1);
 }
 
-void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+void DllSmartAlgo::notifyOnAttackResult(int player, Coordinate move, AttackResult result)
 {
 	row -= 1;
 	col -= 1;
@@ -110,86 +120,81 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 	} 
 }
 
-void DllSmartAlgo::sinkBigShip(int row, int col) {
+void DllSmartAlgo::sinkBigShip(Coordinate c) {
 
-	for (std::pair<int, int> toSink : this->shipPositionHit) {
+	for (Coordinate toSink : this->shipPositionHit) {
 
-		DllSmartAlgo::changeSurrounding(toSink.first, toSink.second, true);
+		DllSmartAlgo::changeSurrounding(toSink, true);
 	}
 	this->possibleMoves.clear();
 
 }
 
-void DllSmartAlgo::sinkSmallShip(int row, int col)
+void DllSmartAlgo::sinkSmallShip(Coordinate c)
 {
 	this->possibleMoves.clear();
 
-	DllSmartAlgo::changeSurrounding(row, col, true);
+	DllSmartAlgo::changeSurrounding(c, true);
 }
 
 
-void DllSmartAlgo::hitShip(int row, int col) {
+void DllSmartAlgo::hitShip(Coordinate c) {
 
-	DllSmartAlgo::changeSurrounding(row, col, false);
-	std::vector<std::pair<int, int>> attacks;
-	this-> addToPossibleMove(DllSmartAlgo::getPossibleMoves(row, col));
-
-	//// Getting all the possible moves after the board change, suppose to be only 2 possible moves - left right or up down
-	//for (std::pair<int, int> attacked : this->shipPositionHit) {
-
-	//	attacks = getPossibleMoves(attacked.first, attacked.second);
-	//	this->possibleMoves.reserve((this->possibleMoves).size() + attacks.size());
-	//	(this->possibleMoves).insert(std::end(this->possibleMoves), std::begin(attacks), std::end(attacks));
-	//}
+	DllSmartAlgo::changeSurrounding(c, false);
+	std::vector<Coordinate> attacks;
+	this-> addToPossibleMove(DllSmartAlgo::getPossibleMoves(c));
 }
 
-void DllSmartAlgo::firstHit(int row, int col) {
+void DllSmartAlgo::firstHit(Coordinate c) {
 
-	this->possibleMoves = DllSmartAlgo::getPossibleMoves(row, col);
+	this->possibleMoves = DllSmartAlgo::getPossibleMoves(c);
 
-	DllSmartAlgo::changeSurrounding(row, col, false);
+	DllSmartAlgo::changeSurrounding(c, false);
 }
 
 // Checking all the possible places for a move to be
-std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col) {
+std::vector<Coordinate> DllSmartAlgo::getPossibleMoves(Coordinate c) {
 
-	std::vector<std::pair<int, int>> positions;
-	std::pair<int, int> positionToHit;
-
-	for (std::pair<int, int> pair : placesToCheckBoard)
+	std::vector<Coordinate> positions;
+	for (Coordinate trio : placesToCheckBoard)
 	{
-		positionToHit = (checkPosition(row + pair.first, col + pair.second))? std::make_pair(row + pair.first, col + pair.second) : std::make_pair(-1,-1);
-		if (positionToHit.first != -1 && positionToHit.second != -1) {
-			positions.push_back(positionToHit);
+		Coordinate temp = Coordinate(c.row + trio.row, c.col + trio.col, c.depth + trio.depth);
+		if(checkPosition(temp))
+		{
+			positions.push_back(temp);
 		}
 	}
-
 	return positions;
 }
 
 // Checking if the position in range and was not hit before
-bool DllSmartAlgo::checkPosition(int row, int col) const {
+bool DllSmartAlgo::checkPosition(Coordinate c) const {
 
-	if (Ship::inBoard(row) && Ship::inBoard(col))
+	if (inBoardBoarders(c))
 	{
-		if(board[row][col] != HIT_WRONG)
+		char ch = (*board)[c.depth][c.row][c.col];
+		if( ch != HIT_WRONG)
 		{
-			if (!(Ship::isShip(board[row][col])))
+			if (!(Ship::isShip(ch)))
 			{
-				if (board[row][col] != HIT_ENEMY)
+				if (ch != HIT_ENEMY)
 				{
 					return true;
 				}
 			}
 		}
 	}
-
 	return false;
 }
 
-std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
+bool DllSmartAlgo::inBoardBoarders(Coordinate & c) const
 {
-	std::unique_ptr<std::vector<std::pair<int, int>>> retVector = getAllPossiblePoints();
+	return (0 <= c.row && c.row < numRows && 0 <= c.col && c.col < numCols && 0 <= c.depth && c.depth < numDepth);
+}
+
+std::unique_ptr<Coordinate> DllSmartAlgo::getRandomAttack()
+{
+	std::unique_ptr<std::vector<Coordinate>> retVector = std::move(getAllPossiblePoints());
 	if(retVector->size()==0)
 	{
 		return std::make_unique<std::pair<int, int>>(std::make_pair(-1, -1));
@@ -229,29 +234,30 @@ std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
 
  }
 
- int DllSmartAlgo::getPositionOfMove(int p1, int p2)
+ int DllSmartAlgo::getPositionOfMove(Coordinate c)
  {
-	 std::pair<int, int> p;
-	for(int i = 0; i < possibleMoves.size(); ++i)
+	int i = 0;
+	for(std::vector<Coordinate>::iterator iter = possibleMoves.begin(); iter != possibleMoves.end(); ++iter)
 	{
-		p = possibleMoves.at(i);
-		if (p.first==p1 && p.second==p2)
+		if ((*iter).row==c.row && (*iter).col == c.col && (*iter).depth == c.depth)
 		{
 			return i;
 		}
+		++i;
 	}
 	return -1;
  }
 
 DllSmartAlgo::DllSmartAlgo():board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
-	player(NOT_INITIALIZED)
+	numDepth(NOT_INITIALIZED), player(NOT_INITIALIZED)
 {
 }
 
 DllSmartAlgo::~DllSmartAlgo()
 {
-	BoardCreator::freeBoard(this->board, numRows);
 }
+
+
 
 // Changing the board to the new surrounding
 void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
@@ -288,30 +294,19 @@ void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
 	
 }
 
-void DllSmartAlgo::setBoard(int player, const char** board, int numRows, int numCols)
+void DllSmartAlgo::setPlayer(int player)
 {
-	this->board = BoardCreator::copyBoard(board, numRows, numCols);
 	this->player = player;
-	this->numRows = numRows;
-	this->numCols = numCols;
 }
 
-bool DllSmartAlgo::init(const std::string& path)
+void DllSmartAlgo::setBoard(const BoardData& board)
 {
-	bool success = true;
-
-	for (int indexRow = 0; indexRow < numRows; indexRow++)
-	{
-		for (int indexCol = 0; indexCol < numCols; indexCol++)
-		{
-			if (Ship::isShip(this->board[indexRow][indexCol]))
-			{
-				DllSmartAlgo::changeSurrounding(indexRow, indexCol, true);
-			}
-		}
-	}
-
-	return success;
+	
+	this->numRows = board.rows();
+	this->numCols = board.cols();
+	this->numDepth = board.depth();
+	this->board = std::move(BoardCreator::createBoard(numRows, numCols, numDepth));
+	//TODO:: create a nested loop to investigate and update our board!
 }
 
 IBattleshipGameAlgo* GetAlgorithm()
