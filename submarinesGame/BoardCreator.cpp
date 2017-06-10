@@ -11,7 +11,7 @@ const char BoardCreator::DELIMETER = 'x';
 
 std::shared_ptr<boardType> BoardCreator::getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth)
 {
-	std::shared_ptr<boardType> board = createBoard(numRows, numCols, numDepth);
+	std::shared_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
 	updateShipsInBoard(board, ships);
 	return board;
 }
@@ -530,6 +530,7 @@ void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, s
 
 /*
 * This Function returns a pointer to a 3D-game board
+* TODO:: update it accurding to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61341
 */
 std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
 {
@@ -564,7 +565,7 @@ std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 		throw Exception("Error: wrong board dimentions format");
 	}
 
-	std::shared_ptr<boardType> board = createBoard(numRows, numCols, numDepth);
+	std::shared_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
 
 	int depth = 0;
 	while (depth < numDepth)
@@ -724,23 +725,23 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 /*
 * Initiates an empty board of size: numDepth X numRows X numCols, returns a smart pointer to it.
 */
-std::shared_ptr<boardType> BoardCreator::createBoard(int numRows, int numCols, int numDepth)
+std::unique_ptr<boardType>& BoardCreator::createBoard(int numRows, int numCols, int numDepth)
 {
-	boardType board;
-	board.resize(numDepth);
+	std::unique_ptr<boardType> board = std::make_unique<boardType>();
+	(*board).resize(numDepth);
 	for (int d = 0; d < numDepth; d++)
 	{
-		board[d].resize(numRows);
+		(*board)[d].resize(numRows);
 		for (int r = 0; r < numRows; r++)
 		{
-			board[d][r].resize(numCols);
+			(*board)[d][r].resize(numCols);
 			for (int c = 0; c < numCols; c++)
 			{
-				board[d][r][c] = ' ';
+				(*board)[d][r][c] = ' ';
 			}
 		}
 	}
-	return std::make_shared<boardType>(board);
+	return ;
 }
 
 /*

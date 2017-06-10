@@ -1,79 +1,90 @@
 #include "DllSmartAlgo.h"
 
 const int DllSmartAlgo::NOT_INITIALIZED = -1;
-const std::vector<std::pair<int, int>> DllSmartAlgo::placesToCheckBoard = { std::make_pair(-1, 0),std::make_pair(1, 0),std::make_pair(0, 1),std::make_pair(0, -1)};
-const std::vector<std::pair<int, int>> DllSmartAlgo::placesToDelete = { std::make_pair(-1, -1),std::make_pair(-1 ,1), std::make_pair(1, -1), std::make_pair(1, 1 ) };
+const std::vector<Coordinate> DllSmartAlgo::placesToCheckBoard = { Coordinate(0, -1, 0),Coordinate(0, 1, 0), Coordinate(0, 0, -1),
+																	Coordinate(0, 0, 1),Coordinate(-1, 0, 0), Coordinate(1, 0, 0) };
+const std::vector<Coordinate> DllSmartAlgo::placesToDelete = { Coordinate(0, 1, -1),Coordinate(0, 1, 1),
+																Coordinate(0, -1, -1),Coordinate(0, -1, 1), 
+																Coordinate(-1, 1, -1),Coordinate(-1, 1, 0), 
+																Coordinate(-1, 1, 1),Coordinate(-1, 0, -1), 
+																Coordinate(-1, 0, 1),Coordinate(-1, -1, -1), 
+																Coordinate(-1, -1, 0),Coordinate(-1, -1, 1), 
+																Coordinate(1, 1, -1),Coordinate(1, 1, 0), 
+																Coordinate(1, 1, 1),Coordinate(1, -1, -1), 
+																Coordinate(1, -1, 0),Coordinate(1, -1, 1), 
+																Coordinate(1, 0, -1),Coordinate(1, 0, 1), };
 
-std::pair<int, int> DllSmartAlgo::attack()
+/*
+ * Returns an attack,
+ * Note: start index is 1 and not 0 - as clarified here:
+ * http://moodle.tau.ac.il/mod/forum/discuss.php?d=62549
+ */
+Coordinate DllSmartAlgo::attack()
 {
-	std::unique_ptr<std::pair<int, int>> hit;
+	std::unique_ptr<Coordinate> hit;
 
 	// Checking if there is already possible move - if so, rand over the moves, if not, rand over the board till found place that can place a ship
 	if((this->possibleMoves).size() == 0)
 	{
-		hit = getRandomAttack();
+		hit = std::move(getRandomAttack());
 	}
 	// Existing possible moves, choose randomly between them
 	else {
 
 		int r = rand() % (this->possibleMoves).size();
-		hit = std::make_unique<std::pair<int,int>>(this->possibleMoves[r]);
+		hit = std::make_unique<Coordinate>(this->possibleMoves[r]);
 		possibleMoves.erase(possibleMoves.begin() + r);
 	}
-	if((*hit).first!=-1)
+	if((*hit).row!=-1)
 	{
-		return std::make_pair((*hit).first + 1, (*hit).second + 1);
+		return Coordinate((*hit).row + 1, (*hit).col + 1, (*hit).depth + 1);
 	}
-	return std::make_pair(-1, -1);
+	return Coordinate(-1, -1,-1);
 }
 
-void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+/*
+ * Note: Coordinate "move" is scaled from index 1 and not 0!
+ */
+void DllSmartAlgo::notifyOnAttackResult(int player, Coordinate move, AttackResult result)
 {
-	row -= 1;
-	col -= 1;
+	Coordinate coordInGameFormat = Coordinate(move.row - 1, move.col - 1, move.depth - 1); //Same coordinate as "move", just with indexes from 0!
 	if (player == this->player) {
 		switch (result)
 		{
 		case AttackResult::Hit:
-			
-			this->shipPositionHit.push_back(std::make_pair(row, col));
-			this->board[row][col] = HIT_ENEMY;
+			this->shipPositionHit.push_back(coordInGameFormat);
+			(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_ENEMY;
 
 			// If first hit of the ship
 			if (this->shipPositionHit.size() == 1) {
 
 				// Create the vector for possible moves
-				DllSmartAlgo::firstHit(row, col);
+				firstHit(coordInGameFormat);
 			}
 			else {
 
-				// Continue the vector 
-				DllSmartAlgo::hitShip(row, col);
+				// Update the vector "possible moves"
+				hitShip(coordInGameFormat);
 			}
 			break;
 
 		case AttackResult::Sink:
+			this->shipPositionHit.push_back(coordInGameFormat);
+			(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_ENEMY;
 
-			this->shipPositionHit.clear();
-			this->board[row][col] = HIT_ENEMY;
-
-			// First hit first sink, small ship
+			// First hit first sink, than this is a small ship
 			if (this->possibleMoves.size() != 0) {
-
-				DllSmartAlgo::sinkSmallShip(row, col);
+				sinkSmallShip(coordInGameFormat);
 			}
 			else {
 				// Big ship, need to check all the ship
-				DllSmartAlgo::sinkBigShip(row, col);
+				sinkBigShip(coordInGameFormat);
 			}
-
-			this->possibleMoves.clear();
 			break;
 
 		case AttackResult::Miss:
 
-			this->board[row][col] = HIT_WRONG;
-
+			(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_WRONG;
 			break;
 
 		default:
@@ -85,23 +96,46 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 		{
 		case AttackResult::Hit:
 
-			if (!Ship::isShip(this->board[row][col])) {
-
-				this->board[row][col] = HIT_ENEMY;
-				enemyHitSelf.push_back(std::make_pair(row, col));
-				DllSmartAlgo::changeSurrounding(row, col, false);
+			//Checks if enemy hit himself
+			if (!Ship::isShip((*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col])){
+				(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_ENEMY;
+				enemyHitSelf.push_back(coordInGameFormat);
+				if (getPositionOfMove(coordInGameFormat) != -1) //means that this was a suspected coordinate
+				{
+					shipPositionHit.push_back(coordInGameFormat);
+					hitShip(coordInGameFormat);
+				} else //it wasn't a suspected coordinate
+				{
+					changeSurrounding(coordInGameFormat, false);
+					//TODO: we might check if coordInGameFormat is a neighbour of suspected coords,
+					// and add here prioritation to attack-moves using it... 
+				}
 			}
 			break;
 
 		case AttackResult::Sink:
+			//Checks if enemy sank himself
+			if (!Ship::isShip((*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col]))
+			{
+				(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_ENEMY;
+				
+				//if enemy sank himself using a coordinate that is in our possibleMoves,
+				//we update the surroundings and empty possible moves because this is the ship we tried to sank (using sink sinkBigShip)
+				if (getPositionOfMove(coordInGameFormat) != -1)  
+				{
+					sinkBigShip(coordInGameFormat);
+				} else
+				{
+					changeSurrounding(coordInGameFormat, false); //it's false on purpse! so it won't delete our "possibleMoves"
+					//TODO:: take care of edge cases...
+				}
+			}
 
-			this->board[row][col] = HIT_ENEMY;
-			DllSmartAlgo::changeSurrounding(row, col, true);
 			break;
 
 		case AttackResult::Miss:
 
-			this->board[row][col] = HIT_WRONG;
+			(*board)[coordInGameFormat.depth][coordInGameFormat.row][coordInGameFormat.col] = HIT_WRONG;
 			break;
 
 		default:
@@ -110,208 +144,240 @@ void DllSmartAlgo::notifyOnAttackResult(int player, int row, int col, AttackResu
 	} 
 }
 
-void DllSmartAlgo::sinkBigShip(int row, int col) {
-
-	for (std::pair<int, int> toSink : this->shipPositionHit) {
-
-		DllSmartAlgo::changeSurrounding(toSink.first, toSink.second, true);
+void DllSmartAlgo::sinkBigShip(Coordinate c) {
+	for (Coordinate toSink : this->shipPositionHit) {
+		changeSurrounding(toSink, true);
 	}
 	this->possibleMoves.clear();
-
+	this->shipPositionHit.clear();
 }
 
-void DllSmartAlgo::sinkSmallShip(int row, int col)
-{
+
+void DllSmartAlgo::sinkSmallShip(Coordinate c)
+{	
+	changeSurrounding(c, true);
 	this->possibleMoves.clear();
-
-	DllSmartAlgo::changeSurrounding(row, col, true);
+	this->shipPositionHit.clear();
 }
 
+/*
+ * Note: call hitShip() AFTER updating shipPositionHit to contain Coordinate c!
+ */
+void DllSmartAlgo::hitShip(Coordinate c) {
+	DllSmartAlgo::changeSurrounding(c, false);
+	std::vector<Coordinate> attacks;
+	this->possibleMoves.clear(); //Deletes all current possible moves
 
-void DllSmartAlgo::hitShip(int row, int col) {
-
-	DllSmartAlgo::changeSurrounding(row, col, false);
-	std::vector<std::pair<int, int>> attacks;
-	this-> addToPossibleMove(DllSmartAlgo::getPossibleMoves(row, col));
-
-	//// Getting all the possible moves after the board change, suppose to be only 2 possible moves - left right or up down
-	//for (std::pair<int, int> attacked : this->shipPositionHit) {
-
-	//	attacks = getPossibleMoves(attacked.first, attacked.second);
-	//	this->possibleMoves.reserve((this->possibleMoves).size() + attacks.size());
-	//	(this->possibleMoves).insert(std::end(this->possibleMoves), std::begin(attacks), std::end(attacks));
-	//}
+	// Getting all the possible moves after the board changed, suppose to be only 2 possible moves - left & right / up & down / depth-up & depth-down
+	for (Coordinate attacked : this->shipPositionHit) {
+		addToPossibleMove(getPossibleMoves(attacked));
+	}
 }
 
-void DllSmartAlgo::firstHit(int row, int col) {
+void DllSmartAlgo::firstHit(Coordinate c) {
 
-	this->possibleMoves = DllSmartAlgo::getPossibleMoves(row, col);
+	this->possibleMoves = DllSmartAlgo::getPossibleMoves(c);
 
-	DllSmartAlgo::changeSurrounding(row, col, false);
+	DllSmartAlgo::changeSurrounding(c, false);
 }
 
-// Checking all the possible places for a move to be
-std::vector<std::pair<int, int>> DllSmartAlgo::getPossibleMoves(int row, int col) {
-
-	std::vector<std::pair<int, int>> positions;
-	std::pair<int, int> positionToHit;
-
-	for (std::pair<int, int> pair : placesToCheckBoard)
+/*
+ * Gets a coordinate (where an enemy ship was hit),
+ * Returnes a vector of all possible places for the rest of this ship to be
+ */
+std::vector<Coordinate> DllSmartAlgo::getPossibleMoves(Coordinate c) const{
+	std::vector<Coordinate> positions;
+	for (Coordinate trio : placesToCheckBoard)
 	{
-		positionToHit = (checkPosition(row + pair.first, col + pair.second))? std::make_pair(row + pair.first, col + pair.second) : std::make_pair(-1,-1);
-		if (positionToHit.first != -1 && positionToHit.second != -1) {
-			positions.push_back(positionToHit);
+		Coordinate temp = Coordinate(c.row + trio.row, c.col + trio.col, c.depth + trio.depth);
+		if(checkPosition(temp))
+		{
+			positions.push_back(temp);
 		}
 	}
-
 	return positions;
 }
 
-// Checking if the position in range and was not hit before
-bool DllSmartAlgo::checkPosition(int row, int col) const {
+/*
+ *  Returns true if coordinate c is:
+ *  1. inside board's range
+ *  2. wasn't hit before
+ *  3. doesn't contain our own ship 
+ */
+bool DllSmartAlgo::checkPosition(const Coordinate& c) const {
 
-	if (Ship::inBoard(row) && Ship::inBoard(col))
+	if (inBoardBorders(c))
 	{
-		if(board[row][col] != HIT_WRONG)
+		char ch = (*board)[c.depth][c.row][c.col];
+		if(ch != HIT_WRONG)
 		{
-			if (!(Ship::isShip(board[row][col])))
+			if (!(Ship::isShip(ch))) //makes sure it isn't our ship
 			{
-				if (board[row][col] != HIT_ENEMY)
+				if (ch != HIT_ENEMY) //makes sure it wasn't hit before
 				{
 					return true;
 				}
 			}
 		}
 	}
-
 	return false;
 }
 
-std::unique_ptr<std::pair<int, int>> DllSmartAlgo::getRandomAttack()
+/*
+ * Returns true if coordinate c is inside this.board 's range
+ */
+bool DllSmartAlgo::inBoardBorders(const Coordinate & c) const
 {
-	std::unique_ptr<std::vector<std::pair<int, int>>> retVector = getAllPossiblePoints();
-	if(retVector->size()==0)
-	{
-		return std::make_unique<std::pair<int, int>>(std::make_pair(-1, -1));
-	}
-	int k = rand() % (retVector->size());
-	return std::make_unique<std::pair<int, int>>(retVector->at(k)) ;
+	return (0 <= c.row && c.row < numRows && 0 <= c.col && c.col < numCols && 0 <= c.depth && c.depth < numDepth);
 }
 
- std::unique_ptr<std::vector<std::pair<int, int>>> DllSmartAlgo::getAllPossiblePoints()
- {
-	std::unique_ptr<std::vector<std::pair<int, int>>> retVector = std::make_unique<std::vector<std::pair<int, int>>>();
-	for (int row = 0; row < numRows; ++row)
+/*
+ * Searches this.possibleMoves for a coordinate with the same values as c's,
+ * If finds one - deletes it. 
+ */
+void DllSmartAlgo::deleteFromPossibleMoves(const Coordinate & c)
+{
+	int k = getPositionOfMove(c);
+	if (k != -1)
 	{
-		for (int col = 0; col < numCols; ++col)
+		possibleMoves.erase(possibleMoves.begin() + k);
+	}
+}
+
+std::unique_ptr<Coordinate>& DllSmartAlgo::getRandomAttack() const
+{
+	std::unique_ptr<std::vector<Coordinate>> retVector = std::move(getAllPossiblePoints());
+	if(retVector->size()==0) //No possible moves
+	{
+		std::unique_ptr<Coordinate> c = std::make_unique<Coordinate>(Coordinate(-1, -1, -1));
+		return c;
+	}
+	int k = rand() % (retVector->size());
+	std::unique_ptr<Coordinate> c = std::make_unique<Coordinate>(retVector->at(k));
+	return c ;
+}
+
+ std::unique_ptr<std::vector<Coordinate>>& DllSmartAlgo::getAllPossiblePoints() const
+ {
+	std::unique_ptr<std::vector<Coordinate>> retVector = std::make_unique<std::vector<Coordinate>>();
+	for (int depth = 0; depth < numDepth; ++depth)
+	{
+		for (int row = 0; row < numRows; ++row)
 		{
-			if (board[row][col]!= HIT_WRONG && !Ship::isShip(board[row][col]) && board[row][col] != HIT_ENEMY)
+			for (int col = 0; col < numCols; ++col)
 			{
-				retVector->push_back(std::make_pair(row, col)); //returning values 0-9!
+				if ((*board)[depth][row][col] != HIT_WRONG && !Ship::isShip((*board)[depth][row][col]) && (*board)[depth][row][col] != HIT_ENEMY)
+				{
+					retVector->push_back(Coordinate(row, col, depth)); //returning values indexed from 0!
+				}
 			}
 		}
 	}
+
 	return retVector;
  }
 
-
-
- void DllSmartAlgo::addToPossibleMove(std::vector<std::pair<int, int>> pm)
+/*
+ * Adds all coordinates in pm to this.possibleMoves
+ */
+ void DllSmartAlgo::addToPossibleMove(std::vector<Coordinate> pm)
  {
-
-	for (std::pair<int, int> p: pm)
+	for (Coordinate p: pm)
 	{
-		if ((this->getPositionOfMove(p.first,p.second))==-1)//meaning it isn't in possibleMoves
+		if ((this->getPositionOfMove(p))==-1)//meaning it isn't in already possibleMoves
 		{
-			(this->possibleMoves).push_back(std::make_pair(p.first, p.second));
+			(this->possibleMoves).push_back(p);
 		}
 	}
 
  }
 
- int DllSmartAlgo::getPositionOfMove(int p1, int p2)
+/*
+ * Returns the index of coordinate c inside this.possibleMoves,
+ *			-1 if it isn't in possibleMoves
+ */
+ int DllSmartAlgo::getPositionOfMove(const Coordinate& c)
  {
-	 std::pair<int, int> p;
-	for(int i = 0; i < possibleMoves.size(); ++i)
+	int i = 0;
+	for(std::vector<Coordinate>::iterator iter = possibleMoves.begin(); iter != possibleMoves.end(); ++iter)
 	{
-		p = possibleMoves.at(i);
-		if (p.first==p1 && p.second==p2)
+		if ((*iter).row==c.row && (*iter).col == c.col && (*iter).depth == c.depth)
 		{
 			return i;
 		}
+		++i;
 	}
 	return -1;
  }
 
+/*
+ * Note: didn't initialize: possibleMoves, shipPositionHit, enemyHitSelf
+ * Because according to: https://stackoverflow.com/a/11725466/5928769, 
+ * there's no need to, because they are vectors..
+ */
 DllSmartAlgo::DllSmartAlgo():board(nullptr), numRows(NOT_INITIALIZED), numCols(NOT_INITIALIZED),
-	player(NOT_INITIALIZED)
+	numDepth(NOT_INITIALIZED), player(NOT_INITIALIZED)
 {
 }
 
 DllSmartAlgo::~DllSmartAlgo()
 {
-	BoardCreator::freeBoard(this->board, numRows);
 }
 
-// Changing the board to the new surrounding
-void DllSmartAlgo::changeSurrounding(int row, int col, bool sink) {
-
-	// If sink - place all around the ship , include init
+/*
+ * Update this.board to the new surroundings
+ */
+void DllSmartAlgo::changeSurrounding(Coordinate& c, bool sink) {
+	// If sink - then update all relevant places on board
 	if (sink) {
-
-		for (std::pair<int, int> toDelete : this->placesToCheckBoard) {
-
-			// Checking in range and not my ship
-			if (Ship::inBoard(row + toDelete.first) && Ship::inBoard(col + toDelete.second)
-				&& !Ship::isShip(this->board[row + toDelete.first][col +toDelete.second])
-				&& this->board[row + toDelete.first][col + toDelete.second] != HIT_ENEMY){
-
-				this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
+		for (Coordinate toDelete : this->placesToCheckBoard) {
+			Coordinate temp = Coordinate(c.row + toDelete.row, c.col + toDelete.col, c.depth + toDelete.depth);
+			// Checks that coordinate "c+toDelete" is in board's range, that it doesn't contain my ship
+			// and wasn't hit before.
+			// note: checkPosition() also checks that coordinate c isn't "hit_wrong",
+			//		 but if it's already "hit_wrong" we won't need to change it again to "hit_wrong".. 
+			if (checkPosition(temp)){
+				(*board)[c.depth+toDelete.depth][c.row + toDelete.row][c.col + toDelete.col] = HIT_WRONG;
+				//Note: if a ship sank - possibleMoves will be emptied later, so no need to call deleteFromPossibleMoves(temp);
 			}
 		}
 	}
-	// Delete from the board all the wrong position if found a hit
-	int k = -1;
-	for (std::pair<int, int> toDelete : this->placesToDelete) {
-
-		if (Ship::inBoard(row + toDelete.first) && Ship::inBoard(col + toDelete.second)) {
-
-			this->board[row + toDelete.first][col + toDelete.second] = HIT_WRONG;
-			k = getPositionOfMove(row + toDelete.first, col + toDelete.second);
-			if (k!=-1)
-			{
-				possibleMoves.erase(possibleMoves.begin() + k);
-			}
-		}
-		
+	// Updates board's positions - all the positions that can't contain a ship by the rules of the game
+	for (Coordinate toDelete : this->placesToDelete) {
+		Coordinate temp = Coordinate(c.row + toDelete.row, c.col + toDelete.col, c.depth + toDelete.depth);
+		if (checkPosition(temp)) {
+			(*board)[c.depth + toDelete.depth][c.row + toDelete.row][c.col + toDelete.col] = HIT_WRONG;
+			deleteFromPossibleMoves(temp); //This line is here in case this function is used after the enemy hit himself
+		}	
 	}
 	
 }
 
-void DllSmartAlgo::setBoard(int player, const char** board, int numRows, int numCols)
+
+
+void DllSmartAlgo::setPlayer(int player)
 {
-	this->board = BoardCreator::copyBoard(board, numRows, numCols);
 	this->player = player;
-	this->numRows = numRows;
-	this->numCols = numCols;
 }
 
-bool DllSmartAlgo::init(const std::string& path)
+void DllSmartAlgo::setBoard(const BoardData& board)
 {
-	bool success = true;
-
-	for (int indexRow = 0; indexRow < numRows; indexRow++)
+	this->numRows = board.rows();
+	this->numCols = board.cols();
+	this->numDepth = board.depth();
+	this->board = std::move(BoardCreator::createBoard(numRows, numCols, numDepth)); //Cretes an empty board of size:[depth][rows][cols]
+	
+	//updates *our* board to contain all information from "board"
+	for(int dep = 0; dep < numDepth; ++dep)
 	{
-		for (int indexCol = 0; indexCol < numCols; indexCol++)
+		for (int row = 0; row < numRows; ++row)
 		{
-			if (Ship::isShip(this->board[indexRow][indexCol]))
+			for (int col = 0; col < numCols; ++col)
 			{
-				DllSmartAlgo::changeSurrounding(indexRow, indexCol, true);
+				(*(this->board))[dep][row][col] = board.charAt(Coordinate(row + 1, col + 1, dep + 1)); //Adds 1's because indexes start at 1
 			}
 		}
 	}
-
-	return success;
 }
 
 IBattleshipGameAlgo* GetAlgorithm()
