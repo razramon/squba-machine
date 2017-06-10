@@ -27,17 +27,17 @@ int main(int argc, char* argv[])
 	// each thread will run forever/ until we tell them to stop, getting a new game each time.
 	BoardCreator::checkBoards(boardFiles);
 
-	Utilities::loadAllDlls(DLLFiles); // In this function we will also count and tag them
 
-
+	std::shared_ptr<std::vector<std::shared_ptr<IBattleshipGameAlgo>>> dlls;
+	GameInfo::loadAllDlls(DLLFiles, dlls); // In this function we will also count and tag them
 
 	//GameInfo::divideToGames(vector of dlls, vector of boards, allGamesData);
 
 
 	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData);
 
-	int gameNumber = threadsNum - 1;
-	manager->setNumberGame(gameNumber);
+	// Saving thread for the logger
+	manager->setNumberThreads(threadsNum - 1);
 
 	manager->startGames();
 

@@ -81,7 +81,7 @@ public:
 	*/
 	static Arguments getTypeOfArg(std::string argu);
 
-	void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
+	static void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
 
 	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
 

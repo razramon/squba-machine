@@ -201,7 +201,7 @@ std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& thre
 {
 	std::string path;
 
-	setArguments(argc, argv, path, threadsNum);
+	Utilities::setArguments(argc, argv, path, threadsNum);
 	if (path.size() == 0) //
 	{
 		path = workingDirectory();

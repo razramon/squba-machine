@@ -33,4 +33,5 @@ public:
 	std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> getPlayersAlgos();
 	std::shared_ptr<boardType> getBoard();
 	static void divideToGames(std::vector<int> dlls, std::vector<boardType> boards, std::vector<std::unique_ptr<GameInfo>> allGames);
+	static void loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::shared_ptr<IBattleshipGameAlgo>>> dlls);
 };

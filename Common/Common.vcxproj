@@ -149,6 +149,7 @@
     <ClCompile Include="..\submarinesGame\Ship.cpp" />
     <ClCompile Include="..\submarinesGame\Utilities.cpp" />
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -63,14 +63,19 @@ std::shared_ptr<boardType> GameInfo::getBoard() {
 	
 	return this->board;
 }
+
 void GameInfo::divideToGames(std::vector<int> dlls, std::vector<boardType> boards, std::vector<std::unique_ptr<GameInfo>> allGames) {
 
+	// Loop over the first dll to enter
 	for (int i = 0; i < dlls.size(); i++) {
 
+		// Loop over the second dll to enter
 		for (int j = i + 1; j < dlls.size(); j++) {
 
+			// Loop over the boards to enter
 			for (int indexBoard = 0; indexBoard < boards.size(); indexBoard++) {
 
+				// Creating a new pointer, pushing the games to the collection
 				std::unique_ptr<GameInfo> game = std::make_unique<GameInfo>(dlls[i], dlls[j], boards[indexBoard]);
 				allGames.push_back(game);
 				game = std::make_unique<GameInfo>(dlls[j], dlls[i], boards[indexBoard]);

@@ -1,105 +1,57 @@
-#pragma once
-#ifndef FILELOGGER_HPP
-#define FILELOGGER_HPP
-
+// Logger.h
+#include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
+#include <mutex>
 
-// Use the namespace you want
-namespace ige {
+// Definition of a multithread safe singleton logger class
+class Logger
+{
+public:
+	static const std::string kLogLevelDebug;
+	static const std::string kLogLevelInfo;
+	static const std::string kLogLevelError;
 
-	class FileLogger {
+	// Returns a reference to the singleton Logger object
+	static Logger& instance();
 
+	// Logs a single message at the given log level
+	void log(const std::string& inMessage,
+		const std::string& inLogLevel);
+
+	// Logs a vector of messages at the given log level
+	void log(const std::vector<std::string>& inMessages,
+		const std::string& inLogLevel);
+
+protected:
+	// Static variable for the one-and-only instance  
+	static Logger* pInstance;
+
+	// Constant for the filename
+	static const char* const kLogFileName;
+
+	// Data member for the output stream
+	std::ofstream mOutputStream;
+
+	// Embedded class to make sure the single Logger
+	// instance gets deleted on program shutdown.
+	friend class Cleanup;
+	class Cleanup
+	{
 	public:
+		~Cleanup();
+	};
 
+	// Logs message. The thread should own a lock on sMutex
+	// before calling this function.
+	void logHelper(const std::string& inMessage,
+		const std::string& inLogLevel);
 
-		// If you can´t/dont-want-to use C++11, remove the "class" word after enum
-		enum class e_logType { LOG_ERROR, LOG_WARNING, LOG_INFO };
-
-
-		// ctor (remove parameters if you don´t need them)
-		explicit FileLogger(const char *engine_version, const char *fname = "ige_log.txt")
-			: numWarnings(0U),
-			numErrors(0U)
-		{
-
-			myFile.open(fname);
-
-			// Write the first lines
-			if (myFile.is_open()) {
-				myFile << "My Game Engine, version " << engine_version << std::endl;
-				myFile << "Log file created" << std::endl << std::endl;
-			} // if
-
-		}
-
-
-		// dtor
-		~FileLogger() {
-
-			if (myFile.is_open()) {
-				myFile << std::endl << std::endl;
-
-				// Report number of errors and warnings
-				myFile << numWarnings << " warnings" << std::endl;
-				myFile << numErrors << " errors" << std::endl;
-
-				myFile.close();
-			} // if
-
-		}
-
-
-		// Overload << operator using log type
-		friend FileLogger &operator << (FileLogger &logger, const e_logType l_type) {
-
-			switch (l_type) {
-			case ige::FileLogger::e_logType::LOG_ERROR:
-				logger.myFile << "[ERROR]: ";
-				++logger.numErrors;
-				break;
-
-			case ige::FileLogger::e_logType::LOG_WARNING:
-				logger.myFile << "[WARNING]: ";
-				++logger.numWarnings;
-				break;
-
-			default:
-				logger.myFile << "[INFO]: ";
-				break;
-			} // sw
-
-
-			return logger;
-
-		}
-
-
-		// Overload << operator using C style strings
-		// No need for std::string objects here
-		friend FileLogger &operator << (FileLogger &logger, const char *text) {
-
-			logger.myFile << text << std::endl;
-			return logger;
-
-		}
-
-
-		// Make it Non Copyable (or you can inherit from sf::NonCopyable if you want)
-		FileLogger(const FileLogger &) = delete;
-		FileLogger &operator= (const FileLogger &) = delete;
-
-
-
-	private:
-
-		std::ofstream           myFile;
-
-		unsigned int            numWarnings;
-		unsigned int            numErrors;
-
-	}; // class end
-
-}  // namespace
-
-
-#endif // FILELOGGER_HPP
+private:
+	Logger();
+	virtual ~Logger();
+	Logger(const Logger&);
+	Logger& operator=(const Logger&);
+	static std::mutex sMutex;
+};
