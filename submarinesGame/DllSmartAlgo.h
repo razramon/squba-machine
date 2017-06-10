@@ -15,24 +15,33 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 	static const int NOT_INITIALIZED;
 	static const std::vector<Coordinate> placesToCheckBoard;
 	static const std::vector<Coordinate> placesToDelete;
+	
 	std::unique_ptr<boardType> board;
 	int numRows;
 	int numCols;
 	int numDepth;
 	int player;
 	/*
-	 * Contains pairs of variables 1-10! 
+	 * All 3 vectors: possibleMoves,shipPositionHit,enemyHitSelf 
+	 * Contain Coordinates indexed from 0!! 
 	 */
 	std::vector<Coordinate> possibleMoves;
 	std::vector<Coordinate> shipPositionHit;
 	std::vector<Coordinate> enemyHitSelf;
 
-	std::unique_ptr<Coordinate> getRandomAttack();
-	std::unique_ptr<std::vector<Coordinate>> getAllPossiblePoints();
+
+	/*
+	 * Returns a random attack, Indexed from 0
+	 */
+	std::unique_ptr<Coordinate>& getRandomAttack() const;
+	/*
+	* Returns vector of all Coordinates that we CAN attack, Indexed from 0
+	*/
+	std::unique_ptr<std::vector<Coordinate>>& getAllPossiblePoints() const;
 
 	void addToPossibleMove(std::vector<Coordinate> pm);
-	int getPositionOfMove(Coordinate c);
-	void changeSurrounding(Coordinate c, bool initBoard);
+	int getPositionOfMove(const Coordinate& c);
+	void changeSurrounding(Coordinate& c, bool initBoard);
 
 	void sinkBigShip(Coordinate c);
 
@@ -42,10 +51,11 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 
 	void firstHit(Coordinate c);
 
-	std::vector<Coordinate> getPossibleMoves(Coordinate c);
+	std::vector<Coordinate> getPossibleMoves(Coordinate c) const;
 
-	bool checkPosition(Coordinate c) const;
-	bool inBoardBoarders(Coordinate& c) const;
+	bool checkPosition(const Coordinate& c) const;
+	bool inBoardBorders(const Coordinate& c) const;
+	void deleteFromPossibleMoves(const Coordinate& c);
 
 public:
 

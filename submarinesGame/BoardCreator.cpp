@@ -530,6 +530,7 @@ void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, s
 
 /*
 * This Function returns a pointer to a 3D-game board
+* TODO:: update it accurding to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61341
 */
 std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
 {
