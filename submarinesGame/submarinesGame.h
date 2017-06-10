@@ -15,6 +15,7 @@
 #include "GameInfo.h"
 #include "GameManager.h"
 #include "../Common/Logger.h"
+#include "PlayerInfo.h"
 
 #define THREADS_DEFAULT_NUMBER 4;
 

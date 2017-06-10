@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
-#include "Board.h"
+#include "../Common/Board.h"
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();

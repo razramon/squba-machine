@@ -153,12 +153,14 @@
     <ClInclude Include="GameInfo.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="PlayerInfo.h" />
     <ClInclude Include="submarinesGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameInfo.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="PlayerInfo.cpp" />
     <ClCompile Include="submarinesGame.cpp" />
   </ItemGroup>
   <ItemGroup>

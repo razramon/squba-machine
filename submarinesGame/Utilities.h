@@ -81,7 +81,7 @@ public:
 	*/
 	static Arguments getTypeOfArg(std::string argu);
 
-	static void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
+
 
 	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
 
@@ -93,7 +93,7 @@ public:
 	*						(if it's still of length 0) - if it wasn't - user should, as required,
 	*						take working directory as a path!!
 	*/
-	void Utilities::setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
+	static void setArguments(int argc, char * argv[], std::string & path, int & threadsNum);
 
 	/*
 	* Returns the number of appearances of ch in str
@@ -106,6 +106,4 @@ public:
 	* NOTE: returns true for an empty string!
 	*/
 	static bool isLineEmpty(const std::string line);
-
-	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
 };

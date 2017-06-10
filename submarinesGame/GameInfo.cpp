@@ -47,16 +47,16 @@ void GameInfo::setPlayerWon(int won)
 	this->playerWon = won;
 }
 
-GameInfo::GameInfo(std::shared_ptr<IBattleshipGameAlgo> firstDll, std::shared_ptr<IBattleshipGameAlgo> secondDll, std::shared_ptr<boardType> board) {
+GameInfo::GameInfo(std::unique_ptr<IBattleshipGameAlgo> firstDll, std::unique_ptr<IBattleshipGameAlgo> secondDll, std::shared_ptr<boardType> board) {
 
-	this->playerA = firstDll;
-	this->playerB = secondDll;
+	this->playerA = std::move(firstDll);
+	this->playerB = std::move(secondDll);
 	this->board = board;
 }
 
-std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> GameInfo::getPlayersAlgos() {
+std::pair<std::unique_ptr<IBattleshipGameAlgo>, std::unique_ptr<IBattleshipGameAlgo>> GameInfo::getPlayersAlgos() {
 
-	return std::make_pair(this->playerA, this->playerB);
+	return std::make_pair(std::move(this->playerA), std::move(this->playerB));
 }
 
 std::shared_ptr<boardType> GameInfo::getBoard() {
@@ -64,23 +64,4 @@ std::shared_ptr<boardType> GameInfo::getBoard() {
 	return this->board;
 }
 
-void GameInfo::divideToGames(std::vector<int> dlls, std::vector<boardType> boards, std::vector<std::unique_ptr<GameInfo>> allGames) {
 
-	// Loop over the first dll to enter
-	for (int i = 0; i < dlls.size(); i++) {
-
-		// Loop over the second dll to enter
-		for (int j = i + 1; j < dlls.size(); j++) {
-
-			// Loop over the boards to enter
-			for (int indexBoard = 0; indexBoard < boards.size(); indexBoard++) {
-
-				// Creating a new pointer, pushing the games to the collection
-				std::unique_ptr<GameInfo> game = std::make_unique<GameInfo>(dlls[i], dlls[j], boards[indexBoard]);
-				allGames.push_back(game);
-				game = std::make_unique<GameInfo>(dlls[j], dlls[i], boards[indexBoard]);
-				allGames.push_back(game);
-			}
-		}
-	}
-}

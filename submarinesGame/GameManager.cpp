@@ -51,17 +51,19 @@ void GameManager::startGames() {
 	}
 }
 
-GameManager::GameManager(std::shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGamesData) {
+GameManager::GameManager(std::shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGamesData, std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo) {
 
 	this->allGamesData = allGamesData;
+	this->allPlayersInfo = allPlayersInfo;
+	this->roundNumber = 1;
 }
 
-void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls) {
+void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo) {
 
 	try
 	{
-		std::string directoryPath = ((*dllsFiles).at(Utilities::NUMBER_DLLS)).substr(0, ((*dllsFiles).at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
-		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
+		std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
+		for (int i = 0; i < (*dllsFiles).size(); ++i)
 		{
 			// Load dynamic library
 			HINSTANCE hDll = LoadLibraryA((*dllsFiles).at(i).c_str());
@@ -74,12 +76,100 @@ void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFile
 			{
 				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, (*dllsFiles).at(i)));
 			}
+			getAlgoFunc->setPlayer(i);
 			(*dlls).push_back(getAlgoFunc);
 
+			std::string playerName = (*dllsFiles).at(i).substr((*dllsFiles).at(i).find_first_of('.')).substr(0, (*dllsFiles).at(i).find_first_of('.'));
+			(*allPlayersInfo).push_back(std::make_shared<PlayerInfo>(i, playerName));
 		}
 	}
 	catch (std::exception& e)
 	{
 		throw e;
 	}
+}
+
+void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards, std::shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGames) {
+
+	// Loop over the first dll to enters
+	for (int i = 0; i < (*dlls).size(); i++) {
+
+		// Loop over the second dll to enter
+		for (int j = i + 1; j < (*dlls).size(); j++) {
+
+			// Loop over the boards to enter
+			for (int indexBoard = 0; indexBoard < (*boards).size(); indexBoard++) {
+
+				// Creating a new pointer, pushing the games to the collection
+				std::unique_ptr<GameInfo> game = std::make_unique<GameInfo>((*dlls)[i], (*dlls)[j], (*boards)[indexBoard]);
+				(*allGames).push_back(std::move(game));
+				game = std::make_unique<GameInfo>((*dlls)[j], (*dlls)[i], (*boards)[indexBoard]);
+				(*allGames).push_back(std::move(game));
+			}
+		}
+	}
+}
+
+bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
+
+	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
+	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
+	return playerAWinRate > playerBWinRate;
+}
+
+void GameManager::printRound() {
+	
+	std::mutex lock;
+	lock.lock();
+
+	bool canPrint = true;
+	std::vector<std::pair<std::string,std::vector<int>>> playersToPrint;
+	int maxLengthName = 0;
+
+	// Checking if all the players have played the round. if not, don't print. if so, print.
+	for (std::shared_ptr<PlayerInfo> player : *(this->allPlayersInfo)) {
+
+		if (!player->hasGameInRound(this->roundNumber))
+		{
+			canPrint = false;
+			break;
+		}
+		else {
+
+			playersToPrint.push_back(std::make_pair(player->getPlayerName(), player->getRoundPoints(this->roundNumber)));
+			maxLengthName = maxLengthName > player->getPlayerName().length() ? maxLengthName : player->getPlayerName().length();
+		}
+	}
+
+	sort(playersToPrint.begin(), playersToPrint.end(), sortPlayers);
+		
+	if (canPrint) {
+
+		// Head row
+		std::cout << std::setfill(' ');
+		std::cout << std::setw(6) << "#";
+		std::cout << std::setw(maxLengthName + 4) << "Team Name";
+		std::cout << std::setw(8) << "Wins";
+		std::cout << std::setw(8) << "Losses";
+		std::cout << std::setw(8) << "%";
+		std::cout << std::setw(8) << "Pts For";
+		std::cout << std::setw(8) << "Pts Against" << std::endl;
+
+		std::cout << std::setw(50 + maxLengthName) << " " << std::endl;
+		int indexRow = 1;
+		std::vector<int> playerScores;
+
+		// Printing the rows with the data
+		for (std::pair<std::string, std::vector<int>> printPlayer: playersToPrint) {
+
+			playerScores = printPlayer.second;
+			std::cout << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
+			std::cout << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
+			std::cout << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
+			std::cout << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
+		}
+		this->roundNumber++;
+	}
+
+	lock.unlock();
 }
