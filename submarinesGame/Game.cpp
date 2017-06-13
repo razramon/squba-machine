@@ -101,8 +101,7 @@ Game::Game(std::unique_ptr<IBattleshipGameAlgo>& playerA, std::unique_ptr<IBattl
 	{
 		throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
 	}
-	std::pair<char **, char**> boards = BoardCreator::getInitBoardForEachPlayer(playersShips);
-	commonBoard = BoardCreator::createCommonBoard(playersShips->first, playersShips->second);
+	
 	try
 	{
 		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
