@@ -1,6 +1,6 @@
 #include "submarinesGame.h"
 
-
+typedef std::vector<std::vector<std::vector<char>>> boardType;
 using namespace std;
 
 
@@ -25,16 +25,20 @@ int main(int argc, char* argv[])
 
 	// TODO: init all the boards and dlls, add each of them to the vector of gameinfo.
 	// each thread will run forever/ until we tell them to stop, getting a new game each time.
-	BoardCreator::checkBoards(boardFiles);
+	std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards;
+
+	/*BoardCreator::checkBoards(boardFiles, boards);*/
 
 
-	std::shared_ptr<std::vector<std::shared_ptr<IBattleshipGameAlgo>>> dlls;
-	GameInfo::loadAllDlls(DLLFiles, dlls); // In this function we will also count and tag them
+	std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls;
+	std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo;
 
-	//GameInfo::divideToGames(vector of dlls, vector of boards, allGamesData);
+	GameManager::loadAllDlls(DLLFiles, dlls, allPlayersInfo); // In this function we will also count and tag them
+
+	GameManager::divideToGames(dlls, boards, allGamesData);
 
 
-	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData);
+	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData, allPlayersInfo);
 
 	// Saving thread for the logger
 	manager->setNumberThreads(threadsNum - 1);
