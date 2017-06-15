@@ -11,7 +11,7 @@ void PlayerInfo::addNewGame(std::shared_ptr<GameInfo> game)
 	int enemy = game->getPlayersPlayed().first == this->playerNumber ? game->getPlayersPlayed().second : game->getPlayersPlayed().first;
 
 	Round newRound;
-	newRound.numberWin = game->getPlayerWon == this->playerNumber ? 1 : 0;
+	newRound.numberWin = (game->getPlayerWon() == this->playerNumber) ? 1 : 0;
 	newRound.numberLose = 1 - newRound.numberWin;
 	newRound.pointsFor = game->getPlayerScore(this->playerNumber);
 	newRound.pointsAgainst = game->getPlayerScore(enemy);

@@ -2,6 +2,7 @@
 
 const std::string Utilities::BOARD_SUFF = ".sboard";
 const std::string Utilities::DLL_SUFF = ".dll";
+const int Utilities::NUM_PARTICIPANTS = 2;
 const int Utilities::NUMBER_DLLS = 2;
 const int Utilities::FILE_NOT_FOUND_ERROR = -1;
 const int Utilities::INDEX_PATH_DLL_A = 0;

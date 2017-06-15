@@ -91,11 +91,12 @@ void Game::notifyPlayers(Coordinate& currAttack, AttackResult& result) const
 }
 
 
-Game::Game(std::unique_ptr<IBattleshipGameAlgo>& playerA, std::unique_ptr<IBattleshipGameAlgo>& playerB,
-	std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth): //large init list, don't panic! :)
-	playersShips(BoardCreator::checkBoard(board, numRows, numCols,numDepth)), playerPlaying(PLAYER_A),
-	playerA(std::move(playerA)), playerB(std::move(playerB)), points(std::make_pair(0, 0)),
-	shipSunk(std::make_pair(0, 0)), numRows(numRows), numCols(numCols), numDepth(numDepth)
+Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA,
+	std::shared_ptr<IBattleshipGameAlgo> playerB, std::shared_ptr<Board> board,
+	std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips, int numRows, int numCols, int numDepth): //large init list, don't panic! :)
+	playersShips(playersShips), playerPlaying(PLAYER_A), playerA(std::move(playerA)), playerB(std::move(playerB)),
+	points(std::make_pair(0, 0)), shipSunk(std::make_pair(0, 0)),
+	numRows(numRows), numCols(numCols), numDepth(numDepth),	dllNames(std::make_pair(dllAName,dllBName))
 {
 	if (playersShips == nullptr)
 	{
@@ -104,49 +105,18 @@ Game::Game(std::unique_ptr<IBattleshipGameAlgo>& playerA, std::unique_ptr<IBattl
 	
 	try
 	{
-		std::string directoryPath = (filesFound.at(Utilities::NUMBER_DLLS)).substr(0, (filesFound.at(Utilities::NUMBER_DLLS)).find_last_of("/\\"));
-		for (int i = 0; i < Utilities::NUMBER_DLLS; ++i)
+		for (int i = 0; i < Utilities::NUM_PARTICIPANTS; ++i)
 		{
-			// Load dynamic library
-			HINSTANCE hDll = LoadLibraryA(filesFound.at(i).c_str());
-			if (!hDll)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
-			}
-			dlls.push_back(hDll);
-			GetAlgoFuncType getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
-			if (!getAlgoFunc)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, filesFound.at(i)));
-			}
-
-			IBattleshipGameAlgo** currPlayer = (i == PLAYER_A ? &playerA : &playerB);
-			*currPlayer = getAlgoFunc();
-			char** currBoard = (i == PLAYER_A ? boards.first : boards.second);
-			(**currPlayer).setBoard(i, const_cast<const char**>(currBoard), BOARD_LENGTH, BOARD_LENGTH);
-			if (!((**currPlayer).init(directoryPath)))
-			{
-				throw Exception(exceptionInfo(ALGO_INIT_FAILED, filesFound.at(i)));
-			}
+			std::shared_ptr<IBattleshipGameAlgo> currPlayer = (i == PLAYER_A ? playerA : playerB);
+			(*currPlayer).setPlayer(i); //Notifies player his number
+			(*currPlayer).setBoard(*board); //sets the player's board
 		}
-		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
-		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
 	}
 	catch (std::exception& e)
 	{
-		//free dlls, boards and ships
-		freeDlls();
-		BoardCreator::freeBoard(boards.first, BOARD_LENGTH);
-		BoardCreator::freeBoard(boards.second, BOARD_LENGTH);
-		deletePlayerShips();
 		throw e;
 	}
 }
-
-Game::~Game()
-{
-}
-
 
 int Game::isHit(int row, int col, int depth, char& letter) const
 {
@@ -194,7 +164,7 @@ int Game::isHit(int row, int col, int depth, char& letter) const
 	return MISS;
 }
 
-void Game::game()
+std::unique_ptr<GameInfo> Game::game()
 {
 	int damaged = 0;;
 	int win = -1;
@@ -259,17 +229,8 @@ void Game::game()
 		win = checkWin();
 	}
 
-	if (win != -1)
-	{
-		std::cout << "Player " << getLetterByNumber(win);
-		std::cout << " won" << std::endl;
-	}
+	return std::make_unique<GameInfo>(win, dllNames, points);
 
-	std::cout << "Points:" << std::endl;
-	std::cout << "Player A: ";
-	std::cout << points.first << std::endl;
-	std::cout << "Player B: ";
-	std::cout << points.second << std::endl;
 }
 
 int Game::checkWin() const

@@ -4,32 +4,34 @@
 #include <thread>
 #include <iostream>
 #include "Sizes.h"
-#include "Ship.h"
-#include "IBattleshipGameAlgo.h"
+
 
 // define function of the type we expect
-typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
 typedef std::vector<std::vector<std::vector<char>>> boardType;
 
 class GameInfo
 {
-	std::pair<int, int> firstPlayer_number_score;
-	std::pair<int, int> secondPlayer_number_score;
-	int playerWon;
-	std::shared_ptr<boardType> board;
-	std::vector<Ship> ships;
-	std::unique_ptr<IBattleshipGameAlgo> playerA;
-	std::unique_ptr<IBattleshipGameAlgo> playerB;
+	int playerWon; //0 if playerA won, 1 if playerB, **-1** if no player won!!
+	std::pair<std::string, std::string> dllNames; //.first is the dll of playerA, .second is playerB's dll
+	std::pair<int, int> playersScore; ////.first is playerA's score, .second is playerB's score
 
 public:
+
+	/*
+	 * Gets score to contain the relevant player's score
+	 */
+	int getPlayerScore(int player) const;
 	
-	int getPlayerScore(int player);
-	int getPlayerWon();
-	std::pair<int, int> getPlayersPlayed();
-	void setAll(int player, int score);
-	void setPlayersScore(int scoreA, int scoreB);
-	void setPlayerWon(int won);
-	GameInfo(std::unique_ptr<IBattleshipGameAlgo> firstDll, std::unique_ptr<IBattleshipGameAlgo> secondDll, std::shared_ptr<boardType> board);
-	std::pair<std::unique_ptr<IBattleshipGameAlgo>, std::unique_ptr<IBattleshipGameAlgo>> getPlayersAlgos();
-	std::shared_ptr<boardType> getBoard();
+	/*
+	 * Returns the number (0/1) of player who won the game 
+	 */
+	int getPlayerWon() const;
+
+	/*
+	 * Returns the DLLs names
+	 */
+	std::pair<std::string, std::string> getPlayerNames() const;
+
+	GameInfo(int playerWon,const std::pair<std::string, std::string>& dllNames, const std::pair<int, int>& playersScore);
+	~GameInfo();
 };

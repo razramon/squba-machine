@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
 
 	std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls;
-	std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo;
+	ptrToVecOfPlayerInfoPtrs allPlayersInfo;
 
 	GameManager::loadAllDlls(DLLFiles, dlls, allPlayersInfo); // In this function we will also count and tag them
 
