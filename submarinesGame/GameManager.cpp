@@ -1,5 +1,13 @@
 #include "GameManager.h"
 
+bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
+
+	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
+	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
+	return playerAWinRate > playerBWinRate;
+}
+
+
 void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 
 	// Infinite loop - only stop when there is no more games in the game manager
@@ -87,7 +95,7 @@ void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFile
 	}
 }
 
-void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards, ptrToVecOfGameInfoPtrs allGames) {
+void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<Board>> boards) {
 
 	// Loop over the first dll to enters
 	for (int i = 0; i < (*dlls).size(); i++) {
@@ -99,21 +107,17 @@ void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBat
 			for (int indexBoard = 0; indexBoard < (*boards).size(); indexBoard++) {
 
 				// Creating a new pointer, pushing the games to the collection
+				
 				std::unique_ptr<GameInfo> game = std::make_unique<GameInfo>((*dlls)[i], (*dlls)[j], (*boards)[indexBoard]);
-				(*allGames).push_back(std::move(game));
+				allGamesData.push_back(std::move(game));
 				game = std::make_unique<GameInfo>((*dlls)[j], (*dlls)[i], (*boards)[indexBoard]);
-				(*allGames).push_back(std::move(game));
+				allGamesData.push_back(std::move(game));
 			}
 		}
 	}
 }
 
-bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
 
-	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
-	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
-	return playerAWinRate > playerBWinRate;
-}
 
 void GameManager::printRound() {
 	

@@ -8,9 +8,53 @@ int GameInfo::getPlayerScore(int player) const
 	return playersScore.second;
 }
 
+int GameInfo::getPlayerScore(std::string nameOfPlayer) const
+{
+	if(dllNames.first==nameOfPlayer)
+	{
+		return playersScore.first;
+	}
+	else if (dllNames.second==nameOfPlayer)
+	{
+		return playersScore.second;
+	}
+	return -1;
+}
+
+int GameInfo::getOtherPlayerScore(std::string nameOfCurrentPlayer) const
+{
+	if (dllNames.first == nameOfCurrentPlayer) {
+		return playersScore.second;
+	}
+	else if (dllNames.second == nameOfCurrentPlayer)
+	{
+		return playersScore.first;
+	}
+	return -1;
+}
+
+int GameInfo::getNumberOfPlayer(std::string nameOfPlayer) const
+{
+	if (dllNames.first == nameOfPlayer)
+	{
+		return PLAYER_A;
+	}
+	else if (dllNames.second == nameOfPlayer)
+	{
+		return PLAYER_B;
+	}
+	return -1;
+}
+
 int GameInfo::getPlayerWon() const
 {
 	return playerWon;
+}
+
+std::unique_ptr<std::string> GameInfo::getPlayerWonName() const
+{
+	if (playerWon == -1) return nullptr;
+	return std::make_unique<std::string>((playerWon==PLAYER_A)? dllNames.first: dllNames.second);
 }
 
 // Getting the players played- for future use
