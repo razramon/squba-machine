@@ -7,7 +7,7 @@ int GameInfo::getPlayerScore(int player)
 
 	score = player == this->firstPlayer_number_score.first ? this->firstPlayer_number_score.second : 0;
 	
-	score = player == this->secondPlayer_number_score.first ? this->secondPlayer_number_score.second : 0;
+	score = player == this->secondPlayer_number_score.first ? this->secondPlayer_number_score.second : score;
 
 	return score;
 }

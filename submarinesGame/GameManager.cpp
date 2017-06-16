@@ -1,4 +1,6 @@
 #include "GameManager.h"
+std::mutex lock;
+
 
 void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 
@@ -9,6 +11,7 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
 		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard());
 
+		this->printRound();
 		this->getGame(gameInfo);
 	}
 }
@@ -16,7 +19,7 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 
 	// Lock for the threads, get the game from all the games
-	std::mutex lock;
+
 	lock.lock();
 
 	// Check if there are games left unplayed
@@ -118,8 +121,7 @@ bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std
 }
 
 void GameManager::printRound() {
-	
-	std::mutex lock;
+
 	lock.lock();
 
 	bool canPrint = true;
@@ -146,14 +148,14 @@ void GameManager::printRound() {
 	if (canPrint) {
 
 		// Head row
-		std::cout << std::setfill(' ');
-		std::cout << std::setw(6) << "#";
-		std::cout << std::setw(maxLengthName + 4) << "Team Name";
-		std::cout << std::setw(8) << "Wins";
-		std::cout << std::setw(8) << "Losses";
-		std::cout << std::setw(8) << "%";
-		std::cout << std::setw(8) << "Pts For";
-		std::cout << std::setw(8) << "Pts Against" << std::endl;
+		std::cout << std::left << std::setfill(' ');
+		std::cout << std::left << std::setw(6) << "#";
+		std::cout << std::left << std::setw(maxLengthName + 4) << "Team Name";
+		std::cout << std::left << std::setw(8) << "Wins";
+		std::cout << std::left << std::setw(8) << "Losses";
+		std::cout << std::left << std::setw(8) << "%";
+		std::cout << std::left << std::setw(8) << "Pts For";
+		std::cout << std::left << std::setw(8) << "Pts Against" << std::endl;
 
 		std::cout << std::setw(50 + maxLengthName) << " " << std::endl;
 		int indexRow = 1;
@@ -163,10 +165,10 @@ void GameManager::printRound() {
 		for (std::pair<std::string, std::vector<int>> printPlayer: playersToPrint) {
 
 			playerScores = printPlayer.second;
-			std::cout << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
-			std::cout << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
-			std::cout << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
-			std::cout << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
+			std::cout << std::left << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
+			std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
+			std::cout << std::left << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
+			std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
 		}
 		this->roundNumber++;
 	}

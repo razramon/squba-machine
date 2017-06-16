@@ -741,7 +741,7 @@ std::unique_ptr<boardType>& BoardCreator::createBoard(int numRows, int numCols, 
 			}
 		}
 	}
-	return ;
+	return board;
 }
 
 /*
