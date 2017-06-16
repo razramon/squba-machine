@@ -18,12 +18,24 @@ static const int NOT_INIT = -1;
 
 class GameManager
 {
+	class GameBasicData
+	{
+	protected:
+		std::unique_ptr<IBattleshipGameAlgo> algoA;
+		std::unique_ptr<IBattleshipGameAlgo> algoB;
+		std::unique_ptr<Board> board;
+	};
+	
 	int numberThreads;
 	int gameNumber;
 	int roundNumber;
-	ptrToVecOfGameInfoPtrs allGamesData;
+	std::vector<GameBasicData> allGamesData; //A vector to contain all game combinations
+	ptrToVecOfGameInfoPtrs allGamesResults; //A vector that will contain all game results
 	ptrToVecOfPlayerInfoPtrs allPlayersInfo;
 
+	/*
+	 * Returns true iff playerA's win rate > playerB's win rate
+	 */
 	static bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB);
 
 public:
@@ -60,7 +72,7 @@ public:
 	 *										one with first player as playerA,
 	 *										second with first player as playerB)
 	 */
-	static void divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards, ptrToVecOfGameInfoPtrs allGames);
+	static void divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<Board>> boards);
 
 	void printRound();
 
