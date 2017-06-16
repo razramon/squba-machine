@@ -9,7 +9,7 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 
 		// Create a new game, running it and then requesting another
 		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
-		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard());
+		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
 
 		this->printRound();
 		this->getGame(gameInfo);
@@ -54,14 +54,12 @@ void GameManager::startGames() {
 	}
 }
 
-GameManager::GameManager(std::shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGamesData, std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo) {
-
-	this->allGamesData = allGamesData;
-	this->allPlayersInfo = allPlayersInfo;
-	this->roundNumber = 1;
+GameManager::GameManager(ptrToVecOfGameInfoPtrs allGamesData, ptrToVecOfPlayerInfoPtrs allPlayersInfo) :
+			numberThreads(NOT_INIT), gameNumber(NOT_INIT), roundNumber(1), allGamesData(allGamesData),
+			allPlayersInfo(allPlayersInfo){
 }
 
-void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<PlayerInfo>>> allPlayersInfo) {
+void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, ptrToVecOfPlayerInfoPtrs allPlayersInfo) {
 
 	try
 	{
@@ -79,7 +77,7 @@ void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFile
 			{
 				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, (*dllsFiles).at(i)));
 			}
-			getAlgoFunc->setPlayer(i);
+			
 			(*dlls).push_back(getAlgoFunc);
 
 			std::string playerName = (*dllsFiles).at(i).substr((*dllsFiles).at(i).find_first_of('.')).substr(0, (*dllsFiles).at(i).find_first_of('.'));
@@ -92,7 +90,7 @@ void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFile
 	}
 }
 
-void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards, std::shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGames) {
+void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards, ptrToVecOfGameInfoPtrs allGames) {
 
 	// Loop over the first dll to enters
 	for (int i = 0; i < (*dlls).size(); i++) {
@@ -113,7 +111,7 @@ void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBat
 	}
 }
 
-bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
+bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
 
 	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
 	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
@@ -143,7 +141,7 @@ void GameManager::printRound() {
 		}
 	}
 
-	sort(playersToPrint.begin(), playersToPrint.end(), sortPlayers);
+	std::sort(playersToPrint.begin(), playersToPrint.end(), sortPlayers);
 		
 	if (canPrint) {
 

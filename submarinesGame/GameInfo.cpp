@@ -1,67 +1,36 @@
 #include "GameInfo.h"
 
 
-int GameInfo::getPlayerScore(int player)
+int GameInfo::getPlayerScore(int player) const
 {
 	int score = -1;
 
 	score = player == this->firstPlayer_number_score.first ? this->firstPlayer_number_score.second : 0;
 	
-	score = player == this->secondPlayer_number_score.first ? this->secondPlayer_number_score.second : score;
+	score = player == this->secondPlayer_number_score.first ? this->secondPlayer_number_score.second : 0;
 
 	return score;
 }
 
-int GameInfo::getPlayerWon()
+int GameInfo::getPlayerWon() const
 {
-	return this->playerWon;
+	return playerWon;
 }
 
 // Getting the players played- for future use
-std::pair<int, int> GameInfo::getPlayersPlayed()
+std::pair<std::string, std::string> GameInfo::getPlayerNames() const
 {
-	return std::make_pair(this->firstPlayer_number_score.first, this->secondPlayer_number_score.first);
+	return this->dllNames;
 }
 
-// Setting the playerInfo for a single player
-void GameInfo::setAll(int player, int score)
+GameInfo::GameInfo(int playerWon, const std::pair<std::string, std::string>& dllNames, const std::pair<int, int>& playersScore):
+					playerWon(playerWon), dllNames(std::make_pair(dllNames.first,dllNames.second)),
+					playersScore(std::make_pair(playersScore.first,playersScore.second))
 {
-	if (this->firstPlayer_number_score.first == NULL) {
-
-		this->firstPlayer_number_score = std::make_pair(player, score);
-	}
-	else if (this->secondPlayer_number_score.first == NULL) {
-
-		this->secondPlayer_number_score = std::make_pair(player, score);
-	}
 }
 
-void GameInfo::setPlayersScore(int scoreA, int scoreB)
+GameInfo::~GameInfo()
 {
-	this->firstPlayer_number_score.second = scoreA;
-	this->secondPlayer_number_score.second = scoreB;
-}
-
-void GameInfo::setPlayerWon(int won)
-{
-	this->playerWon = won;
-}
-
-GameInfo::GameInfo(std::unique_ptr<IBattleshipGameAlgo> firstDll, std::unique_ptr<IBattleshipGameAlgo> secondDll, std::shared_ptr<boardType> board) {
-
-	this->playerA = std::move(firstDll);
-	this->playerB = std::move(secondDll);
-	this->board = board;
-}
-
-std::pair<std::unique_ptr<IBattleshipGameAlgo>, std::unique_ptr<IBattleshipGameAlgo>> GameInfo::getPlayersAlgos() {
-
-	return std::make_pair(std::move(this->playerA), std::move(this->playerB));
-}
-
-std::shared_ptr<boardType> GameInfo::getBoard() {
-	
-	return this->board;
 }
 
 

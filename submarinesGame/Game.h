@@ -7,6 +7,8 @@
 #include "Sizes.h"
 #include "BoardCreator.h"
 #include "../Common/Board.h"
+#include "GameInfo.h"
+
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo*(*GetAlgoFuncType)();
@@ -15,11 +17,12 @@ class Game
 {
 	mutable std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips;
 	int playerPlaying;
-	std::unique_ptr<IBattleshipGameAlgo> playerA;
-	std::unique_ptr<IBattleshipGameAlgo> playerB;
+	std::shared_ptr<IBattleshipGameAlgo> playerA;
+	std::shared_ptr<IBattleshipGameAlgo> playerB;
 	std::pair<int, int> points;
 	std::pair<int, int> shipSunk;
 	int numRows, numCols, numDepth;
+	std::pair <std::string, std::string> dllNames;
 
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer
@@ -54,13 +57,13 @@ class Game
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
-	Game(std::unique_ptr<IBattleshipGameAlgo>& playerA, std::unique_ptr<IBattleshipGameAlgo>& playerB,
-		std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
-	~Game();
+	Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattleshipGameAlgo> playerB,
+		std::shared_ptr<Board> board, std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips, int numRows, int numCols, int numDepth);
+	~Game() = default;
 
 	int isHit(int row, int col, int depth, char& letter) const;
 
-	void game();
+	std::unique_ptr<GameInfo> game();
 
 	int checkWin() const;
 };

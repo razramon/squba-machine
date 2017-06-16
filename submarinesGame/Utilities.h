@@ -32,7 +32,7 @@ class Utilities
 	};
 public:
 	static const std::string ATTACK_SUFF, BOARD_SUFF, DLL_SUFF;
-	static const int NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
+	static const int NUM_PARTICIPANTS, NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
 	static const char HIT_SIGN, SINK_SIGN, MISS_SIGN;
 
 	static void getFullPath(std::string& path);

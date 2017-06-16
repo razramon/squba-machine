@@ -62,6 +62,8 @@ public:
 	DllSmartAlgo();
 	~DllSmartAlgo();
 	void setPlayer(int player) override;
+	
+	//About setBoard and setPlayer order of calling: http://moodle.tau.ac.il/mod/forum/discuss.php?d=63262#p93290
 	void setBoard(const BoardData& board) override;		// called once to notify player on his board
 	Coordinate attack() override;						// ask player for his move
 	void notifyOnAttackResult(int player, Coordinate move, AttackResult result) override;	// notify on last move result
