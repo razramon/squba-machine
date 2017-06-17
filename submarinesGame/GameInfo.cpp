@@ -4,9 +4,13 @@ bool GameInfo::moreGamesLeft = true;
 
 int GameInfo::getPlayerScore(int player) const
 {
-	if (player == PLAYER_A)
-		return playersScore.first;
-	return playersScore.second;
+	int score = -1;
+
+	score = player == this->firstPlayer_number_score.first ? this->firstPlayer_number_score.second : 0;
+	
+	score = player == this->secondPlayer_number_score.first ? this->secondPlayer_number_score.second : 0;
+
+	return score;
 }
 
 int GameInfo::getPlayerScore(std::string nameOfPlayer) const
