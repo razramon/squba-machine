@@ -1,8 +1,8 @@
 #include "PlayerInfo.h"
 
 
-PlayerInfo::PlayerInfo(int playerNumber, std::string playerName) :
-	playerNumber(playerNumber), playerName(playerName)
+PlayerInfo::PlayerInfo(std::string playerName) :
+	playerName(playerName), rounds()
 {
 }
 
@@ -15,10 +15,19 @@ void PlayerInfo::addNewGame(std::unique_ptr<GameInfo> game)
 	}
 
 	Round newRound;
-	newRound.numberWin = (game->getPlayerWon() == this->playerNumber) ? 1 : 0;
-	newRound.numberLose = 1 - newRound.numberWin;
-	newRound.pointsFor = game->getPlayerScore(this->playerNumber);
-	newRound.pointsAgainst = game->getPlayerScore(enemy);
+
+	//when no player wins - numberWin/numberLose doesn't change, according to:
+	//http://moodle.tau.ac.il/mod/forum/discuss.php?d=63620#p93614
+	if (game->getPlayerWonName() != nullptr) {
+		newRound.numberWin = (*(game->getPlayerWonName()) == playerName) ? 1 : 0;
+		newRound.numberLose = 1 - newRound.numberWin;
+	} else
+	{
+		newRound.numberWin = 0;
+		newRound.numberLose = 0;
+	}
+	newRound.pointsFor = game->getPlayerScore(playerName);
+	newRound.pointsAgainst = game->getOtherPlayerScore(playerName);
 
 	if (rounds.size() > 0)
 	{

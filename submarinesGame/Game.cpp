@@ -90,26 +90,28 @@ void Game::notifyPlayers(Coordinate& currAttack, AttackResult& result) const
 	(*playerB).notifyOnAttackResult(playerPlaying, currAttack, result);
 }
 
-
+//large init list, don't panic! :)
 Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA,
-	std::shared_ptr<IBattleshipGameAlgo> playerB, std::shared_ptr<Board> board,
-	std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips, int numRows, int numCols, int numDepth): //large init list, don't panic! :)
+	std::shared_ptr<IBattleshipGameAlgo> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
+	std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips, int numRows, int numCols, int numDepth) :
 	playersShips(playersShips), playerPlaying(PLAYER_A), playerA(std::move(playerA)), playerB(std::move(playerB)),
-	points(std::make_pair(0, 0)), shipSunk(std::make_pair(0, 0)),
-	numRows(numRows), numCols(numCols), numDepth(numDepth),	dllNames(std::make_pair(dllAName,dllBName))
+	points(std::make_pair(0, 0)), shipSunk(std::make_pair(0, 0)), numRows(numRows), numCols(numCols), numDepth(numDepth),
+	dllNames(std::make_pair(dllAName, dllBName)), board(board)
 {
 	if (playersShips == nullptr)
 	{
 		throw Exception("PRINT_NOTHING"); //Appropriate errors have already been printed in "checkBoard"
 	}
-	
 	try
 	{
 		for (int i = 0; i < Utilities::NUM_PARTICIPANTS; ++i)
 		{
 			std::shared_ptr<IBattleshipGameAlgo> currPlayer = (i == PLAYER_A ? playerA : playerB);
 			(*currPlayer).setPlayer(i); //Notifies player his number
-			(*currPlayer).setBoard(*board); //sets the player's board
+			//TODO:: take care of problem: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61791#p90872
+			//[That we need to assume player can use board any time he'd like: 
+			//	so we can't be sure if we use the exact same Board for each player :( ] 
+			(i == PLAYER_A) ? (*currPlayer).setBoard(*(this->board.first)) : (*currPlayer).setBoard(*(this->board.second));//sets the player's board
 		}
 	}
 	catch (std::exception& e)
