@@ -24,6 +24,7 @@ class Game
 	int numRows, numCols, numDepth;
 	std::pair <std::string, std::string> dllNames;
 	std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board; // <board for playerA, board for playerB>
+	
 
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer

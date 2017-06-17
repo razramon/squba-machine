@@ -38,18 +38,18 @@ public:
 
 	static void printCoord(Coordinate c);
 	static int& updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, Ship::INDEX_3D dimentionToCheck);
-	static int checkSequence(const Coordinate& currPos, Ship::INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter);
+	static int checkSequence(const Coordinate& currPos, Ship::INDEX_3D dimentionToCheck, int maxIndex, std::unique_ptr<boardType>& board, char letter);
 	static void insertBadCoords(int shipCells, bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords,
 		int row, int col, int depth, Ship::INDEX_3D dimentionToUpdate);
 	static void createShipAtCoord(char letter, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer, int& numShipsForCurrPlayer,
 		int row, int col, int depth, Ship::INDEX_3D dimentionToUpdate);
-	static void checkShipBorders(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
+	static void checkShipBorders(std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
 		char letter, int& numShipsForCurrPlayer, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer,
 		bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords);
 	static bool twoCoordsNeighbours(Coordinate c1, Coordinate c2);
 	static bool checkShipShape(std::shared_ptr<Ship>& ship, char letter, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer);
-	static bool checkNeighbourShips(std::shared_ptr<boardType> board, int currentRow, int currentCol, int currentDepth, int numRows, int numCols, int numDepth);
-	static std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> checkBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
+	static bool checkNeighbourShips(std::unique_ptr<boardType>& board, int currentRow, int currentCol, int currentDepth, int numRows, int numCols, int numDepth);
+	static std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> checkBoard(std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth);
 	static void getDimentions(int& numRows, int& numCols, int& numDepth, std::string line);
 	static std::unique_ptr<boardType> getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth);
 

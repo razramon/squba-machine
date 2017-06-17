@@ -10,21 +10,29 @@ bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, 
 /*
  * TODO:: edit function, change signature: because GameInfo doesn't contain GameData (to create a new Game)
  */
-void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
+void GameManager::runGameThread() {
 
 	// Infinite loop - only stop when there is no more games in the game manager
-	while (gameInfo->getMoreGamesLeft()) {
+	while (gameNumber < allGamesData.size()) {
 
-		// Create a new game, running it and then requesting another
-		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
-		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
+		// Create a new game, run it and then request another
+		std::shared_ptr<GameBasicData> gameBD = nullptr;
+		getGame(gameBD);
+		if( gameBD == nullptr)
+		{
+			break;
+		}
+		//std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
+		Game g = new Game((*gameBD).dllA.first, (*gameBD).dllB.first, (*gameBD).dllA.second, (*gameBD).dllB.second,
+				*((*gameBD).board), );
+		//std::unique_ptr<Game> newGame = std::make_unique<Game>(
 		newGame->game();
-		this->getGame(gameInfo);
+		
 	}
 }
 
-
-void GameManager::getGame(std::shared_ptr<GameInfo> game) {
+//TODO:: change it to change pointers to actual game
+void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 
 	// Lock for the threads, get the game from all the games
 	std::mutex lock;
@@ -32,14 +40,12 @@ void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 
 	// Check if there are games left unplayed
 	if (gameNumber >= allGamesData.size()) { //no more games left!
-		game->setMoreGamesLeft(false);
+		gameBasicData = nullptr;
+	} else
+	{
+		gameBasicData = std::move(allGamesData[gameNumber]);
+		gameNumber++;
 	}
-	else {
-
-		game = std::move(allGamesData[gameNumber]);
-	}
-	gameNumber++;
-
 	lock.unlock();
 }
 
@@ -51,22 +57,19 @@ void GameManager::setNumberThreads(int numberThreads) {
 //TODO:: "startGames()" might be problamatic when there are more threads than games
 void GameManager::startGames() {
 
-	// For the getGame - will know what game wasn't played yet
-	this->gameNumber = this->numberThreads;
+	this->gameNumber = 0;
 
 	// Creating threads according to the number of threads
 	for (int indexThread = 0; indexThread < this->numberThreads; indexThread++) {
-		std::thread gameThread(&GameManager::runGameThread, allGamesData[indexThread]);
-
-
-		gameThread.join();
+		std::thread gameThread(&GameManager::runGameThread);
+		gameThread.join(); //wait for all tournament to finish
 	}
 }
 
 GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::string>> boardFiles) :
 			numberThreads(NOT_INIT), gameNumber(NOT_INIT), roundNumber(1),
 			allGamesData(), allGamesResults(), allPlayersInfo(),
-			dlls(), boards()
+			dlls(), boards(), boardsShips()
 {
 		/*TODO:: 
 		* might need a signature change (get number of threads as an argument?)
@@ -109,6 +112,13 @@ void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardF
 		{
 			int rows, cols, depth;
 			std::unique_ptr<boardType> baseBoard = std::move(BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth));
+			std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> shipsOfBoard = BoardCreator::checkBoard(baseBoard, rows, cols, depth);
+			if (shipsOfBoard == nullptr)
+			{
+				//TODO:: add print to logger - about invalid board
+				continue; //continue to next board, this one's invalid
+			}
+			boardsShips.push_back(shipsOfBoard);
 			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, baseBoard, NOT_INIT);
 			(*b0).setPlayerNumber(PLAYER_A); //so that the first board of the pair will match playerA
 			std::unique_ptr<Board> b1 = std::make_unique<Board>(b0);

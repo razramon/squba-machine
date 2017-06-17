@@ -20,6 +20,7 @@ class GameManager
 {
 	class GameBasicData
 	{
+		friend class GameManager;
 	protected:
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllA;
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllB;
@@ -45,11 +46,13 @@ class GameManager
 	//A vector that will contain all game results:
 	vecOfGameInfoPtrs allGamesResults; 
 	//A vector that will contain all players 
-	vecOfPlayerInfoPtrs allPlayersInfo; 
+	vecOfPlayerInfoPtrs allPlayersInfo;
 	//A vector of pairs: <dll name, (not initiaized)dll>
 	std::vector<std::unique_ptr<std::pair<std::string,GetAlgoFuncType>>> dlls; 
 	//A vector of ptrs to all pairs of valid Boards: <Board to send to PLAYER_A, Board to sent to PLAYER_B>    
 	std::vector<std::unique_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >>> boards;
+	//for each board (represented as a pair), boardsShips[i] = ships of boards[i]
+	std::vector<std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>>> boardsShips;
 
 	/*
 	 * Returns true iff playerA's win rate > playerB's win rate
@@ -58,13 +61,13 @@ class GameManager
 
 public:
 	
-	void runGameThread(std::shared_ptr<GameInfo> gameInfo);
+	void runGameThread();
 	
 	/*
-	 * If there are more games to play - updates pointer "game" to point at a new game,
-	 * Otherwise - changes GameInfo's "moreGamesLeft" to false, to indicate no more games left.
+	 * If there are more games to play - updates pointer "gameBasicData" to point at next GameBasicData (from allGamesData),
+	 * Otherwise - gameBasicData is updated to nullptr, to indicate no more games left.
 	 */
-	void getGame(std::shared_ptr<GameInfo> game);
+	void getGame(std::shared_ptr<GameBasicData> gameBasicData);
 	
 	/*
 	 * Sets this->numberThreads to be "numberThreads"
@@ -89,7 +92,7 @@ public:
 	void loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles);
 
 	/*
-	* Loads all boards into "boards" vector
+	* Loads all boards into "boards" vector, and all ships to boardsShips according to the relevant board.
 	*/
 	void loadAllBoards(std::shared_ptr<std::vector<std::string>> boardFiles);
 

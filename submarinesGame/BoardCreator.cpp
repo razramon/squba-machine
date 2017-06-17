@@ -89,7 +89,7 @@ int& BoardCreator::updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, 
 *	Returns:
 *		number of consecutive same-letter appearances in dimentionToCheck.
 */
-int BoardCreator::checkSequence(const Coordinate& currPos, Ship::INDEX_3D dimentionToCheck, int maxIndex, std::shared_ptr<boardType> board, char letter)
+int BoardCreator::checkSequence(const Coordinate& currPos, Ship::INDEX_3D dimentionToCheck, int maxIndex, std::unique_ptr<boardType>& board, char letter)
 {
 	int shipCells = 1;
 	int row_ind = currPos.row;
@@ -153,7 +153,7 @@ void BoardCreator::createShipAtCoord(char letter, std::vector<std::shared_ptr<Sh
 *		badLetterCoords - if it's not a ship, adds the "bad" coordinates of this letter to a list
 *		board - updates each visited cell to the DEFAULT_LETTER
 */
-void BoardCreator::checkShipBorders(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
+void BoardCreator::checkShipBorders(std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth, const Coordinate& currPos,
 	char letter, int& numShipsForCurrPlayer, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer,
 	bool& wrongSizeOrShape, std::shared_ptr<std::vector<Coordinate>>& badLetterCoords)
 {
@@ -299,7 +299,7 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 /*
 *Returns true if there IS an adjacent (different) ship (next to (currentRow,currentCol,currentDepth)).
 */
-bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int currentRow, int currentCol,
+bool BoardCreator::checkNeighbourShips(std::unique_ptr<boardType>& board, int currentRow, int currentCol,
 	int currentDepth, int numRows, int numCols, int numDepth)
 {
 	char letter = (*board)[currentDepth][currentRow][currentCol];
@@ -348,7 +348,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 	return false;
 }
 
-std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::checkBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth)
+std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::checkBoard(std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth)
 {
 	ptrToShipsVector shipsA = std::make_shared<std::vector<std::shared_ptr<Ship>>>();
 	ptrToShipsVector shipsB = std::make_shared<std::vector<std::shared_ptr<Ship>>>();
