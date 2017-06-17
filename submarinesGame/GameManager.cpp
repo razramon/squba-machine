@@ -14,7 +14,7 @@ void GameManager::runGameThread() {
 
 	// Infinite loop - only stop when there is no more games in the game manager
 	while (gameNumber < allGamesData.size()) {
-
+		/* ******NOT FINISHED YET!!!******
 		// Create a new game, run it and then request another
 		std::shared_ptr<GameBasicData> gameBD = nullptr;
 		getGame(gameBD);
@@ -27,6 +27,16 @@ void GameManager::runGameThread() {
 				*((*gameBD).board), );
 		//std::unique_ptr<Game> newGame = std::make_unique<Game>(
 		newGame->game();
+		*/
+
+		// Lock for the threads, get the game from all the games
+		lockMutex.lock();
+
+		this->addNewGameInfo(newGame->game());
+		this->printRound();
+		this->getGame(gameInfo);
+
+		lockMutex.unlock();
 		
 	}
 }
