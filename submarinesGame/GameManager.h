@@ -40,14 +40,19 @@ class GameManager
 	int numberThreads;
 	int gameNumber;
 	int roundNumber;
+
 	//A vector to contain all game combinations:
 	std::vector<std::unique_ptr<GameBasicData>> allGamesData; 
+
 	//A vector that will contain all game results:
 	vecOfGameInfoPtrs allGamesResults; 
+
 	//A vector that will contain all players 
 	vecOfPlayerInfoPtrs allPlayersInfo; 
+
 	//A vector of pairs: <dll name, (not initiaized)dll>
 	std::vector<std::unique_ptr<std::pair<std::string,GetAlgoFuncType>>> dlls; 
+
 	//A vector of ptrs to all pairs of valid Boards: <Board to send to PLAYER_A, Board to sent to PLAYER_B>    
 	std::vector<std::unique_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >>> boards;
 

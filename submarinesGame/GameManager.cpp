@@ -19,12 +19,8 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 		// Create a new game, running it and then requesting another
 		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
 		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
-		// TODO: move lock to here, so it will lock both. another thing, neew to add to the playerInfo in a lock otherwise it will not work properly
 
 		// Lock for the threads, get the game from all the games
-
-		
-		
 		lockMutex.lock();
 
 		this->addNewGameInfo(newGame->game());
@@ -37,10 +33,6 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 
 
 void GameManager::getGame(std::shared_ptr<GameInfo> game) {
-
-	// Lock for the threads, get the game from all the games
-
-	lock.lock();
 
 	// Check if there are games left unplayed
 	if (gameNumber >= allGamesData.size()) { //no more games left!
@@ -56,11 +48,11 @@ void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 
 void GameManager::addNewGameInfo(std::unique_ptr<GameInfo> game) {
 
-	for (int indexPlayer = 0; indexPlayer < (*this->allPlayersInfo).size(); indexPlayer++) {
+	for (int indexPlayer = 0; indexPlayer < this->allPlayersInfo.size(); indexPlayer++) {
 
-		if ((*this->allPlayersInfo).at(indexPlayer)->getPlayerName() == game->getPlayerNames().first || (*this->allPlayersInfo).at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) {
+		if (this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().first || this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) {
 
-			(*this->allPlayersInfo).at(indexPlayer)->addNewGame(std::move(game));
+			this->allPlayersInfo.at(indexPlayer)->addNewGame(std::move(game));
 		}
 	}
 	
@@ -79,8 +71,8 @@ void GameManager::startGames() {
 
 	// Creating threads according to the number of threads
 	for (int indexThread = 0; indexThread < this->numberThreads; indexThread++) {
-		std::thread gameThread(&GameManager::runGameThread, allGamesData[indexThread]);
 
+		std::thread gameThread(&GameManager::runGameThread, allGamesData[indexThread]);
 
 		gameThread.join();
 	}
@@ -102,20 +94,22 @@ GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, st
 }
 
 void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles) {
+
 	std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
+
 	for (int i = 0; i < (*dllsFiles).size(); ++i)
 	{
 		// Load dynamic library
 		HINSTANCE hDll = LoadLibraryA((*dllsFiles).at(i).c_str());
 		if (!hDll)
 		{
-			//TODO:: add print to logger here
+			Logger::instance().log("Could not load DLL", Logger::kLogLevelError);
 			continue;
 		}
 		GetAlgoFuncType getAlgoFunc = reinterpret_cast<GetAlgoFuncType>(GetProcAddress(hDll, "GetAlgorithm"));
 		if (!getAlgoFunc)
 		{
-			//TODO:: add print to logger here
+			Logger::instance().log("Could not load DLL", Logger::kLogLevelError);
 			continue;
 		}
 		std::string playerName = ((*dllsFiles).at((*dllsFiles).size())).substr(((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"), ((*dllsFiles).at((*dllsFiles).size())).length());
@@ -133,14 +127,18 @@ void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardF
 			int rows, cols, depth;
 			std::unique_ptr<boardType> baseBoard = std::move(BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth));
 			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, baseBoard, NOT_INIT);
+
 			(*b0).setPlayerNumber(PLAYER_A); //so that the first board of the pair will match playerA
 			std::unique_ptr<Board> b1 = std::make_unique<Board>(b0);
 			(*b1).setPlayerNumber(PLAYER_B); //so that the second board of the pair will match playerB
+
 			auto pairBoards = std::make_pair<std::shared_ptr<Board>, std::shared_ptr<Board>>(std::move(b0), std::move(b1));
 			boards.push_back(std::make_unique<std::pair<std::shared_ptr<Board>, std::shared_ptr<Board>>>(std::move(pairBoards)));
-		} catch(std::exception& e)
+
+		} 
+		catch(std::exception& e)
 		{
-			//TODO:: add print to logger
+			Logger::instance().log("Could not load Board", Logger::kLogLevelError);
 			continue;
 		}
 	}
