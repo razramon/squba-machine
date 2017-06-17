@@ -32,7 +32,7 @@ public:
 	/*
 	 * Adds a round which fits the results of "game" into the vector "rounds".
 	 */
-	void addNewGame(std::shared_ptr<GameInfo> game);
+	void addNewGame(std::unique_ptr<GameInfo> game);
 	
 	/*
 	 * Returns true iff round number "roundNumber" is in "rounds" (the first round is numbered as 0 round)

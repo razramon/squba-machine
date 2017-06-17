@@ -6,7 +6,7 @@ PlayerInfo::PlayerInfo(std::string playerName) :
 {
 }
 
-void PlayerInfo::addNewGame(std::shared_ptr<GameInfo> game)
+void PlayerInfo::addNewGame(std::unique_ptr<GameInfo> game)
 {
 	int enemyPoints = game->getOtherPlayerScore(playerName);
 	if (enemyPoints==-1) //never supposed to get here, just to self test! gets's inside only if current player wasn't a player in "game"

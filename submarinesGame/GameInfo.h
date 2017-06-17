@@ -20,11 +20,6 @@ class GameInfo
 public:
 
 	/*
-	 * Returns the relevant player's score
-	 */
-	int getPlayerScore(int player) const;
-
-	/*
 	* Returns the relevant player's score,
 	* Returns -1 if the name of the player doesn't fit dllNames.first nor dllNames.second
 	*  (=doesn't fit both players' names)
