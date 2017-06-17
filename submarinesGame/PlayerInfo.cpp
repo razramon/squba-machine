@@ -15,19 +15,10 @@ void PlayerInfo::addNewGame(std::shared_ptr<GameInfo> game)
 	}
 
 	Round newRound;
-
-	//when no player wins - numberWin/numberLose doesn't change, according to:
-	//http://moodle.tau.ac.il/mod/forum/discuss.php?d=63620#p93614
-	if (game->getPlayerWonName() != nullptr) {
-		newRound.numberWin = (*(game->getPlayerWonName()) == playerName) ? 1 : 0;
-		newRound.numberLose = 1 - newRound.numberWin;
-	} else
-	{
-		newRound.numberWin = 0;
-		newRound.numberLose = 0;
-	}
-	newRound.pointsFor = game->getPlayerScore(playerNumber);
-	newRound.pointsAgainst = game->getOtherPlayerScore(playerName);
+	newRound.numberWin = (game->getPlayerWon() == this->playerNumber) ? 1 : 0;
+	newRound.numberLose = 1 - newRound.numberWin;
+	newRound.pointsFor = game->getPlayerScore(this->playerNumber);
+	newRound.pointsAgainst = game->getPlayerScore(enemy);
 
 	if (rounds.size() > 0)
 	{
