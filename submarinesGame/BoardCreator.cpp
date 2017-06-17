@@ -303,6 +303,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 	int currentDepth, int numRows, int numCols, int numDepth)
 {
 	char letter = (*board)[currentDepth][currentRow][currentCol];
+
 	if (currentRow - 1 >= 0)
 	{
 		if (Ship::isShip((*board)[currentDepth][currentRow - 1][currentCol]) && ((*board)[currentDepth][currentRow - 1][currentCol] != letter))
@@ -310,6 +311,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 			return true;
 		}
 	}
+
 	if (currentCol - 1 >= 0)
 	{
 		if (Ship::isShip((*board)[currentDepth][currentRow][currentCol - 1]) && ((*board)[currentDepth][currentRow][currentCol - 1] != letter))
@@ -317,6 +319,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 			return true;
 		}
 	}
+
 	if (currentDepth - 1 >= 0)
 	{
 		if (Ship::isShip((*board)[currentDepth - 1][currentRow][currentCol]) && ((*board)[currentDepth - 1][currentRow][currentCol] != letter))
@@ -324,6 +327,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 			return true;
 		}
 	}
+
 	if (currentRow + 1 < numRows)
 	{
 		if (Ship::isShip((*board)[currentDepth][currentRow + 1][currentCol]) && ((*board)[currentDepth][currentRow + 1][currentCol] != letter))
@@ -331,6 +335,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 			return true;
 		}
 	}
+
 	if (currentCol + 1 < numCols)
 	{
 		if (Ship::isShip((*board)[currentDepth][currentRow][currentCol + 1]) && ((*board)[currentDepth][currentRow][currentCol + 1] != letter))
@@ -338,6 +343,7 @@ bool BoardCreator::checkNeighbourShips(std::shared_ptr<boardType> board, int cur
 			return true;
 		}
 	}
+
 	if (currentDepth + 1 < numDepth)
 	{
 		if (Ship::isShip((*board)[currentDepth + 1][currentRow][currentCol]) && ((*board)[currentDepth + 1][currentRow][currentCol] != letter))
@@ -354,6 +360,7 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 	ptrToShipsVector shipsB = std::make_shared<std::vector<std::shared_ptr<Ship>>>();
 
 	std::vector<std::shared_ptr<std::vector<Coordinate>>> allBadCoordinates(VALID_LETTERS);
+
 	for (int i = 0; i < VALID_LETTERS; ++i)
 	{
 		allBadCoordinates[i] = std::make_shared<std::vector<Coordinate>>();
@@ -443,47 +450,56 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 	{
 		boardNotValid = true;
 		/*Printing errors as instructed - wrong size or shape*/
-		/*for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
+
+		std::string msg;
+
+		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
 		{
-		if (!islower(*i))
-		{
-		std::cout << "Wrong size or shape for ship " << *i << " for player A" << std::endl;
-		}
+			if (!islower(*i))
+			{
+				msg = "Wrong size or shape for ship " + (*i);
+				msg += " for player A";
+
+				Logger::instance().log(msg, Logger::kLogLevelError);
+			}
 		}
 		for (std::set<char>::iterator i = wrongSizeShapeShips.begin(); i != wrongSizeShapeShips.end(); ++i)
 		{
-		if (islower(*i))
-		{
-		std::cout << "Wrong size or shape for ship " << *i << " for player B" << std::endl;
+			if (islower(*i))
+			{
+				msg = "Wrong size or shape for ship " + *i;
+				msg += " for player B";
+
+				Logger::instance().log(msg, Logger::kLogLevelError);
+			}
 		}
-		}*/
 	}
 
 	/*Printing errors as instructed - too many / to few ships*/
-	/*if ((*shipsA).size() > NUMBER_SHIPS)
+	if ((*shipsA).size() > NUMBER_SHIPS)
 	{
-	boardNotValid = true;
-	std::cout << "Too many ships for player A" << std::endl;
+		boardNotValid = true;
+		Logger::instance().log("Too many ships for player A", Logger::kLogLevelError);
 	}
 	if ((*shipsA).size() < NUMBER_SHIPS)
 	{
-	boardNotValid = true;
-	std::cout << "Too few ships for player A" << std::endl;
+		boardNotValid = true;
+		Logger::instance().log("Too few ships for player A", Logger::kLogLevelError);
 	}
 	if ((*shipsB).size() > NUMBER_SHIPS)
 	{
-	boardNotValid = true;
-	std::cout << "Too many ships for player B" << std::endl;
+		boardNotValid = true;
+		Logger::instance().log("Too many ships for player B", Logger::kLogLevelError);
 	}
 	if ((*shipsB).size() < NUMBER_SHIPS)
 	{
-	boardNotValid = true;
-	std::cout << "Too few ships for player B" << std::endl;
-	}*/
+		boardNotValid = true;
+		Logger::instance().log("Too few ships for player B", Logger::kLogLevelError);
+	}
 	if (adjacentShips)
 	{
 		boardNotValid = true;
-		//std::cout << "Adjacent Ships on Board" << std::endl;
+		Logger::instance().log("Adjacent Ships on Board", Logger::kLogLevelError);
 	}
 
 	/*If board's invalid - deletes all ships and return nullptr*/

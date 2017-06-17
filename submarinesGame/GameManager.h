@@ -47,6 +47,8 @@ public:
 	 * Otherwise - changes game's playerWon to -1, to indicate no more games left.
 	 */
 	void getGame(std::shared_ptr<GameInfo> game);
+
+	void addNewGameInfo(std::unique_ptr<GameInfo> game);
 	
 	/*
 	 * Sets this->numberThreads to be "numberThreads"

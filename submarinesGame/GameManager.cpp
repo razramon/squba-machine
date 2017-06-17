@@ -1,5 +1,5 @@
 #include "GameManager.h"
-std::mutex lock;
+std::mutex lockMutex;
 
 
 bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
@@ -18,17 +18,23 @@ void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 		// Create a new game, running it and then requesting another
 		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
 		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
+		// TODO: move lock to here, so it will lock both. another thing, neew to add to the playerInfo in a lock otherwise it will not work properly
 
+		// Lock for the threads, get the game from all the games
+
+		
+		
+		lockMutex.lock();
+
+		this->addNewGameInfo(newGame->game());
 		this->printRound();
 		this->getGame(gameInfo);
+
+		lockMutex.unlock();
 	}
 }
 
 void GameManager::getGame(std::shared_ptr<GameInfo> game) {
-
-	// Lock for the threads, get the game from all the games
-
-	lock.lock();
 
 	// Check if there are games left unplayed
 	if (this->gameNumber >= (*this->allGamesData).size()) {
@@ -39,9 +45,20 @@ void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 
 		game = (*this->allGamesData)[this->gameNumber];
 	}
-	gameNumber++;
 
-	lock.unlock();
+	gameNumber++;
+}
+
+void GameManager::addNewGameInfo(std::unique_ptr<GameInfo> game) {
+
+	for (int indexPlayer = 0; indexPlayer < (*this->allPlayersInfo).size(); indexPlayer++) {
+
+		if ((*this->allPlayersInfo).at(indexPlayer)->getPlayerName() == game->getPlayerNames().first || (*this->allPlayersInfo).at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) {
+
+			(*this->allPlayersInfo).at(indexPlayer)->addNewGame(std::move(game));
+		}
+	}
+	
 }
 
 void GameManager::setNumberThreads(int numberThreads) {
@@ -124,8 +141,6 @@ void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBat
 
 void GameManager::printRound() {
 
-	lock.lock();
-
 	bool canPrint = true;
 	std::vector<std::pair<std::string,std::vector<int>>> playersToPrint;
 	int maxLengthName = 0;
@@ -175,5 +190,4 @@ void GameManager::printRound() {
 		this->roundNumber++;
 	}
 
-	lock.unlock();
 }
