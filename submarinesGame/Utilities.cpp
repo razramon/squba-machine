@@ -367,11 +367,9 @@ void Utilities::divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> al
 	for (std::string file : *allFiles) {
 
 		if (Utilities::endsWith(file, std::string(Utilities::BOARD_SUFF))) {
-
 			(*boardFiles).push_back(file);
 		}
-		else if (Utilities::endsWith(file, std::string(Utilities::BOARD_SUFF))) {
-
+		else if (Utilities::endsWith(file, std::string(Utilities::DLL_SUFF))) {
 			(*DLLFiles).push_back(file);
 		}
 	}

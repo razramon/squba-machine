@@ -11,9 +11,11 @@ typedef std::vector<std::vector<std::vector<char>>> boardType;
 
 class GameInfo
 {
+	static bool moreGamesLeft; //default is true, will be updated to false when all games were played (by GameManager::getGame())
 	int playerWon; //0 if playerA won, 1 if playerB, **-1** if no player won!!
 	std::pair<std::string, std::string> dllNames; //.first is the dll (name) of playerA, .second is playerB's dll (name)
-	std::pair<int, int> playersScore; ////.first is playerA's score, .second is playerB's score
+	std::pair<int, int> playersScore; //.first is playerA's score, .second is playerB's score
+
 
 public:
 
@@ -55,6 +57,16 @@ public:
 	 * Returns the DLLs names
 	 */
 	std::pair<std::string, std::string> getPlayerNames() const;
+
+	/*
+	 * Returns value of moreGamesLeft
+	 */
+	static bool getMoreGamesLeft();
+
+	/*
+	 * Sets value of moreGamesLeft
+	 */
+	static void setMoreGamesLeft(bool val);
 
 	GameInfo(int playerWon,const std::pair<std::string, std::string>& dllNames, const std::pair<int, int>& playersScore);
 	~GameInfo();

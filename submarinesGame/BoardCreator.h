@@ -51,12 +51,12 @@ public:
 	static bool checkNeighbourShips(std::shared_ptr<boardType> board, int currentRow, int currentCol, int currentDepth, int numRows, int numCols, int numDepth);
 	static std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> checkBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
 	static void getDimentions(int& numRows, int& numCols, int& numDepth, std::string line);
-	static std::shared_ptr<boardType> getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth);
+	static std::unique_ptr<boardType> getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth);
 
 
 	static bool findBoardFile(const char* path, size_t pathLen, char** boardFile);
 	static std::unique_ptr<boardType>& createBoard(int numRows, int numCols, int numDepth);
-	//static char*** copyBoard(const char** board, int numRows, int numCols, int numDepth);
+	static std::unique_ptr<boardType> copyBoard(const std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth);
 	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
 	/*
 	* Returns a clean (without unnecessary letters) board represnting both players' ships.

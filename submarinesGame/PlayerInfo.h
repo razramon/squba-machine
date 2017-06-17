@@ -21,13 +21,12 @@ struct Round {
 };
 
 class PlayerInfo {
-	int playerNumber;
-	std::string playerName;
+	std::string playerName; //playerName is the dll's name..
 	std::vector<Round> rounds; //contains all rounds information of this player
 
 public:
 
-	PlayerInfo(int playerNumber, std::string playerName);
+	PlayerInfo(std::string playerName);
 	~PlayerInfo() = default;
 	
 	/*

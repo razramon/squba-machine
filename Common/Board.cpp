@@ -1,12 +1,21 @@
 #include "Board.h"
 
-Board::Board(int rows, int cols, int depth, std::shared_ptr<boardType> board, int playerNum)
+Board::Board(int rows, int cols, int depth, std::unique_ptr<boardType> board, int playerNum)
 {
 	_rows = rows;
 	_cols = cols;
 	_depth = depth;
-	gameBoard = board;
+	gameBoard = std::move(board);
 	_playerNumber = playerNum;
+}
+
+Board::Board(const std::unique_ptr<Board>& ptrToboardToCopy)
+{
+	_rows = ptrToboardToCopy->_rows;
+	_cols = ptrToboardToCopy->_cols;
+	_depth = ptrToboardToCopy->_depth;
+	gameBoard = std::move(BoardCreator::copyBoard((ptrToboardToCopy->gameBoard), _rows, _cols, _depth));
+	_playerNumber = ptrToboardToCopy->_playerNumber;
 }
 
 Board::~Board()
@@ -24,5 +33,10 @@ char Board::charAt(Coordinate c) const
 		}
 	}
 	return ' ';
+}
+
+void Board::setPlayerNumber(int playerNumber)
+{
+	_playerNumber = playerNumber;
 }
 

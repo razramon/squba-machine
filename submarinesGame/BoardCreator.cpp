@@ -532,7 +532,7 @@ void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, s
 * This Function returns a pointer to a 3D-game board
 * TODO:: update it accurding to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61341
 */
-std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
+std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
 {
 	//opening boardfile:
 	std::ifstream bfile(boardFile);
@@ -565,7 +565,7 @@ std::shared_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 		throw Exception("Error: wrong board dimentions format");
 	}
 
-	std::shared_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
+	std::unique_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
 
 	int depth = 0;
 	while (depth < numDepth)
@@ -741,25 +741,28 @@ std::unique_ptr<boardType>& BoardCreator::createBoard(int numRows, int numCols, 
 			}
 		}
 	}
-	return ;
+	return board;
 }
 
 /*
-* Creates a copy of "board" - Allocates memory for that copy.
-* User of this function should delete the memory allocated in it using "freeBoard"!
+* Returns a copy of "board"
 */
-//char** BoardCreator::copyBoard(const char** board, int numRows, int numCols)
-//{
-//	char** retBoard = createBoard(numRows, numCols);
-//	for (int row = 0; row < numRows; row++)
-//	{
-//		for (int col = 0; col < numCols; col++)
-//		{
-//			retBoard[row][col] = board[row][col];
-//		}
-//	}
-//	return retBoard;
-//}
+std::unique_ptr<boardType> BoardCreator::copyBoard(const std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth)
+{
+	std::unique_ptr<boardType> retBoard = std::move(createBoard(numRows, numCols,numDepth));
+	for (int depth = 0; depth < numDepth; depth++)
+	{
+		for (int row = 0; row < numRows; row++)
+		{
+			for (int col = 0; col < numCols; col++)
+			{
+				(*retBoard)[depth][row][col] = (*board)[depth][row][col];
+			}
+		}
+	}
+
+	return retBoard;
+}
 
 /*Prints board layer by layer:*/
 void BoardCreator::printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth)

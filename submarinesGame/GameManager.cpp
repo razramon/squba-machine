@@ -7,19 +7,22 @@ bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, 
 	return playerAWinRate > playerBWinRate;
 }
 
-
+/*
+ * TODO:: edit function, change signature: because GameInfo doesn't contain GameData (to create a new Game)
+ */
 void GameManager::runGameThread(std::shared_ptr<GameInfo> gameInfo) {
 
 	// Infinite loop - only stop when there is no more games in the game manager
-	while (gameInfo->getPlayerWon() != -1) {
+	while (gameInfo->getMoreGamesLeft()) {
 
 		// Create a new game, running it and then requesting another
 		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
 		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
-
+		newGame->game();
 		this->getGame(gameInfo);
 	}
 }
+
 
 void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 
@@ -28,13 +31,12 @@ void GameManager::getGame(std::shared_ptr<GameInfo> game) {
 	lock.lock();
 
 	// Check if there are games left unplayed
-	if (this->gameNumber >= (*this->allGamesData).size()) {
-
-		game->setPlayerWon(-1);
+	if (gameNumber >= allGamesData.size()) { //no more games left!
+		game->setMoreGamesLeft(false);
 	}
 	else {
 
-		game = (*this->allGamesData)[this->gameNumber];
+		game = std::move(allGamesData[gameNumber]);
 	}
 	gameNumber++;
 
@@ -46,6 +48,7 @@ void GameManager::setNumberThreads(int numberThreads) {
 	this->numberThreads = numberThreads;
 }
 
+//TODO:: "startGames()" might be problamatic when there are more threads than games
 void GameManager::startGames() {
 
 	// For the getGame - will know what game wasn't played yet
@@ -53,65 +56,88 @@ void GameManager::startGames() {
 
 	// Creating threads according to the number of threads
 	for (int indexThread = 0; indexThread < this->numberThreads; indexThread++) {
+		std::thread gameThread(&GameManager::runGameThread, allGamesData[indexThread]);
 
-		std::thread gameThread(&GameManager::runGameThread, (*this->allGamesData)[indexThread]);
+
 		gameThread.join();
 	}
 }
 
-GameManager::GameManager(ptrToVecOfGameInfoPtrs allGamesData, ptrToVecOfPlayerInfoPtrs allPlayersInfo) :
-			numberThreads(NOT_INIT), gameNumber(NOT_INIT), roundNumber(1), allGamesData(allGamesData),
-			allPlayersInfo(allPlayersInfo){
+GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::string>> boardFiles) :
+			numberThreads(NOT_INIT), gameNumber(NOT_INIT), roundNumber(1),
+			allGamesData(), allGamesResults(), allPlayersInfo(),
+			dlls(), boards()
+{
+		/*TODO:: 
+		* might need a signature change (get number of threads as an argument?)
+		* create all dlls using loadAllDlls(),
+		* create all boards using loadAllBoards()
+		* create combination using divideToGames()
+		* run the tournament!
+		*/
+
 }
 
-void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, ptrToVecOfPlayerInfoPtrs allPlayersInfo) {
-
-	try
+void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles) {
+	std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
+	for (int i = 0; i < (*dllsFiles).size(); ++i)
 	{
-		std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
-		for (int i = 0; i < (*dllsFiles).size(); ++i)
+		// Load dynamic library
+		HINSTANCE hDll = LoadLibraryA((*dllsFiles).at(i).c_str());
+		if (!hDll)
 		{
-			// Load dynamic library
-			HINSTANCE hDll = LoadLibraryA((*dllsFiles).at(i).c_str());
-			if (!hDll)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, (*dllsFiles).at(i)));
-			}
-			std::unique_ptr<IBattleshipGameAlgo> getAlgoFunc = std::make_unique<IBattleshipGameAlgo>((GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm"));
-			if (!getAlgoFunc)
-			{
-				throw Exception(exceptionInfo(CANNOT_LOAD_DLL, (*dllsFiles).at(i)));
-			}
-			
-			(*dlls).push_back(getAlgoFunc);
+			//TODO:: add print to logger here
+			continue;
+		}
+		GetAlgoFuncType getAlgoFunc = reinterpret_cast<GetAlgoFuncType>(GetProcAddress(hDll, "GetAlgorithm"));
+		if (!getAlgoFunc)
+		{
+			//TODO:: add print to logger here
+			continue;
+		}
+		std::string playerName = ((*dllsFiles).at((*dllsFiles).size())).substr(((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"), ((*dllsFiles).at((*dllsFiles).size())).length());
+		dlls.push_back(std::make_unique<std::pair<std::string, GetAlgoFuncType>>(std::make_pair(playerName,getAlgoFunc)));
+		allPlayersInfo.push_back(std::make_shared<PlayerInfo>(playerName));
+	}
+}
 
-			std::string playerName = (*dllsFiles).at(i).substr((*dllsFiles).at(i).find_first_of('.')).substr(0, (*dllsFiles).at(i).find_first_of('.'));
-			(*allPlayersInfo).push_back(std::make_shared<PlayerInfo>(i, playerName));
+void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardFiles)
+{
+	for (std::vector<std::string>::iterator boardPath = (*boardFiles).begin(); boardPath != (*boardFiles).end(); ++boardPath)
+	{
+		try
+		{
+			int rows, cols, depth;
+			std::unique_ptr<boardType> baseBoard = std::move(BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth));
+			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, baseBoard, NOT_INIT);
+			(*b0).setPlayerNumber(PLAYER_A); //so that the first board of the pair will match playerA
+			std::unique_ptr<Board> b1 = std::make_unique<Board>(b0);
+			(*b1).setPlayerNumber(PLAYER_B); //so that the second board of the pair will match playerB
+			auto pairBoards = std::make_pair<std::shared_ptr<Board>, std::shared_ptr<Board>>(std::move(b0), std::move(b1));
+			boards.push_back(std::make_unique<std::pair<std::shared_ptr<Board>, std::shared_ptr<Board>>>(std::move(pairBoards)));
+		} catch(std::exception& e)
+		{
+			//TODO:: add print to logger
+			continue;
 		}
 	}
-	catch (std::exception& e)
-	{
-		throw e;
-	}
 }
 
-void GameManager::divideToGames(std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls, std::shared_ptr<std::vector<Board>> boards) {
+
+void GameManager::divideToGames() {
 
 	// Loop over the first dll to enters
-	for (int i = 0; i < (*dlls).size(); i++) {
+	for (int i = 0; i < dlls.size(); i++) {
 
 		// Loop over the second dll to enter
-		for (int j = i + 1; j < (*dlls).size(); j++) {
+		for (int j = i + 1; j < dlls.size(); j++) {
 
 			// Loop over the boards to enter
-			for (int indexBoard = 0; indexBoard < (*boards).size(); indexBoard++) {
+			for (int indexBoard = 0; indexBoard < boards.size(); indexBoard++) {
 
 				// Creating a new pointer, pushing the games to the collection
-				
-				std::unique_ptr<GameInfo> game = std::make_unique<GameInfo>((*dlls)[i], (*dlls)[j], (*boards)[indexBoard]);
-				allGamesData.push_back(std::move(game));
-				game = std::make_unique<GameInfo>((*dlls)[j], (*dlls)[i], (*boards)[indexBoard]);
-				allGamesData.push_back(std::move(game));
+				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[i]), (*dlls[j]), (*boards[indexBoard])));
+				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[j]), (*dlls[i]), (*boards[indexBoard])));
 			}
 		}
 	}
@@ -129,18 +155,16 @@ void GameManager::printRound() {
 	int maxLengthName = 0;
 
 	// Checking if all the players have played the round. if not, don't print. if so, print.
-	for (std::shared_ptr<PlayerInfo> player : *(this->allPlayersInfo)) {
+	for (std::shared_ptr<PlayerInfo> player : allPlayersInfo) {
 
 		if (!player->hasGameInRound(this->roundNumber))
 		{
 			canPrint = false;
 			break;
 		}
-		else {
-
-			playersToPrint.push_back(std::make_pair(player->getPlayerName(), player->getRoundPoints(this->roundNumber)));
-			maxLengthName = maxLengthName > player->getPlayerName().length() ? maxLengthName : player->getPlayerName().length();
-		}
+		//otherwise:
+		playersToPrint.push_back(std::make_pair(player->getPlayerName(), player->getRoundPoints(this->roundNumber)));
+		maxLengthName = maxLengthName > player->getPlayerName().length() ? maxLengthName : player->getPlayerName().length();
 	}
 
 	std::sort(playersToPrint.begin(), playersToPrint.end(), sortPlayers);

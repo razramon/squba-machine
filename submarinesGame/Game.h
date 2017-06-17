@@ -23,6 +23,7 @@ class Game
 	std::pair<int, int> shipSunk;
 	int numRows, numCols, numDepth;
 	std::pair <std::string, std::string> dllNames;
+	std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board; // <board for playerA, board for playerB>
 
 	/*
 	 * Returns TRUE if current playerPlaying has an attack, if he does - updates attackOfPlayer
@@ -57,8 +58,10 @@ class Game
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 public:
-	Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA, std::shared_ptr<IBattleshipGameAlgo> playerB,
-		std::shared_ptr<Board> board, std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips, int numRows, int numCols, int numDepth);
+	Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA,
+		std::shared_ptr<IBattleshipGameAlgo> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
+		std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips,
+		int numRows, int numCols, int numDepth);
 	~Game() = default;
 
 	int isHit(int row, int col, int depth, char& letter) const;

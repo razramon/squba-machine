@@ -22,20 +22,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-
-	// TODO: init all the boards and dlls, add each of them to the vector of gameinfo.
-	// each thread will run forever/ until we tell them to stop, getting a new game each time.
-	std::shared_ptr<std::vector<std::shared_ptr<boardType>>> boards;
-
 	/*BoardCreator::checkBoards(boardFiles, boards);*/
 
 
 	std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls;
-	ptrToVecOfPlayerInfoPtrs allPlayersInfo;
-
-	GameManager::loadAllDlls(DLLFiles, dlls, allPlayersInfo); // In this function we will also count and tag them
-
-	GameManager::divideToGames(dlls, boards, allGamesData);
 
 
 	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData, allPlayersInfo);

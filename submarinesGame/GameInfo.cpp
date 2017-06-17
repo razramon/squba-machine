@@ -1,5 +1,6 @@
 #include "GameInfo.h"
 
+bool GameInfo::moreGamesLeft = true;
 
 int GameInfo::getPlayerScore(int player) const
 {
@@ -61,6 +62,16 @@ std::unique_ptr<std::string> GameInfo::getPlayerWonName() const
 std::pair<std::string, std::string> GameInfo::getPlayerNames() const
 {
 	return this->dllNames;
+}
+
+bool GameInfo::getMoreGamesLeft()
+{
+	return moreGamesLeft;
+}
+
+void GameInfo::setMoreGamesLeft(bool val)
+{
+	moreGamesLeft = val;
 }
 
 GameInfo::GameInfo(int playerWon, const std::pair<std::string, std::string>& dllNames, const std::pair<int, int>& playersScore):

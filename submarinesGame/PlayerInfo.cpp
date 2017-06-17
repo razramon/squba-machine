@@ -1,8 +1,8 @@
 #include "PlayerInfo.h"
 
 
-PlayerInfo::PlayerInfo(int playerNumber, std::string playerName) :
-	playerNumber(playerNumber), playerName(playerName)
+PlayerInfo::PlayerInfo(std::string playerName) :
+	playerName(playerName), rounds()
 {
 }
 
@@ -26,7 +26,7 @@ void PlayerInfo::addNewGame(std::shared_ptr<GameInfo> game)
 		newRound.numberWin = 0;
 		newRound.numberLose = 0;
 	}
-	newRound.pointsFor = game->getPlayerScore(playerNumber);
+	newRound.pointsFor = game->getPlayerScore(playerName);
 	newRound.pointsAgainst = game->getOtherPlayerScore(playerName);
 
 	if (rounds.size() > 0)
