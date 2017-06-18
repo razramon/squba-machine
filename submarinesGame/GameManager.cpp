@@ -15,36 +15,23 @@ void GameManager::runGameThread() {
 
 	// Infinite loop - only stop when there is no more games in the game manager
 	while (gameNumber < allGamesData.size()) {
-		/* ******NOT FINISHED YET!!!******
+
 		// Create a new game, run it and then request another
 		std::shared_ptr<GameBasicData> gameBD = nullptr;
-		getGame(gameBD);
+		getGame(gameBD); //getGame() does the lock stuff
+
 		if( gameBD == nullptr)
 		{
 			break;
 		}
-		//std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
-		Game g = new Game((*gameBD).dllA.first, (*gameBD).dllB.first, (*gameBD).dllA.second, (*gameBD).dllB.second,
-				*((*gameBD).board), );
-		//std::unique_ptr<Game> newGame = std::make_unique<Game>(
-		newGame->game();
-		*/
 
-		// Lock for the threads, get the game from all the games
-		lockMutex.lock();
-
-		// Create a new game, running it and then requesting another
-		std::pair<std::shared_ptr<IBattleshipGameAlgo>, std::shared_ptr<IBattleshipGameAlgo>> algos = gameInfo->getPlayersAlgos();
-		std::unique_ptr<Game> newGame = std::make_unique<Game>(algos.first, algos.second, gameInfo->getBoard(), );
-
-		// Lock for the threads, get the game from all the games
-		lockMutex.lock();
-
-		this->addNewGameInfo(newGame->game());
+		std::unique_ptr<Game> g = std::make_unique<Game>((*gameBD).dllA.first, (*gameBD).dllB.first,
+				std::move((*gameBD).dllA.second), std::move((*gameBD).dllB.second), (*(*gameBD).board),
+				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
+				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
+		allGamesResults.push_back(std::move(g->game()));
+		addNewGameInfo()//TODO:: complete!
 		this->printRound();
-		this->getGame(gameInfo);
-
-		lockMutex.unlock();
 	}
 }
 
@@ -58,18 +45,24 @@ void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 	// Check if there are games left unplayed
 	if (gameNumber >= allGamesData.size()) { //no more games left!
 		gameBasicData = nullptr;
-	} else
+	}
+	else
 	{
 		gameBasicData = std::move(allGamesData[gameNumber]);
 		gameNumber++;
 	}
-void GameManager::addNewGameInfo(std::unique_ptr<GameInfo> game) {
+
+	lock.unlock();
+}
+
+void GameManager::addNewGameInfo(std::unique_ptr<GameInfo>& game) {
 
 	for (int indexPlayer = 0; indexPlayer < this->allPlayersInfo.size(); indexPlayer++) {
 
-		if (this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().first || this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) {
-
-			this->allPlayersInfo.at(indexPlayer)->addNewGame(std::move(game));
+		if (this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().first ||
+			this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) 
+		{
+			this->allPlayersInfo.at(indexPlayer)->addNewGame(game);
 		}
 	}
 	
@@ -178,8 +171,8 @@ void GameManager::divideToGames() {
 			for (int indexBoard = 0; indexBoard < boards.size(); indexBoard++) {
 
 				// Creating a new pointer, pushing the games to the collection
-				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[i]), (*dlls[j]), (*boards[indexBoard])));
-				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[j]), (*dlls[i]), (*boards[indexBoard])));
+				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[i]), (*dlls[j]), (*boards[indexBoard]), indexBoard));
+				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[j]), (*dlls[i]), (*boards[indexBoard]), indexBoard));
 			}
 		}
 	}

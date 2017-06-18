@@ -25,10 +25,11 @@ class GameManager
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllA;
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllB;
 		std::shared_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >> board;
+		int indexOfGameShips;
 
 		GameBasicData(std::pair<std::string, GetAlgoFuncType>& algoA, std::pair<std::string, GetAlgoFuncType>& algoB,
-			std::pair< std::shared_ptr<Board>,std::shared_ptr<Board>> board) :
-			board(std::make_shared<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board>>>(board))
+			std::pair< std::shared_ptr<Board>,std::shared_ptr<Board>> board, int indexOfShips) :
+			board(std::make_shared<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board>>>(board)), indexOfGameShips(indexOfShips)
 		{
 			std::string dllNameA(algoA.first);
 			dllA = std::make_pair<std::string , std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameA), std::make_unique<IBattleshipGameAlgo>(*(*algoA.second)()));
@@ -43,14 +44,19 @@ class GameManager
 	int roundNumber;
 	//A vector to contain all game combinations:
 	std::vector<std::unique_ptr<GameBasicData>> allGamesData; 
+	
 	//A vector that will contain all game results:
 	vecOfGameInfoPtrs allGamesResults; 
+	
 	//A vector that will contain all players 
 	vecOfPlayerInfoPtrs allPlayersInfo;
+	
 	//A vector of pairs: <dll name, (not initiaized)dll>
 	std::vector<std::unique_ptr<std::pair<std::string,GetAlgoFuncType>>> dlls; 
+	
 	//A vector of ptrs to all pairs of valid Boards: <Board to send to PLAYER_A, Board to sent to PLAYER_B>    
 	std::vector<std::unique_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >>> boards;
+	
 	//for each board (represented as a pair), boardsShips[i] = ships of boards[i]
 	std::vector<std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>>> boardsShips;
 
@@ -105,5 +111,5 @@ public:
 
 	void printRound();
 
-	
+	void addNewGameInfo(std::unique_ptr<GameInfo>& game);
 };
