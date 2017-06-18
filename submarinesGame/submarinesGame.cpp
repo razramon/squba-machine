@@ -22,24 +22,15 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	/*BoardCreator::checkBoards(boardFiles, boards);*/
-
-
-	std::shared_ptr<std::vector<std::unique_ptr<IBattleshipGameAlgo>>> dlls;
-
-
-	shared_ptr<GameManager> manager = make_shared<GameManager>(allGamesData, allPlayersInfo);
+	shared_ptr<GameManager> manager = make_shared<GameManager>(DLLFiles, boardFiles);
 
 	// Saving thread for the logger
 	manager->setNumberThreads(threadsNum - 1);
 
-	manager->startGames();
 
 	try
 	{
-		////Game* firstGame = new Game(board, *filesFound);
-		//firstGame->game();
-		//delete firstGame;
+		manager->startGames();
 	}
 	catch (std::exception& e)
 	{
