@@ -58,5 +58,12 @@ void Logger::log(const string& inMessage, const string& inLogLevel)
 
 void Logger::logHelper(const std::string& inMessage, const std::string& inLogLevel)
 {
+	time_t t = time(nullptr);
+	struct tm timeinfo;
+	int rc = localtime_s(&timeinfo, &t);
+
+	if (!rc)
+		mOutputStream << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H:%M:%S") << "] ";
+
 	mOutputStream << inLogLevel << ": " << inMessage << endl;
 }
