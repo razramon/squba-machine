@@ -142,7 +142,10 @@ void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFil
 			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
-		std::string playerName = ((*dllsFiles).at(i)).substr(((*dllsFiles).at(i)).find_last_of("/\\")+1, ((*dllsFiles).at(i)).length());
+		size_t firstIndex = ((*dllsFiles).at(i)).find_last_of("/\\") + 1;
+		size_t lastIndex = ((*dllsFiles).at(i)).find_last_of(".dll") - 4;
+		std::string playerName = ((*dllsFiles).at(i)).substr(firstIndex, (lastIndex - firstIndex)+1);
+		std::cout << "playerName is: " << playerName << std::endl;
 		dlls.push_back(std::make_unique<std::pair<std::string, GetAlgoFuncType>>(std::make_pair(playerName,getAlgoFunc)));
 		allPlayersInfo.push_back(std::make_shared<PlayerInfo>(playerName));
 	}
