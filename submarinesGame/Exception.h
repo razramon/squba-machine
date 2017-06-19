@@ -12,5 +12,5 @@ public:
 	explicit Exception(const std::string msgInfo);
 	explicit Exception(const char* msgInfo);
 	virtual ~Exception();
-	virtual const char* what() const;
+	virtual const char* what() const override;
 };

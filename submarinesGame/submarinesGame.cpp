@@ -10,21 +10,19 @@ int main(int argc, char* argv[])
 
 	int threadsNum = THREADS_DEFAULT_NUMBER;
 
-	shared_ptr<std::vector<std::string>> filesFound = make_shared<vector<string>>(Utilities::buildPath(argc, argv, threadsNum));
-	shared_ptr<std::vector<std::string>> boardFiles;
-	shared_ptr<std::vector<std::string>> DLLFiles;
-	shared_ptr<std::vector<std::shared_ptr<GameInfo>>> allGamesData;
-
-	Utilities::divideToDLLAndBoard(filesFound, boardFiles, DLLFiles);
+	unique_ptr<std::vector<std::string>> boardFiles = make_unique<std::vector<std::string>>();
+	unique_ptr<std::vector<std::string>> DLLFiles = make_unique<std::vector<std::string>>();
 
 	//print errors, according to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=63147#p93599
-	if ((*filesFound).size() <= 2 || (*boardFiles).size() == 0 || (*DLLFiles).size() < 2)
+	try
 	{
-
-
-		return 1;
+		Utilities::buildPath(argc, argv, threadsNum, DLLFiles, boardFiles);
+	} catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
 	}
 
+	//TODO:: check from here down (all of the code)
 	shared_ptr<GameManager> manager = make_shared<GameManager>(DLLFiles, boardFiles);
 
 	// Saving thread for the logger
