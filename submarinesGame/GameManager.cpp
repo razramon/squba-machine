@@ -3,8 +3,8 @@
 
 bool GameManager::sortPlayers(const std::pair<std::string, std::vector<int>>& playerA,const std::pair<std::string, std::vector<int>>& playerB) {
 
-	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
-	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
+	double playerAWinRate = static_cast<double>(playerA.second.at(0)) / (playerA.second.at(0) + playerA.second.at(1));
+	double playerBWinRate = static_cast<double>(playerB.second.at(0)) / (playerB.second.at(0) + playerB.second.at(1));
 	return playerAWinRate > playerBWinRate;
 }
 
@@ -142,7 +142,7 @@ void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFil
 			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
-		std::string playerName = ((*dllsFiles).at(i)).substr(((*dllsFiles).at(i)).find_last_of("/\\"), ((*dllsFiles).at(i)).length());
+		std::string playerName = ((*dllsFiles).at(i)).substr(((*dllsFiles).at(i)).find_last_of("/\\")+1, ((*dllsFiles).at(i)).length());
 		dlls.push_back(std::make_unique<std::pair<std::string, GetAlgoFuncType>>(std::make_pair(playerName,getAlgoFunc)));
 		allPlayersInfo.push_back(std::make_shared<PlayerInfo>(playerName));
 	}
@@ -254,7 +254,7 @@ void GameManager::printRound() {
 		playerScores = printPlayer.second;
 		std::cout << std::left << std::setw(6) << indexRow << "." << std::setw(maxLengthName + 4) << printPlayer.first;
 		std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
-		std::cout << std::left << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
+		std::cout << std::left << std::setw(8) << (static_cast<double>(playerScores.at(0)) / (playerScores.at(1) + playerScores.at(0)) * 100);
 		std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
 		indexRow++;
 	}
