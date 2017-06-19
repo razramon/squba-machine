@@ -21,16 +21,23 @@ Board::~Board()
 {
 }
 
+//Gets coordinated indexed from 1!!
 char Board::charAt(Coordinate c) const
 {
-	char letter = (*gameBoard)[c.depth][c.row][c.col];
-	if (Ship::isShip(letter))
+	if (1<=c.row && c.row <=_rows &&
+		1<=c.col && c.col <=_cols &&
+		1<=c.depth && c.depth<=_depth) //checks its a valid coordinate
 	{
-		//player B's letter (small letters), player A's letters are big letters
-		if ((islower(letter) && _playerNumber==PLAYER_B) || ((!islower(letter)) && _playerNumber==PLAYER_A )) {
-			return letter;
+		char letter = (*gameBoard)[c.depth-1][c.row-1][c.col-1];
+		if (Ship::isShip(letter))
+		{
+			//player B's letter (small letters), player A's letters are big letters
+			if ((islower(letter) && _playerNumber == PLAYER_B) || ((!islower(letter)) && _playerNumber == PLAYER_A)) {
+				return letter;
+			}
 		}
 	}
+
 	return blank_space;
 }
 

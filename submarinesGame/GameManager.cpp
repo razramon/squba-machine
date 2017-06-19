@@ -23,7 +23,7 @@ void GameManager::runGameThread() {
 		}
 
 		std::unique_ptr<Game> g = std::make_unique<Game>((*gameBD).dllA.first, (*gameBD).dllB.first,
-				std::move((*gameBD).dllA.second), std::move((*gameBD).dllB.second), (*(*gameBD).board),
+				(*gameBD).dllA.second, (*gameBD).dllB.second, (*(*gameBD).board),
 				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
 				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
 

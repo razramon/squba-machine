@@ -58,9 +58,11 @@ class Game
 
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
+	static void initializePlayer(IBattleshipGameAlgo* algo, int p_Number, BoardData& b);
+
 public:
-	Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattleshipGameAlgo> playerA,
-		std::shared_ptr<IBattleshipGameAlgo> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
+	Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFuncType> playerA,
+		std::shared_ptr<GetAlgoFuncType> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
 		std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips,
 		int numRows, int numCols, int numDepth);
 	~Game();
