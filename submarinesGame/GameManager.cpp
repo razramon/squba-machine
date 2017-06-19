@@ -195,6 +195,7 @@ void GameManager::divideToGames() {
 			for (int indexBoard = 0; indexBoard < boards.size(); indexBoard++) {
 
 				// Creating a new pointer, pushing the games to the collection
+
 				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[i]), (*dlls[j]), (*boards[indexBoard]), indexBoard));
 				allGamesData.push_back(std::make_unique<GameBasicData>((*dlls[j]), (*dlls[i]), (*boards[indexBoard]), indexBoard));
 			}
