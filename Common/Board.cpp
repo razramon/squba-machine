@@ -1,12 +1,11 @@
 #include "Board.h"
 
-Board::Board(int rows, int cols, int depth, std::unique_ptr<boardType> board, int playerNum)
+Board::Board(int rows, int cols, int depth, std::unique_ptr<boardType> board, int playerNum):
+	gameBoard(std::move(board)), _playerNumber(playerNum)
 {
 	_rows = rows;
 	_cols = cols;
 	_depth = depth;
-	gameBoard = std::move(board);
-	_playerNumber = playerNum;
 }
 
 Board::Board(const std::unique_ptr<Board>& ptrToboardToCopy)

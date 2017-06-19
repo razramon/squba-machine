@@ -5,11 +5,12 @@ GameBasicData::GameBasicData(std::pair<std::string, GetAlgoFuncType>& algoA, std
 			board(std::make_shared<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board>>>(board)), indexOfGameShips(indexOfShips)
 {
 	std::string dllNameA(algoA.first);
-	dllA = std::make_pair<std::string , std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameA), std::make_unique<IBattleshipGameAlgo>(*(*algoA.second)()));
+	std::unique_ptr<IBattleshipGameAlgo> playerA_algo((algoA.second()));
+	dllA = std::make_pair<std::string , std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameA),std::move(playerA_algo));
 	std::string dllNameB(algoB.first);
-	dllB = std::make_pair<std::string, std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameB), std::make_unique<IBattleshipGameAlgo>(*(*algoB.second)()));
+	std::unique_ptr<IBattleshipGameAlgo> playerB_algo((algoB.second()));
+	dllB = std::make_pair<std::string, std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameB), std::move(playerB_algo));
 }
-
 
 GameBasicData::~GameBasicData()
 {
