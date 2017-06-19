@@ -6,6 +6,10 @@ PlayerInfo::PlayerInfo(std::string playerName) :
 {
 }
 
+PlayerInfo::~PlayerInfo()
+{
+}
+
 void PlayerInfo::addNewGame(std::unique_ptr<GameInfo>& game)
 {
 	int enemyPoints = game->getOtherPlayerScore(playerName);

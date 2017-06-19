@@ -12,6 +12,7 @@
 #include <iostream>
 #include <iomanip>
 #include <atomic>
+#include "GameBasicData.h"
 
 typedef std::vector<std::shared_ptr<GameInfo>> vecOfGameInfoPtrs;
 typedef std::vector<std::shared_ptr<PlayerInfo>> vecOfPlayerInfoPtrs;
@@ -19,26 +20,6 @@ static const int NOT_INIT = -1;
 
 class GameManager
 {
-	class GameBasicData
-	{
-		friend class GameManager;
-
-		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllA;
-		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllB;
-		std::shared_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >> board;
-		int indexOfGameShips;
-
-		GameBasicData(std::pair<std::string, GetAlgoFuncType>& algoA, std::pair<std::string, GetAlgoFuncType>& algoB,
-			std::pair< std::shared_ptr<Board>,std::shared_ptr<Board>> board, int indexOfShips) :
-			board(std::make_shared<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board>>>(board)), indexOfGameShips(indexOfShips)
-		{
-			std::string dllNameA(algoA.first);
-			dllA = std::make_pair<std::string , std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameA), std::make_unique<IBattleshipGameAlgo>(*(*algoA.second)()));
-			std::string dllNameB(algoB.first);
-			dllB = std::make_pair<std::string, std::unique_ptr<IBattleshipGameAlgo>>(std::move(dllNameB), std::make_unique<IBattleshipGameAlgo>(*(*algoB.second)()));
-		}
-		~GameBasicData() = default;
-	};
 	
 	int numberThreads;
 	std::atomic<int> gameNumber;
@@ -66,8 +47,6 @@ class GameManager
 	 * Returns true iff playerA's win rate > playerB's win rate
 	 */
 	static bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB);
-
-
 
 	/*
 	* Loads all DLLs into "dlls" vector, creates all players (dlls) info in "allPlayersInfo"

@@ -120,6 +120,10 @@ Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<IBattlesh
 	}
 }
 
+Game::~Game()
+{
+}
+
 int Game::isHit(int row, int col, int depth, char& letter) const
 {
 	std::shared_ptr<Ship> s = nullptr;
