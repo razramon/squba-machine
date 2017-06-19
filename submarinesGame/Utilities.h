@@ -26,8 +26,7 @@ class Utilities
 	enum Arguments
 	{
 		Path,
-		Quiet,
-		Delay,
+		Threads,
 		Number
 	};
 public:
@@ -42,24 +41,32 @@ public:
 	static std::istream& getAllKindsOfLine(std::istream& inputStream, std::string& line);
 	static std::string delSpaces(std::string& str);
 	static std::string workingDirectory();
+
+	/*
+	 *
+	 */
 	static bool isValidPath(const std::string path, std::string& boardFile);
 	static void printNotFoundFileErrors(bool pathIsValid, const std::string& path, const std::vector<std::string>& filesFound);
+	
+
 	/*
-	* Returns a vector of size 3, containing:
-	*				index 0 - full path to player A's dll
-	*				index 1 - full path to player B's dll
-	*				index 2 - full path to board.
-	*	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
+	* Returns a vector of strings, representing all files found in path
+	* PRINTS errors to screen:
+	*		If path is wrong, print "Wrong path: <path>"
+	*		If no (.sboard) files were found, prints: "No board files (*.sboard) looking in path: <path>"
+	*		If number of dlls who were found is less than 2, prints: "Missing algorithm (dll) files looking in path: <path> (needs at least two)"
 	*/
-	static std::vector<std::string>* buildPath(int argc, char* argv[], int& threadsNum);
+	static std::unique_ptr<std::vector<std::string>> buildPath(int argc, char* argv[], int& threadsNum);
+
 	/*
 	* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files
 	* that end with suffix - oredered lexicographically.
 	* Returns 0/-1 if no files where found / an error accured,
 	*			1/2 if 1/2 files where found
 	*/
-	static int find2FilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix);
 	static int findAllFilesWithSuf(const char * path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix);
+	
+	
 	/*
 	* Maintains "filesFound" to hold at most 2 files,
 	* The ones which are first lexicographically.
@@ -75,9 +82,12 @@ public:
 	* NOTE: isdigit() might throw an exception
 	*/
 	static bool isNumeric(std::string& s);
+	
 	/*
 	* Gets a string: checks if it is:
-	*	"-quiet" / "-delay" / a number / otherwise - the default is to recognize it as a path
+	*	"-threads" / a number, otherwise - the default is to recognize it as a path
+	*	Note: the format to pass "-threads" argument is: "-threads <number of threads>"
+	*	according to this: http://moodle.tau.ac.il/mod/forum/discuss.php?d=62283#p92869
 	*/
 	static Arguments getTypeOfArg(std::string argu);
 

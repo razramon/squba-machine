@@ -11,6 +11,7 @@
 #include "PlayerInfo.h"
 #include <iostream>
 #include <iomanip>
+#include <atomic>
 
 typedef std::vector<std::shared_ptr<GameInfo>> vecOfGameInfoPtrs;
 typedef std::vector<std::shared_ptr<PlayerInfo>> vecOfPlayerInfoPtrs;
@@ -40,8 +41,9 @@ class GameManager
 	};
 	
 	int numberThreads;
-	int gameNumber;
-	int roundNumber;
+	std::atomic<int> gameNumber;
+	std::atomic<int> roundNumber;
+
 	//A vector to contain all game combinations:
 	std::vector<std::unique_ptr<GameBasicData>> allGamesData; 
 	
@@ -67,6 +69,7 @@ class GameManager
 
 public:
 	
+
 	void runGameThread();
 	
 	/*
@@ -81,7 +84,7 @@ public:
 	void setNumberThreads(int numberThreads);
 	
 	/*
-	 * TODO:: fix edge cases
+	 * Creates relevant number of threads and start the tournament
 	 */
 	void startGames();
 	
@@ -89,7 +92,8 @@ public:
 	 * Creates a new game manager: 
 	 *	Sets roundNumber to be 1.
 	 */
-	GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::string>> boardFiles);
+	GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
+			std::shared_ptr<std::vector<std::string>> boardFiles, int numOfThreads);
 	
 	/*
 	 * Loads all DLLs into "dlls" vector, creates all players (dlls) info in "allPlayersInfo"

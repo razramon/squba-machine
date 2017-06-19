@@ -17,8 +17,11 @@ int main(int argc, char* argv[])
 
 	Utilities::divideToDLLAndBoard(filesFound, boardFiles, DLLFiles);
 
-	if ((*filesFound).size() <= 2 || (*boardFiles).size() < 0 || (*DLLFiles).size() < 2)
+	//print errors, according to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=63147#p93599
+	if ((*filesFound).size() <= 2 || (*boardFiles).size() == 0 || (*DLLFiles).size() < 2)
 	{
+
+
 		return 1;
 	}
 

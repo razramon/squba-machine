@@ -8,9 +8,6 @@ bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, 
 	return playerAWinRate > playerBWinRate;
 }
 
-/*
- * TODO:: edit function, change signature: because GameInfo doesn't contain GameData (to create a new Game)
- */
 void GameManager::runGameThread() {
 
 	// Infinite loop - only stop when there is no more games in the game manager
@@ -30,18 +27,24 @@ void GameManager::runGameThread() {
 				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
 				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
 		std::unique_ptr<GameInfo> gameResult = g->game();
+		
+		addNewGameInfo(gameResult);
+		
+		//changing a shared resource has to be thread-safe: 
+		std::mutex lock;
+		lock.lock();
 		allGamesResults.push_back(std::move(gameResult));
-		addNewGameInfo(std::move(gameResult));//TODO:: complete!
+		lock.unlock();
+
 		this->printRound();
 	}
 }
 
-//TODO:: change it to change pointers to actual game
 void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 
 	// Lock for the threads, get the game from all the games
 	std::mutex lock;
-	lock.lock();
+	lock.lock(); //to make sure gameNumber doesn't change while we're checking it!
 
 	// Check if there are games left unplayed
 	if (gameNumber >= allGamesData.size()) { //no more games left!
@@ -49,8 +52,9 @@ void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 	}
 	else
 	{
-		gameBasicData = std::move(allGamesData[gameNumber]);
-		gameNumber++;
+		//Note: next line makes allGamesData[gameNumber] invalid (because we used move) - but that's OK: won't use it again
+		gameBasicData = std::move(allGamesData[gameNumber]); 
+		++gameNumber;
 	}
 
 	lock.unlock();
@@ -59,13 +63,12 @@ void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 
 // Add to the playerInfo a new gameData, for both players.
 void GameManager::addNewGameInfo(std::unique_ptr<GameInfo>& game) {
-
 	for (int indexPlayer = 0; indexPlayer < this->allPlayersInfo.size(); indexPlayer++) {
 
-		if (this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().first ||
-			this->allPlayersInfo.at(indexPlayer)->getPlayerName() == game->getPlayerNames().second) 
+		if (allPlayersInfo[indexPlayer]->getPlayerName() == game->getPlayerNames().first ||
+			allPlayersInfo[indexPlayer]->getPlayerName() == game->getPlayerNames().second) 
 		{
-			this->allPlayersInfo.at(indexPlayer)->addNewGame(game);
+			allPlayersInfo[indexPlayer]->addNewGame(game);
 		}
 	}
 	
@@ -76,39 +79,48 @@ void GameManager::setNumberThreads(int numberThreads) {
 	this->numberThreads = numberThreads;
 }
 
-//TODO:: "startGames()" might be problamatic when there are more threads than games
 void GameManager::startGames() {
 
 	this->gameNumber = 0;
 
+	int threadsToCreate = (allGamesData.size() < numberThreads) ? allGamesData.size() : numberThreads;
+	
 	// Creating threads according to the number of threads
-	for (int indexThread = 0; indexThread < this->numberThreads; indexThread++) {
+	// Note: in case there are more threads than games to play, creates only needed threads
+	for (int indexThread = 0; indexThread < threadsToCreate; indexThread++) {
 		std::thread gameThread(&GameManager::runGameThread);
 		gameThread.join(); //wait for all tournament to finish
 	}
 }
 
-GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, std::shared_ptr<std::vector<std::string>> boardFiles) :
-			numberThreads(NOT_INIT), gameNumber(NOT_INIT), roundNumber(1),
+GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
+	std::shared_ptr<std::vector<std::string>> boardFiles, int numOfThreads) :
+			numberThreads(numOfThreads), gameNumber(NOT_INIT), roundNumber(1),
 			allGamesData(), allGamesResults(), allPlayersInfo(),
 			dlls(), boards(), boardsShips()
 {
 
 	this->loadAllDlls(dllsFiles);
+	if (dlls.size() < 2)
+	{
+		//TODO:: i'm not sure if we need to write to the logger...
+		throw Exception("Error: not enough dlls were loaded");
+	}
+
 	this->loadAllBoards(boardFiles);
+	if (boards.size() == 0)
+	{		
+		//TODO:: i'm not sure if we need to write to the logger...
+		throw Exception("Error: no valid boards were found");
+	}
 	this->divideToGames();
 
-
-	//TODO: add printing of how many players and board there are, as said in the file. and printing of critical errors.
-
-		/*TODO:: 
-		* might need a signature change (get number of threads as an argument?)
-		* create all dlls using loadAllDlls(),
-		* create all boards using loadAllBoards()
-		* create combination using divideToGames()
-		* run the tournament!
-		*/
-
+	std::cout << "Number of legal players: " << this->allPlayersInfo.size() << std::endl;
+	std::cout << "Number of legal boards: " << this->boards.size() << std::endl;
+	
+	
+	//TODO: add printing of critical errors.(?)
+	//set all variables
 }
 
 void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles) {
@@ -164,7 +176,6 @@ void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardF
 		catch(std::exception& e)
 		{
 			Logger::instance().log("Could not load Board", Logger::kLogLevelError);
-			continue;
 		}
 	}
 }
@@ -193,17 +204,21 @@ void GameManager::divideToGames() {
 
 void GameManager::printRound() {
 
-	bool canPrint = true;
 	std::vector<std::pair<std::string,std::vector<int>>> playersToPrint;
 	int maxLengthName = 0;
+
+
+	//Locks "print_lock", a lock that will die at the end of this block:
+	// == when this function finishes.
+	std::mutex print_mutex;
+	std::lock_guard<std::mutex> guard(print_mutex); 
 
 	// Checking if all the players have played the round. if not, don't print. if so, print.
 	for (std::shared_ptr<PlayerInfo> player : allPlayersInfo) {
 
 		if (!player->hasGameInRound(this->roundNumber))
 		{
-			canPrint = false;
-			break;
+			return; //because the rest of the function isn't relevant
 		}
 		//otherwise:
 		playersToPrint.push_back(std::make_pair(player->getPlayerName(), player->getRoundPoints(this->roundNumber)));
@@ -211,33 +226,30 @@ void GameManager::printRound() {
 	}
 
 	std::sort(playersToPrint.begin(), playersToPrint.end(), sortPlayers);
-		
-	if (canPrint) {
 
-		// Head row
-		std::cout << std::left << std::setfill(' ');
-		std::cout << std::left << std::setw(6) << "#";
-		std::cout << std::left << std::setw(maxLengthName + 4) << "Team Name";
-		std::cout << std::left << std::setw(8) << "Wins";
-		std::cout << std::left << std::setw(8) << "Losses";
-		std::cout << std::left << std::setw(8) << "%";
-		std::cout << std::left << std::setw(8) << "Pts For";
-		std::cout << std::left << std::setw(8) << "Pts Against" << std::endl;
+	// Head row
+	std::cout << std::left << std::setfill(' ');
+	std::cout << std::left << std::setw(6) << "#";
+	std::cout << std::left << std::setw(maxLengthName + 4) << "Team Name";
+	std::cout << std::left << std::setw(8) << "Wins";
+	std::cout << std::left << std::setw(8) << "Losses";
+	std::cout << std::left << std::setw(8) << "%";
+	std::cout << std::left << std::setw(8) << "Pts For";
+	std::cout << std::left << std::setw(8) << "Pts Against" << std::endl;
 
-		std::cout << std::setw(50 + maxLengthName) << " " << std::endl;
-		int indexRow = 1;
-		std::vector<int> playerScores;
+	std::cout << std::setw(50 + maxLengthName) << " " << std::endl;
+	int indexRow = 1;
+	std::vector<int> playerScores;
 
-		// Printing the rows with the data
-		for (std::pair<std::string, std::vector<int>> printPlayer: playersToPrint) {
+	// Printing the rows with the data
+	for (std::pair<std::string, std::vector<int>> printPlayer: playersToPrint) {
 
-			playerScores = printPlayer.second;
-			std::cout << std::left << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
-			std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
-			std::cout << std::left << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
-			std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
-		}
-		this->roundNumber++;
+		playerScores = printPlayer.second;
+		std::cout << std::left << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
+		std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
+		std::cout << std::left << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
+		std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
 	}
+	++roundNumber;
 
 }

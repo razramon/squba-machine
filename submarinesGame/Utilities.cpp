@@ -192,14 +192,16 @@ void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& pat
 }
 
 /*
- * Returns a vector of size 3, containing:
- *				index 0 = INDEX_PATH_DLL_A =  full path to player A's dll
- *				index 1 = INDEX_PATH_DLL_B = full path to player B's dll
- *				index 2 = INDEX_BOARD_PATH = full path to board.
- *	If One (or more) is missing, returns smaller vector and PRINTS errors to screen!
+ * Returns a vector of strings, representing all files found in path
+ * PRINTS errors to screen:
+ *		If path is wrong, print "Wrong path: <path>"
+ *		If no (.sboard) files were found, prints: "No board files (*.sboard) looking in path: <path>"
+ *		If number of dlls who were found is less than 2, prints: "Missing algorithm (dll) files looking in path: <path> (needs at least two)"
  */
-std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& threadsNum)
+std::unique_ptr<std::vector<std::string>> Utilities::buildPath(int argc, char* argv[], int& threadsNum)
 {
+
+	//TODO:: complete this function
 	std::string path;
 
 	Utilities::setArguments(argc, argv, path, threadsNum);
@@ -208,11 +210,8 @@ std::vector<std::string>* Utilities::buildPath(int argc, char* argv[], int& thre
 		path = workingDirectory();
 	}
 
-	//TODO:: need to edit this, to support printing!
-
-	std::string boardFilePtr, fullPathToBoard;
 	bool pathIsValid = false;
-	std::vector<std::string>* filesFound = new std::vector<std::string>;
+	std::unique_ptr<std::vector<std::string>> filesFound = std::make_unique<std::vector<std::string>>();
 
 	try
 	{
@@ -320,14 +319,11 @@ bool Utilities::isNumeric(std::string & s)
 
 Utilities::Arguments Utilities::getTypeOfArg(std::string argu)
 {
-	if (argu.compare("-quiet") == 0)
+	if (argu.compare("-threads") == 0)
 	{
-		return Quiet;
+		return Threads;
 	}
-	if (argu.compare("-delay") == 0)
-	{
-		return Delay;
-	}
+
 	try { //isNumeric might through exception...(if isDigit() failes)
 		if (isNumeric(argu))
 		{
@@ -352,9 +348,17 @@ void Utilities::setArguments(int argc, char * argv[], std::string & path, int & 
 				path = argv[i];
 			}
 			break;
-		case (Number):
-			threadsNum = *argv[i];
+		case (Threads):
+			if (i < argc - 1)
+			{
+				if (getTypeOfArg(argv[i + 1]) == Number)
+				{
+					i++;
+					threadsNum = std::atoi(argv[i]);
+				}
+			}
 			break;
+		case (Number):
 		default:
 			break;
 		}

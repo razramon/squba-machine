@@ -7,6 +7,8 @@
 #include "IBattleshipGameAlgo.h"
 #include "GameInfo.h"
 #include "Exception.h"
+#include <mutex>
+
 class PlayerInfo;
 
 /*

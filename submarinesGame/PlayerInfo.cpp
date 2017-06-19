@@ -37,8 +37,10 @@ void PlayerInfo::addNewGame(std::unique_ptr<GameInfo>& game)
 		newRound.pointsFor += prevRound.pointsFor;
 		newRound.pointsAgainst += prevRound.pointsAgainst;
 	}
-
+	std::mutex lock;
+	lock.lock();
 	this->rounds.push_back(newRound);
+	lock.unlock();
 }
 
 bool PlayerInfo::hasGameInRound(int roundNumber) const

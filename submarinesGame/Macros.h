@@ -11,7 +11,8 @@ enum Exeptions
 	MISSING_BOARD,
 	MISSING_ATTACK_FILE,
 	CANNOT_LOAD_DLL,
-	ALGO_INIT_FAILED
+	ALGO_INIT_FAILED,
+	MISSING_ALGO
 };
 
 
@@ -38,8 +39,10 @@ static std::string exceptionInfo(int exceptionNumber, std::string str1)
 		return ("Too few ships for player " + str1);
 	case WRONG_PATH:
 		return ("Wrong path: " + str1);
-	case MISSING_BOARD: //will not be used eventually..
-		return ("Missing board file (*.sboard) looking in path: " + str1);
+	case MISSING_BOARD:
+		return ("No board files (*.sboard) looking in path: " + str1);
+	case MISSING_ALGO:
+		return ("Missing algorithm (dll) files looking in path: " + str1 + " (needs at least two)");
 	case CANNOT_LOAD_DLL:
 		return ("Cannot load dll: " + str1);
 	case ALGO_INIT_FAILED:
