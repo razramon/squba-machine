@@ -133,13 +133,13 @@ void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFil
 		HINSTANCE hDll = LoadLibraryA((*dllsFiles).at(i).c_str());
 		if (!hDll)
 		{
-			Logger::instance().log("Could not load DLL", Logger::kLogLevelError);
+			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
 		GetAlgoFuncType getAlgoFunc = reinterpret_cast<GetAlgoFuncType>(GetProcAddress(hDll, "GetAlgorithm"));
 		if (!getAlgoFunc)
 		{
-			Logger::instance().log("Could not load DLL", Logger::kLogLevelError);
+			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
 		std::string playerName = ((*dllsFiles).at((*dllsFiles).size())).substr(((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"), ((*dllsFiles).at((*dllsFiles).size())).length());
@@ -159,7 +159,7 @@ void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& board
 			std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> shipsOfBoard = BoardCreator::checkBoard(baseBoard, rows, cols, depth);
 			if (shipsOfBoard == nullptr)
 			{
-				Logger::instance().log("Invalid board", Logger::kLogLevelError);
+				Logger::instance().log("Invalid board", Logger::LogLevelError);
 				continue; //continue to next board, this one's invalid
 			}
 			boardsShips.push_back(shipsOfBoard);
@@ -177,7 +177,7 @@ void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& board
 		{
 			std::string errorStr("Could not load Board: ");
 			errorStr.append(e.what());
-			Logger::instance().log(errorStr, Logger::kLogLevelError);
+			Logger::instance().log(errorStr, Logger::LogLevelError);
 		}
 	}
 }

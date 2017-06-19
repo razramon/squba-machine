@@ -41,7 +41,7 @@ Logger::~Logger()
 
 Logger::Logger()
 {
-	mOutputStream.open(kLogFileName, ios_base::app);
+	mOutputStream.open(LogFileName, ios_base::app);
 
 	if (!mOutputStream.good()) {
 
