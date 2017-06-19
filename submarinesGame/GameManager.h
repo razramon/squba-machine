@@ -47,8 +47,8 @@ class GameManager
 	//A vector to contain all game combinations:
 	std::vector<std::unique_ptr<GameBasicData>> allGamesData; 
 	
-	//A vector that will contain all game results:
-	vecOfGameInfoPtrs allGamesResults; 
+	////A vector that will contain all game results:
+	//vecOfGameInfoPtrs allGamesResults; 
 	
 	//A vector that will contain all players 
 	vecOfPlayerInfoPtrs allPlayersInfo;

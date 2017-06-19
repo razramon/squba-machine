@@ -26,6 +26,8 @@ void GameManager::runGameThread() {
 				std::move((*gameBD).dllA.second), std::move((*gameBD).dllB.second), (*(*gameBD).board),
 				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
 				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
+
+
 		std::unique_ptr<GameInfo> gameResult = g->game();
 		
 		addNewGameInfo(gameResult);
@@ -33,7 +35,7 @@ void GameManager::runGameThread() {
 		//changing a shared resource has to be thread-safe: 
 		std::mutex lock;
 		lock.lock();
-		allGamesResults.push_back(std::move(gameResult));
+		/*allGamesResults.push_back(std::move(gameResult));*/
 		lock.unlock();
 
 		this->printRound();
@@ -96,7 +98,7 @@ void GameManager::startGames() {
 GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
 	std::shared_ptr<std::vector<std::string>> boardFiles, int numOfThreads) :
 			numberThreads(numOfThreads), gameNumber(NOT_INIT), roundNumber(1),
-			allGamesData(), allGamesResults(), allPlayersInfo(),
+			allGamesData(), allPlayersInfo(),
 			dlls(), boards(), boardsShips()
 {
 

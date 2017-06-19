@@ -6,11 +6,11 @@
 
 using namespace std;
 
-const string Logger::kLogLevelDebug = "DEBUG";
-const string Logger::kLogLevelInfo = "INFO";
-const string Logger::kLogLevelError = "ERROR";
+const string Logger::LogLevelDebug = "DEBUG";
+const string Logger::LogLevelInfo = "INFO";
+const string Logger::LogLevelError = "ERROR";
 
-const char* const Logger::kLogFileName = "game.log";
+const char* const Logger::LogFileName = "game.log";
 
 Logger* Logger::pInstance = nullptr;
 
@@ -21,6 +21,7 @@ Logger& Logger::instance()
 	static Cleanup cleanup;
 
 	lock_guard<mutex> guard(sMutex);
+
 	if (pInstance == nullptr)
 		pInstance = new Logger();
 	return *pInstance;
@@ -41,7 +42,9 @@ Logger::~Logger()
 Logger::Logger()
 {
 	mOutputStream.open(kLogFileName, ios_base::app);
+
 	if (!mOutputStream.good()) {
+
 		throw runtime_error("Unable to initialize the Logger!");
 	}
 }
@@ -52,13 +55,6 @@ void Logger::log(const string& inMessage, const string& inLogLevel)
 	logHelper(inMessage, inLogLevel);
 }
 
-void Logger::log(const vector<string>& inMessages, const string& inLogLevel)
-{
-	lock_guard<mutex> guard(sMutex);
-	for (size_t i = 0; i < inMessages.size(); i++) {
-		logHelper(inMessages[i], inLogLevel);
-	}
-}
 
 void Logger::logHelper(const std::string& inMessage, const std::string& inLogLevel)
 {

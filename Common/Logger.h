@@ -9,9 +9,9 @@
 class Logger
 {
 public:
-	static const std::string kLogLevelDebug;
-	static const std::string kLogLevelInfo;
-	static const std::string kLogLevelError;
+	static const std::string LogLevelDebug;
+	static const std::string LogLevelInfo;
+	static const std::string LogLevelError;
 
 	// Returns a reference to the singleton Logger object
 	static Logger& instance();
@@ -20,16 +20,13 @@ public:
 	void log(const std::string& inMessage,
 		const std::string& inLogLevel);
 
-	// Logs a vector of messages at the given log level
-	void log(const std::vector<std::string>& inMessages,
-		const std::string& inLogLevel);
 
 protected:
 	// Static variable for the one-and-only instance  
 	static Logger* pInstance;
 
 	// Constant for the filename
-	static const char* const kLogFileName;
+	static const char* const LogFileName;
 
 	// Data member for the output stream
 	std::ofstream mOutputStream;

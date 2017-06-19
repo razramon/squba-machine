@@ -21,7 +21,6 @@ int main(int argc, char* argv[])
 	if ((*filesFound).size() <= 2 || (*boardFiles).size() == 0 || (*DLLFiles).size() < 2)
 	{
 
-
 		return 1;
 	}
 
@@ -29,7 +28,6 @@ int main(int argc, char* argv[])
 
 	// Saving thread for the logger
 	manager->setNumberThreads(threadsNum - 1);
-
 
 	try
 	{
