@@ -522,8 +522,8 @@ void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, s
 	std::transform(line.begin(), line.end(), line.begin(), std::tolower); //converts line to small-letters
 	if (2 == Utilities::countAppearances(DELIMETER, line)) //makes sure 'x' appears exactly twice in "line"
 	{
-		int firstX = line.find_first_of(DELIMETER);
-		int secondX = line.find_last_of(DELIMETER);
+		size_t firstX = line.find_first_of(DELIMETER);
+		size_t secondX = line.find_last_of(DELIMETER);
 		std::string cols = line.substr(0, firstX);
 		if (Utilities::isNumeric(cols))
 		{
@@ -742,7 +742,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 /*
 * Initiates an empty board of size: numDepth X numRows X numCols, returns a smart pointer to it.
 */
-std::unique_ptr<boardType>& BoardCreator::createBoard(int numRows, int numCols, int numDepth)
+std::unique_ptr<boardType> BoardCreator::createBoard(int numRows, int numCols, int numDepth)
 {
 	std::unique_ptr<boardType> board = std::make_unique<boardType>();
 	(*board).resize(numDepth);
@@ -758,7 +758,7 @@ std::unique_ptr<boardType>& BoardCreator::createBoard(int numRows, int numCols, 
 			}
 		}
 	}
-	return board;
+	return std::move(board);
 }
 
 /*

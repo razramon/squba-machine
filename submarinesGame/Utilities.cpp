@@ -185,7 +185,6 @@ void Utilities::findDLLBoardFiles(const std::string path, std::unique_ptr<std::v
 void Utilities::buildPath(int argc, char* argv[], int& threadsNum, std::unique_ptr<std::vector<std::string>>& DLLFiles,
 						std::unique_ptr<std::vector<std::string>>& boardFiles)
 {
-	//TODO:: complete this function
 	std::string path;
 	threadsNum = THREADS_DEFAULT_NUMBER;
 	Utilities::setArguments(argc, argv, path, threadsNum);
@@ -251,6 +250,7 @@ Utilities::Arguments Utilities::getTypeOfArg(std::string argu)
 	}
 	catch (std::exception& e)
 	{
+		ignore(e);
 	}
 	return Path;
 }

@@ -33,11 +33,11 @@ class DllSmartAlgo : public IBattleshipGameAlgo
 	/*
 	 * Returns a random attack, Indexed from 0
 	 */
-	std::unique_ptr<Coordinate>& getRandomAttack() const;
+	std::unique_ptr<Coordinate> getRandomAttack() const;
 	/*
 	* Returns vector of all Coordinates that we CAN attack, Indexed from 0
 	*/
-	std::unique_ptr<std::vector<Coordinate>>& getAllPossiblePoints() const;
+	std::unique_ptr<std::vector<Coordinate>> getAllPossiblePoints() const;
 
 	void addToPossibleMove(std::vector<Coordinate> pm);
 	int getPositionOfMove(const Coordinate& c);

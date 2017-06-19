@@ -107,4 +107,10 @@ public:
 	* NOTE: returns true for an empty string!
 	*/
 	static bool isLineEmpty(const std::string line);
+
+	/*
+	 * A function that does nothing - to avoid warnings such as: "'e':unreferenced local variable" (where e is an exception we don't care about)
+	 */
+	template<class T>
+	static void ignore(const T&){}
 };

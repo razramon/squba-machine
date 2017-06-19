@@ -1,5 +1,5 @@
 #include "GameManager.h"
-std::mutex lockMutex;
+
 
 bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
 
@@ -83,18 +83,18 @@ void GameManager::startGames() {
 
 	this->gameNumber = 0;
 
-	int threadsToCreate = (allGamesData.size() < numberThreads) ? allGamesData.size() : numberThreads;
+	size_t threadsToCreate = (allGamesData.size() < numberThreads) ? allGamesData.size() : numberThreads;
 	
 	// Creating threads according to the number of threads
 	// Note: in case there are more threads than games to play, creates only needed threads
-	for (int indexThread = 0; indexThread < threadsToCreate; indexThread++) {
+	for (size_t indexThread = 0; indexThread < threadsToCreate; indexThread++) {
 		std::thread gameThread(&GameManager::runGameThread);
 		gameThread.join(); //wait for all tournament to finish
 	}
 }
 
-GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
-	std::shared_ptr<std::vector<std::string>> boardFiles, int numOfThreads) :
+GameManager::GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
+	std::unique_ptr<std::vector<std::string>>& boardFiles, int numOfThreads) :
 			numberThreads(numOfThreads), gameNumber(NOT_INIT), roundNumber(1),
 			allGamesData(), allGamesResults(), allPlayersInfo(),
 			dlls(), boards(), boardsShips()
@@ -118,12 +118,10 @@ GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
 	std::cout << "Number of legal players: " << this->allPlayersInfo.size() << std::endl;
 	std::cout << "Number of legal boards: " << this->boards.size() << std::endl;
 	
-	
 	//TODO: add printing of critical errors.(?)
-	//set all variables
 }
 
-void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles) {
+void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFiles) {
 
 	std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
 
@@ -148,7 +146,7 @@ void GameManager::loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFile
 	}
 }
 
-void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardFiles)
+void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& boardFiles)
 {
 	for (std::vector<std::string>::iterator boardPath = (*boardFiles).begin(); boardPath != (*boardFiles).end(); ++boardPath)
 	{
@@ -175,7 +173,9 @@ void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardF
 		} 
 		catch(std::exception& e)
 		{
-			Logger::instance().log("Could not load Board", Logger::kLogLevelError);
+			std::string errorStr("Could not load Board: ");
+			errorStr.append(e.what());
+			Logger::instance().log(errorStr, Logger::kLogLevelError);
 		}
 	}
 }
@@ -205,7 +205,7 @@ void GameManager::divideToGames() {
 void GameManager::printRound() {
 
 	std::vector<std::pair<std::string,std::vector<int>>> playersToPrint;
-	int maxLengthName = 0;
+	size_t maxLengthName = 0;
 
 
 	//Locks "print_lock", a lock that will die at the end of this block:
