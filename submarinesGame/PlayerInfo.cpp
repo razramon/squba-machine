@@ -59,10 +59,11 @@ std::string PlayerInfo::getPlayerName() const{
 
 std::vector<int> PlayerInfo::getRoundPoints(int roundNumber)
 {
+	roundNumber--;
 	std::vector<int> result={}; //initialize an empty vector
 	if ( 0 <= roundNumber && roundNumber<rounds.size() )
 	{
-		Round r = rounds[roundNumber - 1];
+		Round r = rounds[roundNumber];
 		result.push_back(r.numberWin);
 		result.push_back(r.numberLose);
 		result.push_back(r.pointsFor);
