@@ -29,6 +29,7 @@ void GameManager::runGameThread() {
 				std::move((*gameBD).dllA.second), std::move((*gameBD).dllB.second), (*(*gameBD).board),
 				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
 				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
+		
 		allGamesResults.push_back(std::move(g->game()));
 		addNewGameInfo()//TODO:: complete!
 		this->printRound();
