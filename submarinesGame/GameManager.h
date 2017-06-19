@@ -46,7 +46,7 @@ class GameManager
 	/*
 	 * Returns true iff playerA's win rate > playerB's win rate
 	 */
-	static bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB);
+	static bool sortPlayers(const std::pair<std::string, std::vector<int>>& playerA,const std::pair<std::string, std::vector<int>>& playerB);
 
 	/*
 	* Loads all DLLs into "dlls" vector, creates all players (dlls) info in "allPlayersInfo"

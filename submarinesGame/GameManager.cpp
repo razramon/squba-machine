@@ -1,7 +1,7 @@
 #include "GameManager.h"
 
 
-bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB) {
+bool GameManager::sortPlayers(const std::pair<std::string, std::vector<int>>& playerA,const std::pair<std::string, std::vector<int>>& playerB) {
 
 	double playerAWinRate = playerA.second.at(0) / (playerA.second.at(0) + playerA.second.at(1));
 	double playerBWinRate = playerB.second.at(0) / (playerB.second.at(0) + playerB.second.at(1));
