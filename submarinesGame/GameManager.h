@@ -72,7 +72,7 @@ class GameManager
 	* If there are more games to play - updates pointer "gameBasicData" to point at next GameBasicData (from allGamesData),
 	* Otherwise - gameBasicData is updated to nullptr, to indicate no more games left.
 	*/
-	void getGame(std::shared_ptr<GameBasicData> gameBasicData);
+	void getGame(std::shared_ptr<GameBasicData>& gameBasicData);
 
 	void addNewGameInfo(std::unique_ptr<GameInfo>& game);
 

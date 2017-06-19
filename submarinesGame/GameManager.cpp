@@ -9,10 +9,10 @@ bool GameManager::sortPlayers(std::pair<std::string, std::vector<int>> playerA, 
 }
 
 void GameManager::runGameThread() {
-
+	
 	// Infinite loop - only stop when there is no more games in the game manager
 	while (gameNumber < allGamesData.size()) {
-
+		std::cout << "In runGameThread() \n";
 		// Create a new game, run it and then request another
 		std::shared_ptr<GameBasicData> gameBD = nullptr;
 		getGame(gameBD); //getGame() does the lock stuff
@@ -42,7 +42,7 @@ void GameManager::runGameThread() {
 	}
 }
 
-void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
+void GameManager::getGame(std::shared_ptr<GameBasicData>& gameBasicData) {
 
 	// Lock for the threads, get the game from all the games
 	std::mutex lock;
@@ -125,7 +125,7 @@ GameManager::GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
 
 void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFiles) {
 
-	std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size())).substr(0, ((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"));
+	std::string directoryPath = ((*dllsFiles).at((*dllsFiles).size()-1)).substr(0, ((*dllsFiles).at((*dllsFiles).size()-1)).find_last_of("/\\"));
 
 	for (int i = 0; i < (*dllsFiles).size(); ++i)
 	{
@@ -142,7 +142,7 @@ void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFil
 			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
-		std::string playerName = ((*dllsFiles).at((*dllsFiles).size())).substr(((*dllsFiles).at((*dllsFiles).size())).find_last_of("/\\"), ((*dllsFiles).at((*dllsFiles).size())).length());
+		std::string playerName = ((*dllsFiles).at(i)).substr(((*dllsFiles).at(i)).find_last_of("/\\"), ((*dllsFiles).at(i)).length());
 		dlls.push_back(std::make_unique<std::pair<std::string, GetAlgoFuncType>>(std::make_pair(playerName,getAlgoFunc)));
 		allPlayersInfo.push_back(std::make_shared<PlayerInfo>(playerName));
 	}
