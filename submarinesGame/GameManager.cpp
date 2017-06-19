@@ -29,9 +29,9 @@ void GameManager::runGameThread() {
 				std::move((*gameBD).dllA.second), std::move((*gameBD).dllB.second), (*(*gameBD).board),
 				boardsShips[(*gameBD).indexOfGameShips], (*(*(*gameBD).board).first).rows(),
 				(*(*(*gameBD).board).first).cols(), (*(*(*gameBD).board).first).depth());
-		
-		allGamesResults.push_back(std::move(g->game()));
-		addNewGameInfo()//TODO:: complete!
+		std::unique_ptr<GameInfo> gameResult = g->game();
+		allGamesResults.push_back(std::move(gameResult));
+		addNewGameInfo(std::move(gameResult));//TODO:: complete!
 		this->printRound();
 	}
 }
@@ -56,6 +56,8 @@ void GameManager::getGame(std::shared_ptr<GameBasicData> gameBasicData) {
 	lock.unlock();
 }
 
+
+// Add to the playerInfo a new gameData, for both players.
 void GameManager::addNewGameInfo(std::unique_ptr<GameInfo>& game) {
 
 	for (int indexPlayer = 0; indexPlayer < this->allPlayersInfo.size(); indexPlayer++) {
@@ -91,6 +93,14 @@ GameManager::GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles, st
 			allGamesData(), allGamesResults(), allPlayersInfo(),
 			dlls(), boards(), boardsShips()
 {
+
+	this->loadAllDlls(dllsFiles);
+	this->loadAllBoards(boardFiles);
+	this->divideToGames();
+
+
+	//TODO: add printing of how many players and board there are, as said in the file. and printing of critical errors.
+
 		/*TODO:: 
 		* might need a signature change (get number of threads as an argument?)
 		* create all dlls using loadAllDlls(),
@@ -137,7 +147,7 @@ void GameManager::loadAllBoards(std::shared_ptr<std::vector<std::string>> boardF
 			std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> shipsOfBoard = BoardCreator::checkBoard(baseBoard, rows, cols, depth);
 			if (shipsOfBoard == nullptr)
 			{
-				//TODO:: add print to logger - about invalid board
+				Logger::instance().log("Invalid board", Logger::kLogLevelError);
 				continue; //continue to next board, this one's invalid
 			}
 			boardsShips.push_back(shipsOfBoard);
