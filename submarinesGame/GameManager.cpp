@@ -252,12 +252,12 @@ void GameManager::printRound() {
 	for (std::pair<std::string, std::vector<int>> printPlayer: playersToPrint) {
 
 		playerScores = printPlayer.second;
-		std::cout << std::left << std::setw(6) << indexRow << std::setw(maxLengthName + 4) << printPlayer.first;
+		std::cout << std::left << std::setw(6) << indexRow << "." << std::setw(maxLengthName + 4) << printPlayer.first;
 		std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
 		std::cout << std::left << std::setw(8) << (playerScores.at(0) / (playerScores.at(1) + playerScores.at(0)) * 100);
 		std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
 		indexRow++;
 	}
-	++roundNumber;
 
+	++roundNumber;
 }
