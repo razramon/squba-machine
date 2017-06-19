@@ -28,8 +28,8 @@ class PlayerInfo {
 
 public:
 
-	PlayerInfo(std::string playerName);
-	~PlayerInfo() = default;
+	explicit PlayerInfo(std::string playerName);
+	~PlayerInfo();
 	
 	/*
 	 * Adds a round which fits the results of "game" into the vector "rounds".

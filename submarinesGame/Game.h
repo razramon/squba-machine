@@ -63,7 +63,7 @@ public:
 		std::shared_ptr<IBattleshipGameAlgo> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
 		std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips,
 		int numRows, int numCols, int numDepth);
-	~Game() = default;
+	~Game();
 
 	int isHit(int row, int col, int depth, char& letter) const;
 
