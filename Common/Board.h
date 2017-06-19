@@ -25,7 +25,7 @@ public:
 	
 	~Board();
 
-	char charAt(Coordinate c) const override;
+	virtual char charAt(Coordinate c) const override;
 
 	void setPlayerNumber(int playerNumber);
 };
