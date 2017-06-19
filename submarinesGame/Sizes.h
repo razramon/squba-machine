@@ -29,3 +29,6 @@
 
 //number of total (little+big) letters that represent a ship
 #define VALID_LETTERS 8
+
+//number of threads (default)
+#define THREADS_DEFAULT_NUMBER 4;

@@ -29,6 +29,7 @@ class Utilities
 		Threads,
 		Number
 	};
+
 public:
 	static const std::string ATTACK_SUFF, BOARD_SUFF, DLL_SUFF;
 	static const int NUM_PARTICIPANTS, NUMBER_DLLS, FILE_NOT_FOUND_ERROR, INDEX_PATH_DLL_A, INDEX_PATH_DLL_B, INDEX_BOARD_PATH;
@@ -37,44 +38,39 @@ public:
 	static void getFullPath(std::string& path);
 
 	static bool doesPathExist(const char* path);
+	
 	static bool endsWith(const std::string& fileName, const std::string& suffix);
+	
 	static std::istream& getAllKindsOfLine(std::istream& inputStream, std::string& line);
+	
 	static std::string delSpaces(std::string& str);
+	
+	/*
+	* Returns a string representing the current working directory
+	*/
 	static std::string workingDirectory();
 
 	/*
-	 *
-	 */
-	static bool isValidPath(const std::string path, std::string& boardFile);
-	static void printNotFoundFileErrors(bool pathIsValid, const std::string& path, const std::vector<std::string>& filesFound);
-	
-
-	/*
-	* Returns a vector of strings, representing all files found in path
-	* PRINTS errors to screen:
-	*		If path is wrong, print "Wrong path: <path>"
-	*		If no (.sboard) files were found, prints: "No board files (*.sboard) looking in path: <path>"
-	*		If number of dlls who were found is less than 2, prints: "Missing algorithm (dll) files looking in path: <path> (needs at least two)"
+	* Checks if the path exists,
+	* Updates vectors of strings:
+	*		DLLFiles - to represent all dll files found in path (each one has the full path to it!!)
+	*		boardFiles - to represent all board files found in path (each one has the full path to it!!)
+	* If path doesn't exist or an error getting to it accured - throws exception
 	*/
-	static std::unique_ptr<std::vector<std::string>> buildPath(int argc, char* argv[], int& threadsNum);
-
-	/*
-	* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files
-	* that end with suffix - oredered lexicographically.
-	* Returns 0/-1 if no files where found / an error accured,
-	*			1/2 if 1/2 files where found
-	*/
-	static int findAllFilesWithSuf(const char * path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix);
-	
+	static void findDLLBoardFiles(const std::string path, std::unique_ptr<std::vector<std::string>>& DLLFiles, std::unique_ptr<std::vector<std::string>>& boardFiles);
 	
 	/*
-	* Maintains "filesFound" to hold at most 2 files,
-	* The ones which are first lexicographically.
+	* Updates vectors of strings:
+	*		DLLFiles - to represent all dll files found in path (each one has the full path to it!!)
+	*		boardFiles - to represent all board files found in path (each one has the full path to it!!)
+	*		
+	* Throws exception errors, containing the folowing ".what()":
+	*		If path is wrong - "Wrong path: <path>"
+	*		If no (.sboard) files were found - "No board files (*.sboard) looking in path: <path>"
+	*		If number of dlls who were found is less than 2 - "Missing algorithm (dll) files looking in path: <path> (needs at least two)"
 	*/
-	static void addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path);
-	/*
-	* Depicts types of arguments of argv
-	*/
+	static void buildPath(int argc, char* argv[], int& threadsNum, 
+		std::unique_ptr<std::vector<std::string>>& DLLFiles, std::unique_ptr<std::vector<std::string>>& boardFiles);
 
 	/*
 	* Return true if string s is numeric
@@ -91,11 +87,6 @@ public:
 	*/
 	static Arguments getTypeOfArg(std::string argu);
 
-
-
-	static void divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles);
-
-	//initialize delayMS to be negative before calling this function!
 	/*
 	* Initializes arguments:
 	*			path - if it was delivered! (or something that can be regognized as one)

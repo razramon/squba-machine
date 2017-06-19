@@ -131,10 +131,7 @@ std::string Utilities::workingDirectory()
 }
 
 
-/*Checks if the path exists,
-*that the board file is there,
-*And if it is- updates its names */
-bool Utilities::isValidPath(const std::string path, std::string& boardFile)	
+void Utilities::findDLLBoardFiles(const std::string path, std::unique_ptr<std::vector<std::string>>& DLLFiles, std::unique_ptr<std::vector<std::string>>& boardFiles)
 {
 	// Change working directory to reletive path if needed
 	if (_chdir(path.c_str()) != 0)
@@ -171,70 +168,55 @@ bool Utilities::isValidPath(const std::string path, std::string& boardFile)
 		{
 			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(Utilities::BOARD_SUFF)))
 			{
-				boardFile = std::string(ffd.cFileName);
-				FindClose(hFind);
-				return true;
+				std::string boardFile = std::string(ffd.cFileName);
+				(*boardFiles).push_back(path + "\\" + boardFile);
+			}
+			else if (Utilities::endsWith(std::string(ffd.cFileName), std::string(Utilities::DLL_SUFF)))
+			{
+				std::string dllFile = std::string(ffd.cFileName);
+				(*DLLFiles).push_back(path + "\\" + dllFile);
 			}
 		}
 	}
 	while (FindNextFileA(hFind, &ffd) != 0);
 	FindClose(hFind);
-	return false;
 }
 
-/*
-* Prints relevant errors to the screen
-*/
-void Utilities::printNotFoundFileErrors(bool pathIsValid, const std::string& path, const std::vector<std::string>& filesFound)
+void Utilities::buildPath(int argc, char* argv[], int& threadsNum, std::unique_ptr<std::vector<std::string>>& DLLFiles,
+						std::unique_ptr<std::vector<std::string>>& boardFiles)
 {
-	if (!pathIsValid) std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
-	if (filesFound.size() < 2) std::cout << "Missing an algorithm (dll) file looking in path: " << path << std::endl;
-}
-
-/*
- * Returns a vector of strings, representing all files found in path
- * PRINTS errors to screen:
- *		If path is wrong, print "Wrong path: <path>"
- *		If no (.sboard) files were found, prints: "No board files (*.sboard) looking in path: <path>"
- *		If number of dlls who were found is less than 2, prints: "Missing algorithm (dll) files looking in path: <path> (needs at least two)"
- */
-std::unique_ptr<std::vector<std::string>> Utilities::buildPath(int argc, char* argv[], int& threadsNum)
-{
-
 	//TODO:: complete this function
 	std::string path;
-
+	threadsNum = THREADS_DEFAULT_NUMBER;
 	Utilities::setArguments(argc, argv, path, threadsNum);
 	if (path.size() == 0) //
 	{
 		path = workingDirectory();
 	}
 
-	bool pathIsValid = false;
-	std::unique_ptr<std::vector<std::string>> filesFound = std::make_unique<std::vector<std::string>>();
-
 	try
 	{
 		getFullPath(path);
-		pathIsValid = isValidPath(path, boardFilePtr);
+		findDLLBoardFiles(path, DLLFiles, boardFiles);
 	}
 	catch (std::exception& e)
 	{
-		std::cout << e.what() << std::endl;
-		return filesFound;
+		throw e;
 	}
 
-	findAllFilesWithSuf(path.c_str(), path.size(), *filesFound, DLL_SUFF);
-	if (((*filesFound).size() != NUMBER_DLLS) || (!pathIsValid))
+	if ((*boardFiles).size() == 0 && (*DLLFiles).size() < 2)
 	{
-		printNotFoundFileErrors(pathIsValid, path, *filesFound);
+		throw Exception(exceptionInfo(MISSING_BOARD, path) + "\n" + exceptionInfo(MISSING_ALGO, path));
+	} 
+	if ((*boardFiles).size() == 0)
+	{
+		throw Exception(exceptionInfo(MISSING_BOARD, path));
 	}
-	else
+	if ((*DLLFiles).size() < 2)
 	{
-		(*filesFound).push_back(path + "\\" + boardFilePtr);
+		throw Exception(exceptionInfo(MISSING_ALGO, path));
 	}
 
-	return filesFound;
 }
 
 
@@ -244,69 +226,6 @@ std::unique_ptr<std::vector<std::string>> Utilities::buildPath(int argc, char* a
 *			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
 */
 
-int Utilities::findAllFilesWithSuf(const char* path, size_t pathLen, std::vector<std::string>& filesFound, const std::string suffix)
-{
-	WIN32_FIND_DATAA ffd;
-	char szDir[MAX_PATH];
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-
-	// Check that the input path plus 3 is not longer than MAX_PATH.
-	// Three characters are for the "\*" plus NULL appended below.
-	StringCchLengthA(path, MAX_PATH, &pathLen);
-	if (pathLen > (MAX_PATH - 3))
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-
-	// Prepare string for use with FindFile functions.  First, copy the
-	// string to a buffer, then append '\*' to the directory name.
-	StringCchCopyA(szDir, MAX_PATH, path);
-	StringCchCatA(szDir, MAX_PATH, "\\*");
-
-	// Find the first file in the directory.
-	hFind = FindFirstFileA(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-
-	// checks all files in the directory in search for files that end with suffix.
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) //checks the file isn't a directory:
-		{
-			if (Utilities::endsWith(std::string(ffd.cFileName), std::string(suffix)))
-			{
-				addFileToList(filesFound, std::string(ffd.cFileName), path);
-			}
-		}
-	} while (FindNextFileA(hFind, &ffd) != 0);
-	if (GetLastError() != ERROR_NO_MORE_FILES)
-	{
-		return FILE_NOT_FOUND_ERROR;
-	}
-	FindClose(hFind);
-	return filesFound.size();
-}
-
-/*
-* Maintains "filesFound"
-*/
-void Utilities::addFileToList(std::vector<std::string>& filesFound, std::string filename, const std::string path)
-{
-	if (filesFound.size() == 0)
-	{
-		filesFound.push_back(path + "\\" + filename);
-		return;
-	}
-	std::vector<std::string>::iterator iter;
-	for (iter = filesFound.begin(); iter != filesFound.end(); ++iter)
-	{
-		filesFound.insert(iter, path + "\\" + filename);
-
-	}
-}
 
 bool Utilities::isNumeric(std::string & s)
 {
@@ -366,15 +285,27 @@ void Utilities::setArguments(int argc, char * argv[], std::string & path, int & 
 }
 
 
-void Utilities::divideToDLLAndBoard(std::shared_ptr<std::vector<std::string>> allFiles, std::shared_ptr<std::vector<std::string>> boardFiles, std::shared_ptr<std::vector<std::string>> DLLFiles) {
-
-	for (std::string file : *allFiles) {
-
-		if (Utilities::endsWith(file, std::string(Utilities::BOARD_SUFF))) {
-			(*boardFiles).push_back(file);
-		}
-		else if (Utilities::endsWith(file, std::string(Utilities::DLL_SUFF))) {
-			(*DLLFiles).push_back(file);
+int Utilities::countAppearances(char ch, const std::string & str)
+{
+	int counter = 0;
+	for (char c : str)
+	{
+		if (c == ch)
+		{
+			counter++;
 		}
 	}
+	return counter;
+}
+
+bool Utilities::isLineEmpty(const std::string line)
+{
+	for (char c : line)
+	{
+		if (c != ' '  && c != '\t' && c != '\n')
+		{
+			return false;
+		}
+	}
+	return true;
 }
