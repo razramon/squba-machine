@@ -22,12 +22,12 @@ class GameManager
 	class GameBasicData
 	{
 		friend class GameManager;
-	protected:
+
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllA;
 		std::pair<std::string, std::unique_ptr<IBattleshipGameAlgo>> dllB;
 		std::shared_ptr<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> >> board;
 		int indexOfGameShips;
-	public:
+
 		GameBasicData(std::pair<std::string, GetAlgoFuncType>& algoA, std::pair<std::string, GetAlgoFuncType>& algoB,
 			std::pair< std::shared_ptr<Board>,std::shared_ptr<Board>> board, int indexOfShips) :
 			board(std::make_shared<std::pair< std::shared_ptr<Board>, std::shared_ptr<Board>>>(board)), indexOfGameShips(indexOfShips)
@@ -67,17 +67,38 @@ class GameManager
 	 */
 	static bool sortPlayers(std::pair<std::string, std::vector<int>> playerA, std::pair<std::string, std::vector<int>> playerB);
 
-public:
-	
+
+
+	/*
+	* Loads all DLLs into "dlls" vector, creates all players (dlls) info in "allPlayersInfo"
+	* Note: GameManager has to make sure it has enough dlls
+	*/
+	void loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFiles);
+
+	/*
+	* Loads all boards into "boards" vector, and all ships to boardsShips according to the relevant board.
+	*/
+	void loadAllBoards(std::unique_ptr<std::vector<std::string>>& boardFiles);
+
+	/*
+	* Creates all combinations of games (each couple of players play 2 games on the same board,
+	*										one with first player as playerA,
+	*										second with first player as playerB)
+	*/
+	void divideToGames();
 
 	void runGameThread();
-	
+
 	/*
-	 * If there are more games to play - updates pointer "gameBasicData" to point at next GameBasicData (from allGamesData),
-	 * Otherwise - gameBasicData is updated to nullptr, to indicate no more games left.
-	 */
+	* If there are more games to play - updates pointer "gameBasicData" to point at next GameBasicData (from allGamesData),
+	* Otherwise - gameBasicData is updated to nullptr, to indicate no more games left.
+	*/
 	void getGame(std::shared_ptr<GameBasicData> gameBasicData);
-	
+
+	void addNewGameInfo(std::unique_ptr<GameInfo>& game);
+
+public:
+
 	/*
 	 * Sets this->numberThreads to be "numberThreads"
 	 */
@@ -92,28 +113,9 @@ public:
 	 * Creates a new game manager: 
 	 *	Sets roundNumber to be 1.
 	 */
-	GameManager(std::shared_ptr<std::vector<std::string>> dllsFiles,
-			std::shared_ptr<std::vector<std::string>> boardFiles, int numOfThreads);
-	
-	/*
-	 * Loads all DLLs into "dlls" vector, creates all players (dlls) info in "allPlayersInfo"
-	 * Note: GameManager has to make sure it has enough dlls
-	 */
-	void loadAllDlls(std::shared_ptr<std::vector<std::string>> dllsFiles);
-
-	/*
-	* Loads all boards into "boards" vector, and all ships to boardsShips according to the relevant board.
-	*/
-	void loadAllBoards(std::shared_ptr<std::vector<std::string>> boardFiles);
-
-	/*
-	 * Creates all combinations of games (each couple of players play 2 games on the same board,
-	 *										one with first player as playerA,
-	 *										second with first player as playerB)
-	 */
-	void divideToGames();
+	GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
+			std::unique_ptr<std::vector<std::string>>& boardFiles, int numOfThreads);
 
 	void printRound();
 
-	void addNewGameInfo(std::unique_ptr<GameInfo>& game);
 };

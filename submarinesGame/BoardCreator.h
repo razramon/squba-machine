@@ -56,7 +56,7 @@ public:
 
 
 	static bool findBoardFile(const char* path, size_t pathLen, char** boardFile);
-	static std::unique_ptr<boardType>& createBoard(int numRows, int numCols, int numDepth);
+	static std::unique_ptr<boardType> createBoard(int numRows, int numCols, int numDepth);
 	static std::unique_ptr<boardType> copyBoard(const std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth);
 	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
 	/*

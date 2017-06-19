@@ -244,20 +244,18 @@ void DllSmartAlgo::deleteFromPossibleMoves(const Coordinate & c)
 	}
 }
 
-std::unique_ptr<Coordinate>& DllSmartAlgo::getRandomAttack() const
+std::unique_ptr<Coordinate> DllSmartAlgo::getRandomAttack() const
 {
 	std::unique_ptr<std::vector<Coordinate>> retVector = std::move(getAllPossiblePoints());
 	if(retVector->size()==0) //No possible moves
 	{
-		std::unique_ptr<Coordinate> c = std::make_unique<Coordinate>(Coordinate(-1, -1, -1));
-		return c;
+		return std::make_unique<Coordinate>(Coordinate(-1, -1, -1));
 	}
 	int k = rand() % (retVector->size());
-	std::unique_ptr<Coordinate> c = std::make_unique<Coordinate>(retVector->at(k));
-	return c ;
+	return std::make_unique<Coordinate>(retVector->at(k));
 }
 
- std::unique_ptr<std::vector<Coordinate>>& DllSmartAlgo::getAllPossiblePoints() const
+ std::unique_ptr<std::vector<Coordinate>> DllSmartAlgo::getAllPossiblePoints() const
  {
 	std::unique_ptr<std::vector<Coordinate>> retVector = std::make_unique<std::vector<Coordinate>>();
 	for (int depth = 0; depth < numDepth; ++depth)
@@ -274,7 +272,7 @@ std::unique_ptr<Coordinate>& DllSmartAlgo::getRandomAttack() const
 		}
 	}
 
-	return retVector;
+	return std::move(retVector);
  }
 
 /*
