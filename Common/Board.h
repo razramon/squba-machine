@@ -4,8 +4,8 @@
 
 class Board : public BoardData
 {
-
-	std::unique_ptr<boardType> gameBoard;
+	static const char blank_space = ' ';
+	std::shared_ptr<boardType> gameBoard;
 	int _playerNumber;
 	Board& operator=(const Board& b) = delete; //No assignment operator!
 
@@ -15,7 +15,7 @@ public:
 	* But will return (when using charAt()) only letters that represent ships of "_playerNumber"
 	* *****NOTE: uses std::move on board!!******
 	*/
-	explicit Board(int rows, int cols,int depth, std::unique_ptr<boardType> board, int playerNumber);
+	explicit Board(int rows, int cols,int depth, std::shared_ptr<boardType>& board, int playerNumber);
 	
 	/*
 	 * Copy constructor:

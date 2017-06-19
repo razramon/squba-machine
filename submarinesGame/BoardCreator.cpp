@@ -11,12 +11,12 @@ const char BoardCreator::DELIMETER = 'x';
 
 std::shared_ptr<boardType> BoardCreator::getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth)
 {
-	std::shared_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
+	std::shared_ptr<boardType> board = createBoard(numRows, numCols, numDepth);
 	updateShipsInBoard(board, ships);
 	return board;
 }
 
-void BoardCreator::updateShipsInBoard(std::shared_ptr<boardType> board, ptrToShipsVector ships)
+void BoardCreator::updateShipsInBoard(std::shared_ptr<boardType>& board, ptrToShipsVector ships)
 {
 	for (int i = 0; i < (*ships).size(); ++i)
 	{
@@ -670,7 +670,7 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 	}
 
 	bfile.close();
-	return board;
+	return std::move(board);
 }
 
 /*
@@ -764,9 +764,9 @@ std::unique_ptr<boardType> BoardCreator::createBoard(int numRows, int numCols, i
 /*
 * Returns a copy of "board"
 */
-std::unique_ptr<boardType> BoardCreator::copyBoard(const std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth)
+std::unique_ptr<boardType> BoardCreator::copyBoard(const std::shared_ptr<boardType>& board, int numRows, int numCols, int numDepth)
 {
-	std::unique_ptr<boardType> retBoard = std::move(createBoard(numRows, numCols,numDepth));
+	std::unique_ptr<boardType> retBoard = createBoard(numRows, numCols,numDepth);
 	for (int depth = 0; depth < numDepth; depth++)
 	{
 		for (int row = 0; row < numRows; row++)
@@ -778,7 +778,7 @@ std::unique_ptr<boardType> BoardCreator::copyBoard(const std::unique_ptr<boardTy
 		}
 	}
 
-	return retBoard;
+	return std::move(retBoard);
 }
 
 /*Prints board layer by layer:*/

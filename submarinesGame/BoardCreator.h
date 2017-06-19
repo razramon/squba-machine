@@ -25,14 +25,15 @@ class BoardCreator
 	static const std::string BOARD_SUFF;
 	static const char DELIMETER;
 
-	/*
-	* Gets a vector of ships, updated board to conatin all letters representing ships
-	*/
-	static void updateShipsInBoard(std::shared_ptr<boardType> board, ptrToShipsVector ships);
+
 
 	static int getIndexOfRelevantBadCoordsVector(char letter);
 
 public:
+	/*
+	* Gets a vector of ships, updated board to conatin all letters representing ships
+	*/
+	static void updateShipsInBoard(std::shared_ptr<boardType>& board, ptrToShipsVector ships);
 
 	static std::shared_ptr<boardType> getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth);
 	//static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
@@ -57,7 +58,7 @@ public:
 
 	static bool findBoardFile(const char* path, size_t pathLen, char** boardFile);
 	static std::unique_ptr<boardType> createBoard(int numRows, int numCols, int numDepth);
-	static std::unique_ptr<boardType> copyBoard(const std::unique_ptr<boardType>& board, int numRows, int numCols, int numDepth);
+	static std::unique_ptr<boardType> copyBoard(const std::shared_ptr<boardType>& board, int numRows, int numCols, int numDepth);
 	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
 	/*
 	* Returns a clean (without unnecessary letters) board represnting both players' ships.

@@ -33,12 +33,12 @@ void GameManager::runGameThread() {
 		addNewGameInfo(gameResult);
 		
 		//changing a shared resource has to be thread-safe: 
-		std::mutex lock;
-		lock.lock();
-		/*allGamesResults.push_back(std::move(gameResult));*/
-		lock.unlock();
+		//std::mutex lock;
+		//lock.lock();
+		//allGamesResults.push_back(std::move(gameResult));
+		//lock.unlock();
 
-		this->printRound();
+		this->printRound(); 
 	}
 }
 
@@ -90,7 +90,7 @@ void GameManager::startGames() {
 	// Creating threads according to the number of threads
 	// Note: in case there are more threads than games to play, creates only needed threads
 	for (size_t indexThread = 0; indexThread < threadsToCreate; indexThread++) {
-		std::thread gameThread(&GameManager::runGameThread);
+		std::thread gameThread(&GameManager::runGameThread, this);
 		gameThread.join(); //wait for all tournament to finish
 	}
 }
@@ -155,15 +155,19 @@ void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& board
 		try
 		{
 			int rows, cols, depth;
-			std::unique_ptr<boardType> baseBoard = std::move(BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth));
+			std::unique_ptr<boardType> baseBoard = BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth);
 			std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> shipsOfBoard = BoardCreator::checkBoard(baseBoard, rows, cols, depth);
+			
+			std::shared_ptr<boardType> cleanBaseBoard = BoardCreator::getBoardFromShips(shipsOfBoard->first, rows, cols, depth);
+			BoardCreator::updateShipsInBoard(cleanBaseBoard, shipsOfBoard->second);
+			
 			if (shipsOfBoard == nullptr)
 			{
 				Logger::instance().log("Invalid board", Logger::LogLevelError);
 				continue; //continue to next board, this one's invalid
 			}
 			boardsShips.push_back(shipsOfBoard);
-			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, baseBoard, NOT_INIT);
+			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, cleanBaseBoard, NOT_INIT);
 
 			(*b0).setPlayerNumber(PLAYER_A); //so that the first board of the pair will match playerA
 			std::unique_ptr<Board> b1 = std::make_unique<Board>(b0);
