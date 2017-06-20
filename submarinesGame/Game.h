@@ -64,14 +64,14 @@ class Game
 	 * Marks all ships positions as NOT - hit (allows to use the same ships each game,
 	 *									making sure they aren't marked as sank ships)
 	 */
-	void  resetPlayersShips();
+	void  resetPlayersShips() const;
 
 public:
 	Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFuncType> playerA,
 		std::shared_ptr<GetAlgoFuncType> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
 		std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector>> playersShips,
 		int numRows, int numCols, int numDepth);
-	~Game();
+	~Game() = default;
 
 	int isHit(int row, int col, int depth, char& letter) const;
 

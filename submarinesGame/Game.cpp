@@ -26,16 +26,16 @@ std::shared_ptr<Ship> Game::getShipAtPosition(int row, int col, int depth) const
 {
 	if (row < 0 || row >= numRows || col < 0 || col >= numCols || depth < 0 || depth >= numDepth) return nullptr;
 
-	for (int i = 0; i < 2; ++i)
+	for (auto i = 0; i < 2; ++i)
 	{
 		ptrToShipsVector ps = (i == 0) ? (*playersShips).first : (*playersShips).second;
 		for (std::vector<std::shared_ptr<Ship>>::iterator iter = (*ps).begin(); iter!=(*ps).end(); ++iter)
 		{
-			for (int j = 0; j < (**iter).getShipSize(); ++j)
+			for (auto j = 0; j < (**iter).getShipSize(); ++j)
 			{
-				if (row == (**iter).getPosition()[j][Ship::INDEX_3D::row_index] && 
-					col == (**iter).getPosition()[j][Ship::INDEX_3D::column_index] && 
-					depth == (**iter).getPosition()[j][Ship::INDEX_3D::depth_index])
+				if (row == (*(**iter).getPosition())[j][Ship::INDEX_3D::row_index] && 
+					col == (*(**iter).getPosition())[j][Ship::INDEX_3D::column_index] && 
+					depth == (*(**iter).getPosition())[j][Ship::INDEX_3D::depth_index])
 				{
 					return *iter;
 				}
@@ -96,7 +96,7 @@ void Game::initializePlayer(IBattleshipGameAlgo * algo, int p_Number, BoardData&
 	algo->setBoard(b); //sets the player's board
 }
 
-void Game::resetPlayersShips()
+void Game::resetPlayersShips() const
 {
 	for (auto ship_to_reset = (*(this->playersShips->first)).begin(); ship_to_reset!= (*(this->playersShips->first)).end(); ++ship_to_reset)
 	{
@@ -132,32 +132,29 @@ Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFu
 	resetPlayersShips(); //make sure all ships are "alive" when starting the game. 
 }
 
-Game::~Game()
-{
-}
 
 int Game::isHit(int row, int col, int depth, char& letter) const
 {
 	std::shared_ptr<Ship> s = nullptr;
-	int** posArray;
+	std::shared_ptr<std::vector<std::vector<int>>> posArray;
 	// Looping over all ships
 	for (int j = 0; j < 2; ++j)
 	{
 		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
-		for (int i = 0; i < (*ps).size(); ++i)
+		for (auto i = 0; i < (*ps).size(); ++i)
 		{
 			s = (*ps)[i];
 			if (s->isSunk())
 				continue;
 			posArray = ((*s).getPosition());
-			for (int pos = 0; pos < (*s).getShipSize(); ++pos)
+			for (auto pos = 0; pos < (*s).getShipSize(); ++pos)
 			{
-				if (row == (posArray)[pos][Ship::INDEX_3D::row_index] &&
-					col == (posArray)[pos][Ship::INDEX_3D::column_index] &&
-					depth == (posArray)[pos][Ship::INDEX_3D::depth_index])
+				if (row == (*posArray)[pos][Ship::INDEX_3D::row_index] &&
+					col == (*posArray)[pos][Ship::INDEX_3D::column_index] &&
+					depth == (*posArray)[pos][Ship::INDEX_3D::depth_index])
 				{
 					letter = (*s).getLetter();
-					switch (posArray[pos][Ship::INDEX_3D::is_hit_index])
+					switch ((*posArray)[pos][Ship::INDEX_3D::is_hit_index])
 					{
 					case 0:
 						(*s).setPosition(pos, row, col, depth, HIT);
@@ -178,7 +175,7 @@ int Game::isHit(int row, int col, int depth, char& letter) const
 			}
 		}
 	}
-	letter = 'a';
+	letter = DEFAULT_LETTER;
 	return MISS;
 }
 
@@ -186,7 +183,7 @@ std::unique_ptr<GameInfo> Game::game()
 {
 	int damaged = 0;;
 	int win = -1;
-	char letter = 'a';
+	char letter = DEFAULT_LETTER;
 	Coordinate curAttack(-1, -1, -1);
 	int row, col, depth;
 
@@ -197,7 +194,7 @@ std::unique_ptr<GameInfo> Game::game()
 	{
 		numberMoves++;
 
-		letter = 'a';
+		letter = DEFAULT_LETTER;
 		AttackResult result = AttackResult::Miss;
 		row = curAttack.row - 1;
 		col = curAttack.col - 1;
@@ -259,21 +256,16 @@ std::unique_ptr<GameInfo> Game::game()
 
 int Game::checkWin() const
 {
-	for (int j = 0; j < 2; ++j)
+	for (auto j = 0; j < 2; ++j)
 	{
 		ptrToShipsVector ps = (j == 0) ? (*playersShips).first : (*playersShips).second;
 		int count = 0;
-		for (int i = 0; i < (*ps).size(); i++)
+		for (auto i = 0; i < (*ps).size(); i++)
 		{
 			count += ps->at(i)->isSunk() ? 1 : 0;
 		}
 		if (count == ps->size()){
-			//std::mutex lock;
-			//lock.lock();
-			//std::cout << "player " << (j == 0 ? PLAYER_B : PLAYER_A) << " has won, ships he sanked: " << count << std::endl;
-			//lock.unlock();
 			return (j == 0 ? PLAYER_B : PLAYER_A); //if j==0, we're checking A's sanked ships, and if there are 5 of those - B won.
-	
 		}
 	}
 	return -1;

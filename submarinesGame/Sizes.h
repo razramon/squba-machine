@@ -12,10 +12,6 @@
 #define M_POINTS 7
 #define D_POINTS 8
 
-// Board size
-#define BOARD_LENGTH 10
-#define NUMBER_SHIPS 5
-
 // Players' numbers
 #define PLAYER_A 0
 #define PLAYER_B 1

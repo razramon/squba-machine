@@ -51,7 +51,5 @@ protected:
 private:
 	Logger();
 	virtual ~Logger();
-	Logger(const Logger&);
-	Logger& operator=(const Logger&);
 	static std::mutex sMutex;
 };

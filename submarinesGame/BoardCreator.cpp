@@ -18,12 +18,12 @@ void BoardCreator::updateShipsInBoard(std::shared_ptr<boardType>& board, ptrToSh
 	{
 		std::shared_ptr<Ship> s = (*ships)[i];
 
-		int** positions = (*s).getPosition();
+		std::shared_ptr<std::vector<std::vector<int>>> positions = (*s).getPosition();
 		char letter = (*s).getLetter();
 
 		for (int pos = 0; pos < (*s).getShipSize(); ++pos)
 		{
-			(*board)[positions[pos][Ship::INDEX_3D::depth_index]][positions[pos][Ship::INDEX_3D::row_index]][positions[pos][Ship::INDEX_3D::column_index]] = letter;
+			(*board)[(*positions)[pos][Ship::INDEX_3D::depth_index]][(*positions)[pos][Ship::INDEX_3D::row_index]][(*positions)[pos][Ship::INDEX_3D::column_index]] = letter;
 		}
 	}
 }
@@ -64,6 +64,7 @@ void BoardCreator::printCoord(Coordinate c)
 {
 	std::cout << "Row: " << c.row << ", Column: " << c.col << ", Depth: " << c.depth << std::endl;
 }
+
 /*
 * Gets:
 *		indexes of row, colomn and depth, a dimentionToCheck
@@ -143,7 +144,6 @@ void BoardCreator::createShipAtCoord(char letter, std::vector<std::shared_ptr<Sh
 	{
 
 		(*ship).setPosition(i, row, col, depth, 0);
-		//last line used to be: (*(shipsOfPlayer[numShipsForCurrPlayer])).setPosition(i, row, col, depth, 0);
 		updateCoordinate(row, col, depth, dimentionToUpdate);
 
 	}
@@ -247,11 +247,11 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 	std::shared_ptr<std::vector<Coordinate>>& badLetterCoords, std::vector<std::shared_ptr<Ship>>& shipsOfPlayer)
 {
 	bool res = false;
-	int** pos = (*ship).getPosition();
+	std::shared_ptr<std::vector<std::vector<int>>> pos = (*ship).getPosition();
 	for (int i = 0; i < (*ship).getShipSize(); ++i)
 	{
-		Coordinate c1 = Coordinate(pos[i][Ship::INDEX_3D::row_index], 
-						pos[i][Ship::INDEX_3D::column_index], pos[i][Ship::INDEX_3D::depth_index]);
+		Coordinate c1 = Coordinate((*pos)[i][Ship::INDEX_3D::row_index], 
+						(*pos)[i][Ship::INDEX_3D::column_index], (*pos)[i][Ship::INDEX_3D::depth_index]);
 		for (int k = 0; k < (*badLetterCoords).size(); ++k)
 		{
 			if (twoCoordsNeighbours(c1, (*badLetterCoords).at(i)))
@@ -268,19 +268,19 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 		for (int i = 0; i < shipsOfPlayer.size(); ++i)
 		{
 			//makes sure it's NOT the same ship: 
-			if (!(pos[0][Ship::INDEX_3D::row_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::row_index] &&
-				pos[0][Ship::INDEX_3D::column_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::column_index]) &&
-				pos[0][Ship::INDEX_3D::depth_index] == (*(shipsOfPlayer.at(i))).getPosition()[0][Ship::INDEX_3D::depth_index])
+			if (!((*pos)[0][Ship::INDEX_3D::row_index] == (*(*(shipsOfPlayer[i])).getPosition())[0][Ship::INDEX_3D::row_index] &&
+				(*pos)[0][Ship::INDEX_3D::column_index] == (*(*(shipsOfPlayer[i])).getPosition())[0][Ship::INDEX_3D::column_index]) &&
+				(*pos)[0][Ship::INDEX_3D::depth_index] == (*(*(shipsOfPlayer[i])).getPosition())[0][Ship::INDEX_3D::depth_index])
 			{
 				if ((*(shipsOfPlayer.at(i))).getLetter() == letter)
 				{
 					for (int j = 0; j < (*ship).getShipSize(); ++j)
 					{
-						Coordinate c1 = Coordinate(pos[j][Ship::INDEX_3D::row_index], pos[j][Ship::INDEX_3D::column_index], pos[j][Ship::INDEX_3D::depth_index]);
+						Coordinate c1 = Coordinate((*pos)[j][Ship::INDEX_3D::row_index], (*pos)[j][Ship::INDEX_3D::column_index], (*pos)[j][Ship::INDEX_3D::depth_index]);
 						for (int k = 0; k < (*shipsOfPlayer.at(i)).getShipSize(); ++k)
 						{
-							int** position = (*shipsOfPlayer.at(i)).getPosition();
-							Coordinate c2 = Coordinate(position[k][Ship::INDEX_3D::row_index], position[k][Ship::INDEX_3D::column_index], position[k][Ship::INDEX_3D::depth_index]);
+							std::shared_ptr<std::vector<std::vector<int>>> position = (*shipsOfPlayer.at(i)).getPosition();
+							Coordinate c2 = Coordinate((*position)[k][Ship::INDEX_3D::row_index], (*position)[k][Ship::INDEX_3D::column_index], (*position)[k][Ship::INDEX_3D::depth_index]);
 							if (twoCoordsNeighbours(c1, c2))
 							{
 								res = true;
@@ -298,7 +298,7 @@ bool BoardCreator::checkShipShape(std::shared_ptr<Ship>& ship, char letter,
 	{
 		for (int i = 0; i < Ship::sizeOfShip(letter); ++i)
 		{
-			Coordinate badCoord = Coordinate(pos[i][Ship::INDEX_3D::row_index], pos[i][Ship::INDEX_3D::column_index], pos[i][Ship::INDEX_3D::depth_index]);
+			Coordinate badCoord = Coordinate((*pos)[i][Ship::INDEX_3D::row_index], (*pos)[i][Ship::INDEX_3D::column_index], (*pos)[i][Ship::INDEX_3D::depth_index]);
 			(*badLetterCoords).push_back(badCoord);
 		}
 	}
@@ -551,7 +551,7 @@ void BoardCreator::getDimentions(int & numRows, int & numCols, int & numDepth, s
 
 /*
 * This Function returns a pointer to a 3D-game board
-* TODO:: update it accurding to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61341
+* updated accurding to: http://moodle.tau.ac.il/mod/forum/discuss.php?d=61341
 * Note: might throw exception!
 */
 std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile, int& numRows, int& numCols, int& numDepth)
@@ -777,7 +777,7 @@ std::unique_ptr<boardType> BoardCreator::createBoard(int numRows, int numCols, i
 			(*board)[d][r].resize(numCols);
 			for (int c = 0; c < numCols; c++)
 			{
-				(*board)[d][r][c] = ' ';
+				(*board)[d][r][c] = EMPTY_LETTER;
 			}
 		}
 	}
