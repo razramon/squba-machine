@@ -23,7 +23,7 @@ class GameManager
 	
 	int numberThreads;
 	std::atomic<int> gameNumber;
-	std::atomic<int> roundNumber;
+	std::atomic<int> roundNumber; //Note: a tie is considered when counting game rounds!
 
 	//A vector to contain all game combinations:
 	std::vector<std::unique_ptr<GameBasicData>> allGamesData; 
