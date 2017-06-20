@@ -75,6 +75,7 @@ void GameManager::setNumberThreads(int numberThreads) {
 
 void GameManager::startGames() {
 
+	Logger::instance().log("Start games with " + std::to_string(this->allPlayersInfo.size()) + " players and " + std::to_string(this->boards.size()) + " boards", Logger::LogLevelInfo);
 	this->gameNumber = 0;
 
 	size_t threadsToCreate = (allGamesData.size() < numberThreads) ? allGamesData.size() : numberThreads;
@@ -111,8 +112,6 @@ GameManager::GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
 
 	std::cout << "Number of legal players: " << this->allPlayersInfo.size() << std::endl;
 	std::cout << "Number of legal boards: " << this->boards.size() << std::endl;
-	
-	//TODO: add printing of critical errors.(?)
 }
 
 void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFiles) {
