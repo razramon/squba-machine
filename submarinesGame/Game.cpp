@@ -187,7 +187,7 @@ std::unique_ptr<GameInfo> Game::game()
 	Coordinate curAttack(-1, -1, -1);
 	int row, col, depth;
 
-	int maxNumberOfMoves = this->numCols * this->numDepth * this->numRows * 3; // An arbitrary number, just to put maximum to a game.
+	int maxNumberOfMoves = this->numCols * this->numDepth * this->numRows * 5; // An arbitrary number, just to put maximum to a game.
 	int numberMoves = 0;
 
 	while (win == -1 && playersHaveAttack(curAttack) && numberMoves < maxNumberOfMoves)
@@ -248,6 +248,15 @@ std::unique_ptr<GameInfo> Game::game()
 			throw Exception("Error: got error result");
 		}
 		win = checkWin();
+	}
+
+	if(numberMoves >= maxNumberOfMoves && win == -1)
+	{
+		Logger::instance().log("Too much game moves, ended with no winners", Logger::LogLevelError);
+	} else if(win == -1)
+	{
+		Logger::instance().log("Game ended with a tie: doesn't count as win/lose for both players", Logger::LogLevelInfo);
+		//Note: a tie is considered when counting game rounds!
 	}
 
 	return std::make_unique<GameInfo>(win, dllNames, points);

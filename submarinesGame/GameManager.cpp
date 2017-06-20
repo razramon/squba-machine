@@ -98,20 +98,21 @@ GameManager::GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
 	this->loadAllDlls(dllsFiles);
 	if (dlls.size() < 2)
 	{
-		//TODO:: i'm not sure if we need to write to the logger...
+		Logger::instance().log("Loaded too few DLLs (enough files, but couldn't load at least two)", Logger::LogLevelError);
 		throw Exception("Error: not enough dlls were loaded");
 	}
 
 	this->loadAllBoards(boardFiles);
 	if (boards.size() == 0)
 	{		
-		//TODO:: i'm not sure if we need to write to the logger...
+		Logger::instance().log("Failed creating boards (enough files, but couldn't create at least one valid board)", Logger::LogLevelError);
 		throw Exception("Error: no valid boards were found");
 	}
 	this->divideToGames();
 
 	std::cout << "Number of legal players: " << this->allPlayersInfo.size() << std::endl;
 	std::cout << "Number of legal boards: " << this->boards.size() << std::endl;
+	
 }
 
 void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFiles) {
