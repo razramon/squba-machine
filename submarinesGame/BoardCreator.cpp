@@ -4,10 +4,6 @@
 const std::string BoardCreator::BOARD_SUFF = ".sboard";
 const char BoardCreator::DELIMETER = 'x';
 
-//std::pair<char **, char**> BoardCreator::getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips)
-//{
-//	return std::make_pair(getBoardFromShips((*playersShips).first), getBoardFromShips((*playersShips).second));
-//}
 
 std::shared_ptr<boardType> BoardCreator::getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth)
 {
@@ -50,6 +46,19 @@ int BoardCreator::getIndexOfRelevantBadCoordsVector(char letter)
 	default: return -1;
 	}
 }
+
+void BoardCreator::fillRows(int row, int numRows, int numCols, int depth, std::unique_ptr<boardType>& board)
+{
+	for (int i = row; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			(*board)[depth][i][j] = EMPTY_LETTER;
+		}
+	}
+}
+
+
 
 void BoardCreator::printCoord(Coordinate c)
 {
@@ -475,26 +484,24 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 		}
 	}
 
-	/*Printing errors as instructed - too many / to few ships*/
-	if ((*shipsA).size() > NUMBER_SHIPS)
+	/*Printing errors to logger:
+	 * Note - If one of players has zero ships - it's not conidered as a valid board!!
+	 *		- A different number of ships is considered ok! but a warning is printed
+	 */
+	if ((*shipsA).size() != (*shipsB).size())
 	{
-		boardNotValid = true;
-		Logger::instance().log("Too many ships for player A", Logger::LogLevelError);
+		//it still considered valid board!!
+		Logger::instance().log("Warning: Player A and Player B have different number of ships", Logger::LogLevelInfo);
 	}
-	if ((*shipsA).size() < NUMBER_SHIPS)
+	if ((*shipsA).size() == 0)
 	{
 		boardNotValid = true;
-		Logger::instance().log("Too few ships for player A", Logger::LogLevelError);
+		Logger::instance().log("Too few ships for player A: zero ships", Logger::LogLevelError);
 	}
-	if ((*shipsB).size() > NUMBER_SHIPS)
+	if ((*shipsB).size() == 0)
 	{
 		boardNotValid = true;
-		Logger::instance().log("Too many ships for player B", Logger::LogLevelError);
-	}
-	if ((*shipsB).size() < NUMBER_SHIPS)
-	{
-		boardNotValid = true;
-		Logger::instance().log("Too few ships for player B", Logger::LogLevelError);
+		Logger::instance().log("Too few ships for player B: zero ships", Logger::LogLevelError);
 	}
 	if (adjacentShips)
 	{
@@ -502,7 +509,7 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 		Logger::instance().log("Adjacent Ships on Board", Logger::LogLevelError);
 	}
 
-	/*If board's invalid - deletes all ships and return nullptr*/
+	/*If board's invalid - return nullptr*/
 	if (boardNotValid)
 	{
 		return nullptr;
@@ -567,6 +574,7 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 	/*Gets first line of the file, format is: <>x<>x<>*/
 	try
 	{
+		
 		Utilities::getAllKindsOfLine(bfile, line);
 		getDimentions(numRows, numCols, numDepth, line);
 	}
@@ -577,12 +585,16 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 		str.insert(0, "Error: failed reading from board file or first line is not of format: <number of columns>x<number of rows>x<depth>: ");
 		throw Exception(str.c_str());
 	}
+
 	if (numRows < 0 || numCols<0 || numDepth<0)
 	{
 		throw Exception("Error: wrong board dimentions format");
 	}
 
 	std::unique_ptr<boardType> board = std::move(createBoard(numRows, numCols, numDepth));
+
+	bool alreadyPassedFirstSpaceSeparator = false;
+	bool seenEndDepthLine = false;
 
 	int depth = 0;
 	while (depth < numDepth)
@@ -607,18 +619,43 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 				str.insert(0, "Error: failed reading from board file: ");
 				throw Exception(str.c_str());
 			}
-			if (row == -1) //makes sure there's an empty line between dimention and boards
+			if (row == -1) 
 			{
-				if (Utilities::isLineEmpty(line))
+				row++;
+				if (!alreadyPassedFirstSpaceSeparator)
 				{
-					row++;
+					//According to the moodle, we can choose to check if there's an empty line between dimention and boards:
+					//if it's not empty - we write to logger and ignore it, as Amir instructed
+					if (!Utilities::isLineEmpty(line))
+					{
+						Logger::instance().log("wrong board format: no empty line after dimensions, continuing", Logger::LogLevelError);
+					}
+					alreadyPassedFirstSpaceSeparator = true;
+					continue;
+				} 
+				if (!seenEndDepthLine) //means, it supposed to be an empty WITHOUT SPACES line:
+				{
+					if(!Utilities::isEmptyLineWOSpaces(line))
+					{
+						row--;
+						//ignores this line until it reaches an empty WO spaces line
+					}
+					//if it is empty, we'll update "row" and continue:
 					continue;
 				}
-				else
-				{
-					throw Exception("Error: wrong board format: no empty line");
-				}
+				
+				//if here, we've seen "EndDepthLine" 
+
 			}
+			if (Utilities::isEmptyLineWOSpaces(line)) //means that we're at the end of this depth:
+													//so it fills all current depth layer with spaces and continues to next depth
+			{
+				fillRows(row, numRows, numCols, depth, board);
+				row = numRows; //so it will continnue to next depth
+				seenEndDepthLine = true;
+				continue;
+			}
+			seenEndDepthLine = false;
 			if (line.length() < numCols)
 			{
 				for (size_t col = 0; col < line.length(); ++col)
@@ -642,13 +679,7 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 
 		if (row < numRows) //file ended (got here through break) 
 		{
-			for (int i = row; i < numRows; ++i)
-			{
-				for (int j = 0; j < numCols; ++j)
-				{
-					(*board)[depth][i][j] = ' ';
-				}
-			}
+			fillRows(row, numRows, numCols, depth, board);
 			++depth;
 			break;
 		}
@@ -659,13 +690,7 @@ std::unique_ptr<boardType> BoardCreator::getBoardFromFile(const char* boardFile,
 	{
 		for (int k = depth; k < numDepth; ++k)
 		{
-			for (int i = 0; i < numRows; ++i)
-			{
-				for (int j = 0; j < numCols; ++j)
-				{
-					(*board)[k][i][j] = ' ';
-				}
-			}
+			fillRows(0, numRows, numCols, k, board);
 		}
 	}
 
@@ -797,10 +822,3 @@ void BoardCreator::printBoard(std::shared_ptr<boardType> board, int numRows, int
 		}
 	}
 }
-
-//char ** BoardCreator::createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB)
-//{
-//	char** commonBoard = getBoardFromShips(shipsA);
-//	updateShipsInBoard(commonBoard, shipsB);
-//	return commonBoard;
-//}

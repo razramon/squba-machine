@@ -109,6 +109,12 @@ public:
 	static bool isLineEmpty(const std::string line);
 
 	/*
+	* Returns true if line is empty and has NO SPACES
+	* NOTE: returns true for an empty string!
+	*/
+	static bool isEmptyLineWOSpaces(const std::string line);
+
+	/*
 	 * A function that does nothing - to avoid warnings such as: "'e':unreferenced local variable" (where e is an exception we don't care about)
 	 */
 	template<class T>

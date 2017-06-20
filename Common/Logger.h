@@ -6,6 +6,7 @@
 #include <string>
 #include <mutex>
 #include <iomanip>
+#include <stdexcept>
 
 // Definition of a multithread safe singleton logger class
 class Logger

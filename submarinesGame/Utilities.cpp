@@ -309,3 +309,15 @@ bool Utilities::isLineEmpty(const std::string line)
 	}
 	return true;
 }
+
+bool Utilities::isEmptyLineWOSpaces(const std::string line)
+{
+	for (char c : line)
+	{
+		if (c != '\r' && c != '\n')
+		{
+			return false;
+		}
+	}
+	return true;
+}

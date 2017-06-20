@@ -96,6 +96,18 @@ void Game::initializePlayer(IBattleshipGameAlgo * algo, int p_Number, BoardData&
 	algo->setBoard(b); //sets the player's board
 }
 
+void Game::resetPlayersShips()
+{
+	for (auto ship_to_reset = (*(this->playersShips->first)).begin(); ship_to_reset!= (*(this->playersShips->first)).end(); ++ship_to_reset)
+	{
+		(**ship_to_reset).resetShip();
+	}
+	for (auto ship_to_reset = (*(this->playersShips->second)).begin(); ship_to_reset != (*(this->playersShips->second)).end(); ++ship_to_reset)
+	{
+		(**ship_to_reset).resetShip();
+	}
+}
+
 //large init list, don't panic! :)
 Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFuncType> playerA,
 	std::shared_ptr<GetAlgoFuncType> playerB, std::pair< std::shared_ptr<Board>, std::shared_ptr<Board> > board,
@@ -117,6 +129,7 @@ Game::Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFu
 	{
 		throw e;
 	}
+	resetPlayersShips(); //make sure all ships are "alive" when starting the game. 
 }
 
 Game::~Game()
@@ -248,8 +261,14 @@ int Game::checkWin() const
 		{
 			count += ps->at(i)->isSunk() ? 1 : 0;
 		}
-		if (count == 5)
+		if (count == ps->size()){
+			//std::mutex lock;
+			//lock.lock();
+			//std::cout << "player " << (j == 0 ? PLAYER_B : PLAYER_A) << " has won, ships he sanked: " << count << std::endl;
+			//lock.unlock();
 			return (j == 0 ? PLAYER_B : PLAYER_A); //if j==0, we're checking A's sanked ships, and if there are 5 of those - B won.
+	
+		}
 	}
 	return -1;
 }

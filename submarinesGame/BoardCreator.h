@@ -14,7 +14,6 @@
 #define DEFAULT_LETTER 'a';
 #define EMPTY_LETTER ' ';
 
-
 typedef std::vector<std::vector<std::vector<char>>> boardType;
 typedef std::shared_ptr<std::vector<std::shared_ptr<Ship>>> ptrToShipsVector;
 
@@ -25,9 +24,13 @@ class BoardCreator
 	static const std::string BOARD_SUFF;
 	static const char DELIMETER;
 
-
-
 	static int getIndexOfRelevantBadCoordsVector(char letter);
+
+	/*
+	 * Fills board[depth] with spaces, starting at position: board[depth][row][0] 
+	 * until position board[depth][numRows-1][numCols-1]
+	 */
+	static void fillRows(int row, int numRows, int numCols, int depth, std::unique_ptr<boardType>& board);
 
 public:
 	/*
@@ -36,7 +39,6 @@ public:
 	static void updateShipsInBoard(std::shared_ptr<boardType>& board, ptrToShipsVector ships);
 
 	static std::shared_ptr<boardType> getBoardFromShips(ptrToShipsVector ships, int numRows, int numCols, int numDepth);
-	//static std::pair<char **, char**> getInitBoardForEachPlayer(std::pair<std::vector<Ship*>*, std::vector<Ship*>*>* playersShips);
 
 	static void printCoord(Coordinate c);
 	static int& updateCoordinate(int& row_ind, int& col_ind, int& depth_ind, Ship::INDEX_3D dimentionToCheck);
@@ -60,11 +62,6 @@ public:
 	static std::unique_ptr<boardType> createBoard(int numRows, int numCols, int numDepth);
 	static std::unique_ptr<boardType> copyBoard(const std::shared_ptr<boardType>& board, int numRows, int numCols, int numDepth);
 	static void printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth);
-	/*
-	* Returns a clean (without unnecessary letters) board represnting both players' ships.
-	* NOTE: need to use freeBoard on the board returned!
-	*/
-	//static char*** createCommonBoard(std::vector<Ship*>* shipsA, std::vector<Ship*>* shipsB);
 
 };
 

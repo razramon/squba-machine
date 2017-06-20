@@ -2,7 +2,7 @@
 // Implementation of a multithread safe singleton logger class
 
 #include "Logger.h"
-#include <stdexcept>
+
 
 using namespace std;
 

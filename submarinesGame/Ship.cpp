@@ -133,12 +133,12 @@ void Ship::setPosition(int pos, int row, int col, int dep, int state)
 void Ship::printShipInfo() const
 {
 	std::cout << "This is ship: " << letter << " of player " << (islower(letter) ? "B" : "A") << std::endl;
-	std::cout << "Printing format of positions is: (depth, row, column)" << std::endl;
+	std::cout << "Printing format of positions is: (depth, row, column) + <HIT ?YES, NO>" << std::endl;
 	for (int k = 0; k < Ship::sizeOfShip(letter) - 1; ++k)
 	{
-		std::cout << "(" << position[k][2] << "," << position[k][0] << "," << position[k][1] << ")  ,  ";
+		std::cout << "(" << position[k][2] << "," << position[k][0] << "," << position[k][1] << ")  <"<< (position[k][3] ==1? "YES":"NO") << "> ,  ";
 	}
-	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][2] << "," << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")" << std::endl;
+	std::cout << "(" << position[Ship::sizeOfShip(letter) - 1][2] << "," << position[Ship::sizeOfShip(letter) - 1][0] << "," << position[Ship::sizeOfShip(letter) - 1][1] << ")  <" << (position[Ship::sizeOfShip(letter) - 1][3] == 1 ? "YES" : "NO") << "> " << std::endl;
 }
 
 
@@ -159,4 +159,12 @@ int Ship::numOfHits() const
 int Ship::shipOfPlayer() const
 {
 	return ((islower(letter)) ? PLAYER_B : PLAYER_A);
+}
+
+void Ship::resetShip()
+{
+	for (int k = 0; k < Ship::sizeOfShip(letter); ++k)
+	{
+		this->position[k][3] = 0;
+	}
 }

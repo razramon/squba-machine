@@ -26,9 +26,19 @@ public:
 	int** getPosition();
 	int getShipSize() const;
 	void setPosition(int pos, int row, int col, int dep, int state);
+
+	/*
+	 * For tests only: prints the ship position and the status of each position
+	 */
 	void printShipInfo() const;
 	int numOfHits() const;
 	int shipOfPlayer() const;
+
+	/*
+	 * Updates all this ship's position to not hit.
+	 */
+	void resetShip();
+
 	enum INDEX_3D
 	{
 		row_index = 0,

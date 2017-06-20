@@ -9,7 +9,6 @@ bool GameManager::sortPlayers(const std::pair<std::string, std::vector<int>>& pl
 }
 
 void GameManager::runGameThread() {
-	std::cout << "In thread number: " << std::this_thread::get_id() << std::endl; //TODO:: DELETE THIS LINE!!
 	// Infinite loop - only stop when there is no more games in the game manager
 	while (gameNumber < allGamesData.size()) {
 		// Create a new game, run it and then request another
@@ -135,10 +134,11 @@ void GameManager::loadAllDlls(std::unique_ptr<std::vector<std::string>>& dllsFil
 			Logger::instance().log("Could not load DLL", Logger::LogLevelError);
 			continue;
 		}
+		//extracting playerName:
 		size_t firstIndex = ((*dllsFiles).at(i)).find_last_of("/\\") + 1;
-		size_t lastIndex = ((*dllsFiles).at(i)).find_last_of(".dll") - 4;
+		size_t lastIndex = ((*dllsFiles).at(i)).find_last_of(Utilities::DLL_SUFF) - 4;
 		std::string playerName = ((*dllsFiles).at(i)).substr(firstIndex, (lastIndex - firstIndex)+1);
-		std::cout << "playerName is: " << playerName << std::endl;
+
 		dlls.push_back(std::make_unique<std::pair<std::string, GetAlgoFuncType>>(std::make_pair(playerName,getAlgoFunc)));
 		allPlayersInfo.push_back(std::make_shared<PlayerInfo>(playerName));
 	}
@@ -161,6 +161,7 @@ void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& board
 			}
 			std::shared_ptr<boardType> cleanBaseBoard = BoardCreator::getBoardFromShips(shipsOfBoard->first, rows, cols, depth);
 			BoardCreator::updateShipsInBoard(cleanBaseBoard, shipsOfBoard->second);
+
 			boardsShips.push_back(shipsOfBoard);
 			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, cleanBaseBoard, NOT_INIT);
 
@@ -250,10 +251,12 @@ void GameManager::printRound() {
 
 		std::cout << std::left << std::setw(6) << std::to_string(indexRow) + "." << std::setw(maxLengthName + 4) << printPlayer.first;
 		std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
-		std::cout << std::left << std::setw(8) << std::setprecision(2) << std::fixed << (static_cast<double>(playerScores.at(0)) / (playerScores.at(1) + playerScores.at(0)) * 100);
+		double denominator = playerScores.at(1) + playerScores.at(0); //For edge case where player played and had a tie: to avoid dividing in zero
+		double percent = denominator == 0 ? 0 : ((static_cast<double>(playerScores.at(0)) / denominator)) * 100;
+		std::cout << std::left << std::setw(8) << std::setprecision(2) << std::fixed << percent;
 		std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
 		indexRow++;
 	}
-
+	std::cout << std::endl;
 	++roundNumber;
 }

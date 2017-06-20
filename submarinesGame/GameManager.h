@@ -95,6 +95,10 @@ public:
 	GameManager(std::unique_ptr<std::vector<std::string>>& dllsFiles,
 			std::unique_ptr<std::vector<std::string>>& boardFiles, int numOfThreads);
 
+	/*
+	 * Prints "current" round,
+	 * Round is dfined by: http://moodle.tau.ac.il/mod/forum/discuss.php?d=62033#p96637
+	 */
 	void printRound();
 
 };

@@ -59,6 +59,12 @@ class Game
 	//	bool initPlayers(int playerNum, std::pair<char**, char**> boards);
 
 	static void initializePlayer(IBattleshipGameAlgo* algo, int p_Number, BoardData& b);
+	
+	/*
+	 * Marks all ships positions as NOT - hit (allows to use the same ships each game,
+	 *									making sure they aren't marked as sank ships)
+	 */
+	void  resetPlayersShips();
 
 public:
 	Game(std::string dllAName, std::string dllBName, std::shared_ptr<GetAlgoFuncType> playerA,
