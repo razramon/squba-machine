@@ -2,35 +2,30 @@
 
 using namespace std;
 
-Ship::Ship(char letter) : letter(letter), numberOfPoints(pointsOfShip(letter)), position(new int*[sizeOfShip(letter)])
+Ship::Ship(char letter) : letter(letter), numberOfPoints(pointsOfShip(letter)),
+			position(std::vector<vector<int>>(sizeOfShip(letter)))
 {
-	for (int i = 0; i < sizeOfShip(letter); ++i)
+
+	for (auto i = 0; i < sizeOfShip(letter); ++i)
 	{
-		position[i] = new int[LEN_OF_POS_AND_RESULT];
+		position[i].resize(LEN_OF_POS_AND_RESULT);
 	}
+
 }
 
-Ship::~Ship()
-{
-	for (int i = 0; i < this->getShipSize(); ++i)
-	{
-		delete position[i];
-	}
-	delete[] position;
-}
 
 Ship::Ship(const Ship& s)
 {
 	this->letter = s.letter;
 	this->numberOfPoints = pointsOfShip(letter);
-	this->position = new int*[sizeOfShip(letter)];
-	for (int i = 0; i < sizeOfShip(letter); ++i)
+	this->position = std::vector<vector<int>>(sizeOfShip(letter));
+	for (auto i = 0; i < sizeOfShip(letter); ++i)
 	{
-		position[i] = new int[LEN_OF_POS_AND_RESULT];
+		this->position[i].resize(LEN_OF_POS_AND_RESULT);
 	}
-	for (int i = 0; i < sizeOfShip(letter); ++i)
+	for (auto i = 0; i < sizeOfShip(letter); ++i)
 	{
-		for (int j = 0; j < LEN_OF_POS_AND_RESULT; ++j)
+		for (auto j = 0; j < LEN_OF_POS_AND_RESULT; ++j)
 		{
 			this->position[i][j] = s.position[i][j];
 		}
@@ -110,9 +105,9 @@ bool Ship::isSunk() const
 	return true;
 }
 
-int** Ship::getPosition()
+std::shared_ptr<std::vector<std::vector<int>>> Ship::getPosition()
 {
-	return position;
+	return std::make_shared<std::vector<std::vector<int>>>(position);
 }
 
 int Ship::getShipSize() const
