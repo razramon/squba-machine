@@ -125,6 +125,7 @@ void Ship::setPosition(int pos, int row, int col, int dep, int state)
 	this->position[pos][3] = state;
 }
 
+/* Testing Only */
 void Ship::printShipInfo() const
 {
 	std::cout << "This is ship: " << letter << " of player " << (islower(letter) ? "B" : "A") << std::endl;

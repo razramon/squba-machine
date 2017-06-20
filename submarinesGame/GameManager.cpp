@@ -204,7 +204,7 @@ void GameManager::divideToGames() {
 }
 
 
-
+/* Printing all rounds one ofter the other, according to http://moodle.tau.ac.il/mod/forum/discuss.php?d=65924*/
 void GameManager::printRound() {
 
 	std::vector<std::pair<std::string,std::vector<int>>> playersToPrint;
@@ -232,13 +232,13 @@ void GameManager::printRound() {
 
 	// Head row
 	std::cout << std::left << std::setfill(' ');
-	std::cout << std::left << std::setw(6) << "#";
-	std::cout << std::left << std::setw(maxLengthName + 4) << "Team Name";
-	std::cout << std::left << std::setw(8) << "Wins";
-	std::cout << std::left << std::setw(8) << "Losses";
-	std::cout << std::left << std::setw(8) << "%";
-	std::cout << std::left << std::setw(8) << "Pts For";
-	std::cout << std::left << std::setw(8) << "Pts Against" << std::endl;
+	std::cout << std::left << std::setw(PRINT_SIZE_B) << "#";
+	std::cout << std::left << std::setw(maxLengthName + PRINT_SIZE_A) << "Team Name";
+	std::cout << std::left << std::setw(PRINT_SIZE_C) << "Wins";
+	std::cout << std::left << std::setw(PRINT_SIZE_C) << "Losses";
+	std::cout << std::left << std::setw(PRINT_SIZE_C) << "%";
+	std::cout << std::left << std::setw(PRINT_SIZE_C) << "Pts For";
+	std::cout << std::left << std::setw(PRINT_SIZE_C) << "Pts Against" << std::endl;
 
 	std::cout << std::setw(50 + maxLengthName) << " " << std::endl;
 	int indexRow = 1;
@@ -249,14 +249,14 @@ void GameManager::printRound() {
 
 		playerScores = printPlayer.second;
 
-		std::cout << std::left << std::setw(6) << std::to_string(indexRow) + "." << std::setw(maxLengthName + 4) << printPlayer.first;
-		std::cout << std::left << std::setw(8) << playerScores.at(0) << std::setw(8) << playerScores.at(1);
+		std::cout << std::left << std::setw(PRINT_SIZE_B) << std::to_string(indexRow) + "." << std::setw(maxLengthName + PRINT_SIZE_A) << printPlayer.first;
+		std::cout << std::left << std::setw(PRINT_SIZE_C) << playerScores.at(0) << std::setw(PRINT_SIZE_C) << playerScores.at(1);
 		double denominator = playerScores.at(1) + playerScores.at(0); //For edge case where player played and had a tie: to avoid dividing in zero
 		double percent = denominator == 0 ? 0 : ((static_cast<double>(playerScores.at(0)) / denominator)) * 100;
-		std::cout << std::left << std::setw(8) << std::setprecision(2) << std::fixed << percent;
-		std::cout << std::left << std::setw(8) << playerScores.at(2) << std::setw(8) << playerScores.at(3) << std::endl;
+		std::cout << std::left << std::setw(PRINT_SIZE_C) << std::setprecision(2) << std::fixed << percent;
+		std::cout << std::left << std::setw(PRINT_SIZE_C) << playerScores.at(2) << std::setw(PRINT_SIZE_C) << playerScores.at(3) << std::endl;
 		indexRow++;
 	}
-	std::cout << std::endl;
+	std::cout << "\n" << std::endl;
 	++roundNumber;
 }

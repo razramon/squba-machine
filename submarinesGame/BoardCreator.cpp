@@ -59,7 +59,7 @@ void BoardCreator::fillRows(int row, int numRows, int numCols, int depth, std::u
 }
 
 
-
+/* For testing only */
 void BoardCreator::printCoord(Coordinate c)
 {
 	std::cout << "Row: " << c.row << ", Column: " << c.col << ", Depth: " << c.depth << std::endl;
@@ -803,6 +803,7 @@ std::unique_ptr<boardType> BoardCreator::copyBoard(const std::shared_ptr<boardTy
 	return std::move(retBoard);
 }
 
+/* Testing only */
 /*Prints board layer by layer:*/
 void BoardCreator::printBoard(std::shared_ptr<boardType> board, int numRows, int numCols, int numDepth)
 {

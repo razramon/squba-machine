@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../submarinesGame/BoardCreator.h"
+#include "BoardCreator.h"
 
 class Board : public BoardData
 {

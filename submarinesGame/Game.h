@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Sizes.h"
 #include "BoardCreator.h"
-#include "../Common/Board.h"
+#include "Board.h"
 #include "GameInfo.h"
 
 

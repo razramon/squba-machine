@@ -1,8 +1,8 @@
 #pragma once
-#include "../submarinesGame/IBattleshipGameAlgo.h"
-#include "../submarinesGame/BoardCreator.h"
-#include "../submarinesGame/Sizes.h"
-#include "../submarinesGame/Ship.h"
+#include "IBattleshipGameAlgo.h"
+#include "BoardCreator.h"
+#include "Sizes.h"
+#include "Ship.h"
 #include <stdlib.h>
 #include <vector>
 #include <memory>

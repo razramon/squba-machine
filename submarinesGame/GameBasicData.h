@@ -1,7 +1,7 @@
 #pragma once
 #include "Utilities.h"
 #include "IBattleshipGameAlgo.h"
-#include "../Common/Board.h"
+#include "Board.h"
 #include "Game.h"
 
 class GameBasicData

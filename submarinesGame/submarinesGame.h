@@ -14,7 +14,7 @@
 #include "Game.h"
 #include "GameInfo.h"
 #include "GameManager.h"
-#include "../Common/Logger.h"
+#include "Logger.h"
 #include "PlayerInfo.h"
 
 int main(int argc, char* argv[]);

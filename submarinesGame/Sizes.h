@@ -27,4 +27,9 @@
 #define VALID_LETTERS 8
 
 //number of threads (default)
-#define THREADS_DEFAULT_NUMBER 4;
+#define THREADS_DEFAULT_NUMBER 4
+
+// Printing sizes
+#define PRINT_SIZE_A 4
+#define PRINT_SIZE_B 6
+#define PRINT_SIZE_C 8

@@ -8,7 +8,7 @@
 #include <Windows.h>
 #include <memory>
 #include "IBattleshipGameAlgo.h"
-#include "../Common/Logger.h"
+#include "Logger.h"
 
 
 #define DEFAULT_LETTER 'a';
