@@ -466,8 +466,7 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 		{
 			if (!islower(*i))
 			{
-				msg = "Wrong size or shape for ship " + (*i);
-				msg += " for player A";
+				msg = "Wrong size or shape for ship " + std::to_string((*i)) + " for player A";
 
 				Logger::instance().log(msg, Logger::LogLevelError);
 			}
@@ -476,8 +475,7 @@ std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> BoardCreator::ch
 		{
 			if (islower(*i))
 			{
-				msg = "Wrong size or shape for ship " + (*i);
-				msg += " for player B";
+				msg = "Wrong size or shape for ship " + std::to_string((*i)) + " for player B";
 
 				Logger::instance().log(msg, Logger::LogLevelError);
 			}
