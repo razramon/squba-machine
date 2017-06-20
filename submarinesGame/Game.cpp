@@ -189,8 +189,14 @@ std::unique_ptr<GameInfo> Game::game()
 	char letter = 'a';
 	Coordinate curAttack(-1, -1, -1);
 	int row, col, depth;
-	while (win == -1 && playersHaveAttack(curAttack))
+
+	int maxNumberOfMoves = this->numCols * this->numDepth * this->numRows * 3; // An arbitrary number, just to put maximum to a game.
+	int numberMoves = 0;
+
+	while (win == -1 && playersHaveAttack(curAttack) && numberMoves < maxNumberOfMoves)
 	{
+		numberMoves++;
+
 		letter = 'a';
 		AttackResult result = AttackResult::Miss;
 		row = curAttack.row - 1;
