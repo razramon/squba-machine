@@ -68,9 +68,9 @@ void GameManager::addNewGameInfo(std::unique_ptr<GameInfo>& game) {
 	
 }
 
-void GameManager::setNumberThreads(int numberThreads) {
+void GameManager::setNumberThreads(int _numberThreads) {
 
-	this->numberThreads = numberThreads;
+	this->numberThreads = _numberThreads;
 }
 
 void GameManager::startGames() {

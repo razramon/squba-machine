@@ -709,7 +709,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 	{
 		if (!(Utilities::doesPathExist(path)))
 		{
-			throw Exception(exceptionInfo(WRONG_PATH, path));
+			throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 		}
 	}
 	catch (std::exception& e)
@@ -720,14 +720,13 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 	WIN32_FIND_DATAA ffd;
 	char szDir[MAX_PATH];
 	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
 	bool retVal = false;
 
 	// Check that the input path plus 3 is not longer than MAX_PATH: 3 characters for "\*" plus NULL appended below.
 	StringCchLengthA(path, MAX_PATH, &pathLen);
 	if (pathLen > (MAX_PATH - 3))
 	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 
 	// Prepare string for use with FindFile functions: copy the string to a buffer, then append '\*' to the directory name.

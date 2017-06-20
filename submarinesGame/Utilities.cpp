@@ -26,7 +26,7 @@ void Utilities::getFullPath(std::string& path)
 	if (retval == 0)
 	{
 		// Handle an error condition.
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 	path = buffer;
 }
@@ -40,7 +40,7 @@ bool Utilities::doesPathExist(const char* path)
 	DWORD dirAttr = GetFileAttributesA(path);
 	if (dirAttr == INVALID_FILE_ATTRIBUTES)
 	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 	return ((dirAttr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
@@ -136,7 +136,7 @@ void Utilities::findDLLBoardFiles(const std::string path, std::unique_ptr<std::v
 	// Change working directory to reletive path if needed
 	if (_chdir(path.c_str()) != 0)
 	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 
 	WIN32_FIND_DATAA ffd;
@@ -146,7 +146,7 @@ void Utilities::findDLLBoardFiles(const std::string path, std::unique_ptr<std::v
 	// Check that input path+3 isn't longer than MAX_PATH, 3 characters for the "\*" plus NULL appended below.
 	if (path.size() > (MAX_PATH - 3))
 	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 
 	// Prepare string for use with FindFile functions.  First, copy the
@@ -158,7 +158,7 @@ void Utilities::findDLLBoardFiles(const std::string path, std::unique_ptr<std::v
 	hFind = FindFirstFileA(szDir, &ffd);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-		throw Exception(exceptionInfo(WRONG_PATH, path));
+		throw Exception(Macros::exceptionInfo(Macros::WRONG_PATH, path));
 	}
 
 	// checks all files in the directory in search for ".sboard" file.
@@ -205,15 +205,15 @@ void Utilities::buildPath(int argc, char* argv[], int& threadsNum, std::unique_p
 
 	if ((*boardFiles).size() == 0 && (*DLLFiles).size() < 2)
 	{
-		throw Exception(exceptionInfo(MISSING_BOARD, path) + "\n" + exceptionInfo(MISSING_ALGO, path));
+		throw Exception(Macros::exceptionInfo(Macros::MISSING_BOARD, path) + "\n" + Macros::exceptionInfo(Macros::MISSING_ALGO, path));
 	} 
 	if ((*boardFiles).size() == 0)
 	{
-		throw Exception(exceptionInfo(MISSING_BOARD, path));
+		throw Exception(Macros::exceptionInfo(Macros::MISSING_BOARD, path));
 	}
 	if ((*DLLFiles).size() < 2)
 	{
-		throw Exception(exceptionInfo(MISSING_ALGO, path));
+		throw Exception(Macros::exceptionInfo(Macros::MISSING_ALGO, path));
 	}
 
 }

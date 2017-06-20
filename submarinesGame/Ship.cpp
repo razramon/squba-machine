@@ -55,7 +55,7 @@ void Ship::setNumberOfPoints(int nop)
 
 bool Ship::isShip(char c)
 {
-	c = tolower(c);
+	c = static_cast<char>(tolower(c));
 	return (c == 'm' || c == 'b' || c == 'd' || c == 'p') ? true : false;
 }
 
@@ -63,7 +63,7 @@ bool Ship::isShip(char c)
 
 int Ship::pointsOfShip(char c)
 {
-	c = tolower(c);
+	c = static_cast<char>(tolower(c));
 	switch (c)
 	{
 	case 'b': return B_POINTS;
@@ -80,7 +80,7 @@ int Ship::pointsOfShip(char c)
 
 int Ship::sizeOfShip(char c)
 {
-	c = tolower(c);
+	c = static_cast<char>(tolower(c));
 	switch (c)
 	{
 	case 'b': return B_SIZE;

@@ -19,9 +19,3 @@
 
 int main(int argc, char* argv[]);
 
-
-/*
-* Frees all dlls' libraries
-*/
-void freeDlls();
-
