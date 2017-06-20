@@ -200,7 +200,7 @@ void Utilities::buildPath(int argc, char* argv[], int& threadsNum, std::unique_p
 	}
 	catch (std::exception& e)
 	{
-		throw e;
+		throw Exception(e.what());
 	}
 
 	if ((*boardFiles).size() == 0 && (*DLLFiles).size() < 2)
@@ -217,13 +217,6 @@ void Utilities::buildPath(int argc, char* argv[], int& threadsNum, std::unique_p
 	}
 
 }
-
-
-/*
-* Gets a valid path (directory), updates "filesFound" to contain 2 (at most) files - oredered lexicographically
-* Returns:  number of files found in path, which are inerted to "filesFound" vector,
-*			FILE_NOT_FOUND_ERROR = -1 / 0 if an error accured / no files have been found.
-*/
 
 
 bool Utilities::isNumeric(std::string & s)
