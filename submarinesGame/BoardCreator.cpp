@@ -714,7 +714,7 @@ bool BoardCreator::findBoardFile(const char* path, size_t pathLen, char** boardF
 	}
 	catch (std::exception& e)
 	{
-		throw e;
+		throw Exception(e.what());
 	}
 
 	WIN32_FIND_DATAA ffd;
