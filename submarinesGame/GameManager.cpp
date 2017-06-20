@@ -9,10 +9,9 @@ bool GameManager::sortPlayers(const std::pair<std::string, std::vector<int>>& pl
 }
 
 void GameManager::runGameThread() {
-	
+	std::cout << "In thread number: " << std::this_thread::get_id() << std::endl; //TODO:: DELETE THIS LINE!!
 	// Infinite loop - only stop when there is no more games in the game manager
 	while (gameNumber < allGamesData.size()) {
-		std::cout << "In runGameThread() \n";
 		// Create a new game, run it and then request another
 		std::shared_ptr<GameBasicData> gameBD = nullptr;
 		getGame(gameBD); //getGame() does the lock stuff
@@ -31,12 +30,6 @@ void GameManager::runGameThread() {
 		std::unique_ptr<GameInfo> gameResult = g->game();
 		
 		addNewGameInfo(gameResult);
-		
-		//changing a shared resource has to be thread-safe: 
-		//std::mutex lock;
-		//lock.lock();
-		//allGamesResults.push_back(std::move(gameResult));
-		//lock.unlock();
 
 		this->printRound(); 
 	}
@@ -161,14 +154,13 @@ void GameManager::loadAllBoards(std::unique_ptr<std::vector<std::string>>& board
 			std::unique_ptr<boardType> baseBoard = BoardCreator::getBoardFromFile((*boardPath).c_str(), rows, cols, depth);
 			std::shared_ptr<std::pair<ptrToShipsVector, ptrToShipsVector >> shipsOfBoard = BoardCreator::checkBoard(baseBoard, rows, cols, depth);
 			
-			std::shared_ptr<boardType> cleanBaseBoard = BoardCreator::getBoardFromShips(shipsOfBoard->first, rows, cols, depth);
-			BoardCreator::updateShipsInBoard(cleanBaseBoard, shipsOfBoard->second);
-			
 			if (shipsOfBoard == nullptr)
 			{
 				Logger::instance().log("Invalid board", Logger::LogLevelError);
 				continue; //continue to next board, this one's invalid
 			}
+			std::shared_ptr<boardType> cleanBaseBoard = BoardCreator::getBoardFromShips(shipsOfBoard->first, rows, cols, depth);
+			BoardCreator::updateShipsInBoard(cleanBaseBoard, shipsOfBoard->second);
 			boardsShips.push_back(shipsOfBoard);
 			std::unique_ptr<Board> b0 = std::make_unique<Board>(rows, cols, depth, cleanBaseBoard, NOT_INIT);
 
