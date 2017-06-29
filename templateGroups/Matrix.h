@@ -1,5 +1,11 @@
 #pragma once
 #include <vector>
+#include <iostream>
+#include <memory>
+#include <vector>
+#include <map>
+#include <algorithm>
+using namespace std;
 
 typedef std::vector<int> coordinate;
 typedef std::vector<std::vector<int>> group;
@@ -99,11 +105,9 @@ public:
 	}
 	
 	template<class GROUPFUNC, typename G = T>
-	auto groupValues(GROUPFUNC groupingFunc) {
+	auto groupValues(GROUPFUNC groupFunc) {
 
 		using groupResult = std::result_of_t<GROUPFUNC(G&)>;
-
-		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
 
 		std::vector<int> dimentionsSizesByDimention(NUM_DIMENSIONS, 1);
 
@@ -115,6 +119,23 @@ public:
 			dimentionsSizesByDimention.at(indexDimention) *= dimentionsSizesByDimention.at(indexDimention - 1) * _dimensions[indexDimention];
 		}
 		std::reverse(dimentionsSizesByDimention.begin(), dimentionsSizesByDimention.end());
+
+		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
+		std::vector<coordinate> coordinatesResult;
+
+		for (int index = 0; index < _size; index++) {
+
+			if (mapCoordinateToGroupResult.find(groupFunc(_array[index])) == mapCoordinateToGroupResult.end()) {
+
+				coordinatesResult.push_back(getCoordByLocationInArray(index, dimentionsSizesByDimention);
+				mapCoordinateToGroupResult.insert(groupFunc(_array[index]), coordinatesResult);
+			}
+			else {
+
+				mapCoordinateToGroupResult.at(groupFunc(_array[index])).push_back(getCoordByLocationInArray(index, dimentionsSizesByDimention)
+			}
+			
+		}
 
 		std::map<groupResult, std::vector<group>> allGroups;
 

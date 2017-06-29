@@ -1,9 +1,4 @@
 #include "Matrix.h"
-#include <iostream>
-#include <algorithm>
-#include <memory>
-#include <cstring>
-#include <cassert>
 
 using std::cout;
 using std::endl;
@@ -31,7 +26,7 @@ int main() {
 	auto groups = m.groupValues([](int i) {return i == 1 ? 1 : 0; });
 	print(groups);
 	cout << endl;
-	cout << "***********mat2***********" << endl << endl;s
+	cout << "***********mat2***********" << endl << endl;
 	Matrix2d<char> m1 = { { 'a', 'A','a' },{ 'B','a', 'B' },{ 'B', 'a', 'B' } };
 	auto all_groups = m1.groupValues([](auto i) {return islower(i) ? "L" : "U"; });
 	print(all_groups);
