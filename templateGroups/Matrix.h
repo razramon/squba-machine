@@ -119,7 +119,7 @@ public:
 		std::map<groupResult, std::vector<group>> allGroups;
 
 
-
+		return allGroups;
 	}
 
 };

@@ -27,11 +27,11 @@ void print(const Groups& all_groups) {
 
 int main() {
 	cout << "***********mat1***********" << endl << endl;
-	Matrix2d<int> m = { { 1,2,6 },{ 3,4 },{ 3,4,6 } };
+	Matrix2d<int> m = { { 1,2,6 },{ 3,4 },{ 3,4,6 } }; 
 	auto groups = m.groupValues([](int i) {return i == 1 ? 1 : 0; });
 	print(groups);
 	cout << endl;
-	cout << "***********mat2***********" << endl << endl;
+	cout << "***********mat2***********" << endl << endl;s
 	Matrix2d<char> m1 = { { 'a', 'A','a' },{ 'B','a', 'B' },{ 'B', 'a', 'B' } };
 	auto all_groups = m1.groupValues([](auto i) {return islower(i) ? "L" : "U"; });
 	print(all_groups);
