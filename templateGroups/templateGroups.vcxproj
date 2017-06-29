@@ -147,12 +147,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\Desktop\matrixAmir.cpp" />
-    <ClCompile Include="main2d.cpp" />
-    <ClCompile Include="main3d.cpp" />
-    <ClCompile Include="Matrix2d.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Matrix2d.h" />
+    <ClInclude Include="Matrix.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
