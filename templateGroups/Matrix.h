@@ -1,4 +1,8 @@
 #pragma once
+#include <vector>
+
+typedef std::vector<int> coordinate;
+typedef std::vector<std::vector<int>> group;
 
 template<class T, size_t DIMENSIONS>
 class Matrix;
@@ -39,7 +43,16 @@ class Matrix {
 	const size_t _size = 0;
 	friend class Matrix<T, DIMENSIONS + 1>;
 
+	std::vector<int> getCoordByLocationInArray(int loc, std::vector<int> dimentionsSizesByDimention) {
 
+		coordinate coord(DIMENSIONS);
+
+		for (int indexDimention = 0; indexDimention < DIMENSIONS; indexDimention++) {
+
+			coord.at(indexDimention) = (loc / dimentionsSizesByDimention.at(indexDimention)) % _dimensions[indexDimention];
+		}
+		return coord;
+	}
 
 public:
 	size_t size() const { return _size; }
@@ -84,7 +97,30 @@ public:
 	size_t getDimension(size_t i) const {
 		return _dimensions[i];
 	}
+	
+	template<class GROUPFUNC, typename G = T>
+	auto groupValues(GROUPFUNC groupingFunc) {
 
+		using groupResult = std::result_of_t<GROUPFUNC(G&)>;
+
+		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
+
+		std::vector<int> dimentionsSizesByDimention(NUM_DIMENSIONS, 1);
+
+
+		dimentionsSizesByDimention.at(0) = 1;
+
+		for (int indexDimention = 1; indexDimention < DIMENSIONS; indexDimention++) {
+
+			dimentionsSizesByDimention.at(indexDimention) *= dimentionsSizesByDimention.at(indexDimention - 1) * _dimensions[indexDimention];
+		}
+		std::reverse(dimentionsSizesByDimention.begin(), dimentionsSizesByDimention.end());
+
+		std::map<groupResult, std::vector<group>> allGroups;
+
+
+
+	}
 
 };
 
