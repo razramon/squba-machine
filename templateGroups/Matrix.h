@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 typedef std::vector<int> coordinate;
 typedef std::vector<std::vector<int>> group;
@@ -99,7 +100,7 @@ public:
 	}
 	
 	template<class GROUPFUNC, typename G = T>
-	auto groupValues(GROUPFUNC groupingFunc) {
+	void groupValues(GROUPFUNC groupingFunc) {
 
 		using groupResult = std::result_of_t<GROUPFUNC(G&)>;
 
@@ -115,10 +116,11 @@ public:
 			dimentionsSizesByDimention.at(indexDimention) *= dimentionsSizesByDimention.at(indexDimention - 1) * _dimensions[indexDimention];
 		}
 		std::reverse(dimentionsSizesByDimention.begin(), dimentionsSizesByDimention.end());
-
-		std::map<groupResult, std::vector<group>> allGroups;
-
-
+		for (std::vector<int>::iterator iter = dimentionsSizesByDimention.begin(); iter!= dimentionsSizesByDimention.end(); ++iter)
+		{
+			std::cout << "value is: " << (*iter) << std::endl;
+		}
+		return std::map<groupResult, std::vector<group>> allGroups;
 
 	}
 
