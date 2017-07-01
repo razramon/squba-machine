@@ -49,13 +49,13 @@ int main() {
 	print(groups1);
 	cout << endl;
 
-	cout << "Test 2" << endl << "---------" << endl;
+	cout << "Test 2" << endl << "---------" << endl; //example copied from exercise instructions
 	Matrix2d<char> martix2 = { { 'a', 'A','a' },{ 'B','a', 'B' },{ 'B', 'a', 'B' } };
 	auto groups2 = martix2.groupValues([](char i) {return islower(i) ? "L" : "U"; });
 	print(groups2);
 	cout << endl;
 
-	cout << "Test 3" << endl << "---------" << endl;
+	cout << "Test 3" << endl << "---------" << endl; //example copied from exercise instructions
 	Matrix3d<int> martix3 = { { { 1, 2, 3 },{ 1, 2 },{ 1, 2 } },{ { 1, 2 },{ 1, 2, 3, 4 } } };
 	auto groups3 = martix3.groupValues([](auto i) {return i % 3 ? "!x3" : "x3"; });
 	print(groups3);
@@ -70,7 +70,7 @@ int main() {
 	cout << endl;
 
 	cout << "Test 5" << endl << "---------" << endl;
-	Matrix<int, 4> matrix5(std::move(martix4));
+	Matrix<int, 4> matrix5(std::move(martix4)); //makes sure the move constructor works...
 	auto groups5 = matrix5.groupValues(moduloFive);
 	print(groups5);
 	cout << endl;

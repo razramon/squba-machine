@@ -198,22 +198,27 @@ public:
 		}
 	}
 
-	Matrix(Matrix&& m) {
+	//We added "noexcept" because we assume it will be used only with relevant Matrix type
+	Matrix(Matrix&& m) noexcept {
 		*this = std::move(m);
 	}
 
-	auto& operator=(Matrix&& m) {
+	//We added "noexcept" because we assume it will be used only with relevant Matrix type
+	auto& operator=(Matrix&& m) noexcept {
 		std::swap(_array, m._array);
 		std::swap(const_cast<size_t&>(_size), const_cast<size_t&>(m._size));
 		std::swap(_dimensions, m._dimensions);
 		return *this;
 	}
 
-
 	size_t getDimension(size_t i) const {
 		return _dimensions[i];
 	}
 
+	/*
+	 * Retruns groups of neighbour coordinates that belong to the same group according to groupFunc()
+	 * NOTE: there's a lot of documentation inside this function's code! it only 23 lines of code :)
+	 */
 	template<typename GROUPFUNC, typename G = T>
 	auto groupValues(GROUPFUNC groupFunc) {
 
@@ -226,44 +231,32 @@ public:
 		std::vector<size_t> dimensionsSizesByDimension(NUM_DIMENSIONS, 1); 
 
 		/*
-		 * We'll explain the propose of next 4 lines with an example:
+		 * We'll explain the propose of next 3 lines with an example:
 		 *		suppose we get a matrix of dimensions: 4x3x9x17x5
 		 *		we calculate each dimension's size: note that it depends on the sizes of all next dimensions
 		 *		in our example, the second dimension's ("3") size depends on the sizes of 
 		 *		the 3rd(9), 4th(17) and 5th (5) dimensions: the second dimension size is: 765(=9*17*5).
-		 *		The 4 lines updates dimentionsSizesByDimention to contain (in our example):
+		 *		The 3 lines updates dimentionsSizesByDimention to contain (in our example):
 		 *		dimentionsSizesByDimention = (2295, 459, 27, 3, 1)
 		 */
-		dimensionsSizesByDimension[NUM_DIMENSIONS - 1] = 1;
-
 		for (int indexDimention = NUM_DIMENSIONS - 2 ; indexDimention >= 0; --indexDimention) {
 
 			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention + 1];
 		}
 
-		/*
-		 *	mapCoordinateToGroupResult contains:
-		 *				keys = all "return types" of function groupFunc() that appeared when applying it on the matrix
-		 *				values = a vector containing all coordinates that returned the relevant key when called with groupFunc()
-		 *						(Not divided to groups yet!) 
-		 */
+
 		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
-		std::vector<coordinate> coordinatesResult;
-		 
+		
+		/*
+		*	Updates mapCoordinateToGroupResult to contain:
+		*				keys = all "return types" of function groupFunc() that appeared when applying it on the matrix
+		*				values = a vector containing all coordinates that returned the relevant key when called with groupFunc()
+		*						(Not divided to neighbour groups yet!)
+		*/
 		for (int index = 0; index < _size; index++) {
-			coordinatesResult.clear();
-			if (mapCoordinateToGroupResult.find(groupFunc(_array[index])) == mapCoordinateToGroupResult.end()) {
-				//Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
-				//that didn't appear yet
-				coordinatesResult.push_back(getCoordByLocationInArray(index, dimensionsSizesByDimension));
-				mapCoordinateToGroupResult.insert(std::make_pair(groupFunc(_array[index]), coordinatesResult));
-			}
-			else {
-				//Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
-				//that already exist (as a key) in "mapCoordinateToGroupResult"
-				mapCoordinateToGroupResult[groupFunc(_array[index])].push_back(getCoordByLocationInArray(index, dimensionsSizesByDimension));
-			}
-			
+
+			//Accessing std::map with map[i] - if key i doesn't exist, creates it, so no need to check if key "groupFunc(_array[index])" exists. 
+			mapCoordinateToGroupResult[groupFunc(_array[index])].push_back(getCoordByLocationInArray(index, dimensionsSizesByDimension));
 		}
 
 		std::vector<std::pair<groupResult, std::vector<group>>> allGroups;
