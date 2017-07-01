@@ -41,7 +41,7 @@ std::string moduloFive(int x)
 
 }
 
-// The main was build according to http://moodle.tau.ac.il/mod/forum/discuss.php?d=71564
+// The main was built according to http://moodle.tau.ac.il/mod/forum/discuss.php?d=71564
 int main() {
 	cout << "Test 1" << endl << "---------" << endl;
 	Matrix2d<int> martix1 = { { 1,2,6 },{ 3,4 },{ 3,4,6 } }; 

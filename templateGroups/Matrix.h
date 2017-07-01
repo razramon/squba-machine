@@ -143,12 +143,14 @@ class Matrix {
 	const size_t _size = 0;
 	friend class Matrix<T, NUM_DIMENSIONS + 1>;
 
-	std::vector<int> getCoordByLocationInArray(int loc, std::vector<int> dimentionsSizesByDimention) {
+	std::vector<int> getCoordByLocationInArray(int loc, std::vector<size_t> dimentionsSizesByDimention) {
 
 		coordinate coord(NUM_DIMENSIONS); //creates a vector of size NUM_DIMENSTIONS, that represents current coordinate
 
 		for (int indexDimention = 0; indexDimention < NUM_DIMENSIONS; indexDimention++) {
-			coord.at(indexDimention) = (loc / dimentionsSizesByDimention[indexDimention]) % _dimensions[indexDimention];
+
+			// Cast to int - from size_t
+			coord.at(indexDimention) = (loc / dimentionsSizesByDimention[indexDimention]) % static_cast<int>(_dimensions[indexDimention]);
 		}
 
 		return coord;
@@ -232,7 +234,7 @@ public:
 		 * Creates a vector of size NUM_DIMENSIONS, initialized to 1s.
 		 * Will be used to calculate the location of each coordinate
 		 */
-		std::vector<int> dimensionsSizesByDimension(NUM_DIMENSIONS, 1); 
+		std::vector<size_t> dimensionsSizesByDimension(NUM_DIMENSIONS, 1); 
 
 		/*
 		 * We'll explain the propose of next 4 lines with an example:
@@ -243,9 +245,11 @@ public:
 		 *		The 4 lines updates dimentionsSizesByDimention to contain (in our example):
 		 *		dimentionsSizesByDimention = (2295, 459, 27, 3, 1)
 		 */
-		dimensionsSizesByDimension[NUM_DIMENSIONS-1] = 1;
-		for (int indexDimention = NUM_DIMENSIONS-2 ; indexDimention >= 0; --indexDimention) {
-			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention+1];
+		dimensionsSizesByDimension[NUM_DIMENSIONS - 1] = 1;
+
+		for (int indexDimention = NUM_DIMENSIONS - 2 ; indexDimention >= 0; --indexDimention) {
+
+			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention + 1];
 		}
 
 		/*
