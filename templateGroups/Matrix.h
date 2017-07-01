@@ -25,11 +25,11 @@ static bool areNeighbours(const coordinate& c1,const coordinate& c2, size_t n)
 	int numOfDifferentPositions = 0;
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (c1[i]!=c2[i])
+		if (c1[i] != c2[i])
 		{
 			int temp = c1[i];
 
-			if (temp == c2[i]+1 || temp == c2[i]-1)
+			if (temp == c2[i] + 1 || temp == c2[i]-1)
 			{
 				numOfDifferentPositions++;
 			} else //the two coordinates differ by more than 1 in at least 1 position => they aren't neighbours
@@ -198,11 +198,6 @@ public:
 		}
 	}
 
-	/*
-	 * AMIR"S FUNCTIONS!
-	 */
-
-
 	Matrix(Matrix&& m) {
 		*this = std::move(m);
 	}
@@ -214,12 +209,6 @@ public:
 		return *this;
 	}
 
-	friend std::ostream& operator<<(std::ostream& out, const Matrix& m) {
-		MatrixPrinter<T, DIMENSIONS>::print(m._array.get(), m._size, m._dimensions, out);
-		return out;
-	}
-
-	/*EO AMIR'S FUNCTIONS*/
 
 	size_t getDimension(size_t i) const {
 		return _dimensions[i];

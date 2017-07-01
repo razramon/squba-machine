@@ -44,8 +44,8 @@ std::string moduloFive(int x)
 // The main was built according to http://moodle.tau.ac.il/mod/forum/discuss.php?d=71564
 int main() {
 	cout << "Test 1" << endl << "---------" << endl;
-	Matrix2d<int> martix1 = { { 1,2,6 },{ 3,4 },{ 3,4,6 } }; 
-	auto groups1 = martix1.groupValues([](int i) {return i == 1 ? 1 : 0; });
+	Matrix2d<int> martix1 = { { 4,2, 7 },{ 7,7,7 },{ 1,2,3,4,5,6 } }; 
+	auto groups1 = martix1.groupValues([](int i) {return i == 7 ? 7 : 0; });
 	print(groups1);
 	cout << endl;
 
@@ -64,12 +64,14 @@ int main() {
 	cout << "Test 4" << endl << "---------" << endl;
 	Matrix<int, 4> martix4 = { { { { 11, 25 },{ 0, 2,53 },{ 77, 55 } },{ { 31, 354 },{ 1, 2, 3, 4 } } } ,
 						{ { { 21, 27, 35 },{ 502, 16, 17 },{ 4,5,6 } },{ { 7,8,9 },{ 19,20,21,22 } } } };
+
 	auto groups4 = martix4.groupValues([](auto i) {return i % 5 ? "NOT Multiple of 5" : "Multiple Of 5"; });
 	print(groups4);
 	cout << endl;
 
 	cout << "Test 5" << endl << "---------" << endl;
-	auto groups5 = martix4.groupValues(moduloFive);
+	Matrix<int, 4> matrix5(std::move(martix4));
+	auto groups5 = matrix5.groupValues(moduloFive);
 	print(groups5);
 	cout << endl;
 }
