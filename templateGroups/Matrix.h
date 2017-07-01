@@ -141,6 +141,7 @@ class Matrix {
 		coordinate coord(NUM_DIMENSIONS); //creates a vector of size NUM_DIMENSTIONS, that represents current coordinate
 
 		for (int indexDimention = 0; indexDimention < NUM_DIMENSIONS; indexDimention++) {
+
 			coord.at(indexDimention) = (loc / dimentionsSizesByDimention[indexDimention]) % _dimensions[indexDimention];
 		}
 
@@ -247,11 +248,12 @@ public:
 		 *		To fix it, we reverse the vector s.t dimentionsSizesByDimention = (2295, 459, 27, 3, 1)
 		 *		[after the 5th line, dimentionsSizesByDimention[i] = size of the dimension number i :)]
 		 */
-		dimensionsSizesByDimension[0] = 1;
-		for (int indexDimention = 1; indexDimention < NUM_DIMENSIONS; indexDimention++) {
-			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention - 1] * _dimensions[indexDimention];
+
+		dimensionsSizesByDimension[NUM_DIMENSIONS - 1] = 1;
+		for (int indexDimention = NUM_DIMENSIONS - 2; indexDimention >= 0; --indexDimention) {
+			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention + 1];
 		}
-		std::reverse(dimensionsSizesByDimension.begin(), dimensionsSizesByDimension.end());
+		//std::reverse(dimensionsSizesByDimension.begin(), dimensionsSizesByDimension.end());
 
 		//FOR DEBUG!!!!!
 		std::cout << "##############PRINTING _dimensions: ";
@@ -279,14 +281,14 @@ public:
 		for (auto index = 0; index < _size; index++) {
 
 			if (mapCoordinateToGroupResult.find(groupFunc(_array[index])) == mapCoordinateToGroupResult.end()) {
-				//Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
-				//that didn't appear yet
+				// Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
+				// that didn't appear yet
 				coordinatesResult.push_back(getCoordByLocationInArray(index, dimensionsSizesByDimension));
 				mapCoordinateToGroupResult.insert(std::make_pair(groupFunc(_array[index]), coordinatesResult));
 			}
 			else {
-				//Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
-				//that already exist (as a key) in "mapCoordinateToGroupResult"
+				// Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
+				// that already exist (as a key) in "mapCoordinateToGroupResult"
 				mapCoordinateToGroupResult[groupFunc(_array[index])].push_back(getCoordByLocationInArray(index, dimensionsSizesByDimension));
 			}
 			
