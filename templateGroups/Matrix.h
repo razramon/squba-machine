@@ -144,14 +144,6 @@ class Matrix {
 			coord.at(indexDimention) = (loc / dimentionsSizesByDimention[indexDimention]) % _dimensions[indexDimention];
 		}
 
-
-		//FOR DEBUG!!!!!
-		std::cout << "~~~~~~~~~~~~~PRINTING RETURNED COORDINATE: ";
-		for (auto i = coord.begin(); i != coord.end(); ++i) {
-			std::cout << *i << " ";
-		}
-		std::cout <<" ~~~~~~~~~~~~~~~~~"<< std::endl;
-
 		return coord;
 	}
 
@@ -226,7 +218,7 @@ public:
 
 	template<typename GROUPFUNC, typename G = T>
 	auto groupValues(GROUPFUNC groupFunc) {
-		std::cout << "@@@@@@@@@_array size is: " << _size << "@@@@@@@@@" << std::endl;
+
 		using groupResult = std::result_of_t<GROUPFUNC(G&)>;
 
 		/*
@@ -251,7 +243,7 @@ public:
 
 		//FOR DEBUG!!!!!
 		std::cout << "##############PRINTING _dimensions: ";
-		for (auto i :_dimensions) {
+		for (auto i : _dimensions) {
 			std::cout << i << " ";
 		}
 		std::cout << " ##############" << std::endl;
@@ -262,13 +254,13 @@ public:
 		std::cout << " ##############" << std::endl;
 
 
+
 		/*
 		 *	mapCoordinateToGroupResult contains:
 		 *				keys = all "return types" of function groupFunc() that appeared when applying it on the matrix
 		 *				values = a vector containing all coordinates that returned the relevant key when called with groupFunc()
 		 *						(Not divided to groups yet!) 
 		 */
-
 		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
 		std::vector<coordinate> coordinatesResult;
 		 
@@ -287,24 +279,6 @@ public:
 			}
 			
 		}
-
-
-		/*********FOR DEBUGGING*************/
-		//the bug is somewhere at "for" of line 257
-		/*for (auto iter = mapCoordinateToGroupResult.begin(); iter != mapCoordinateToGroupResult.end(); ++iter)
-		{
-			std::cout << "~~~~~~~~~~~~~~~~~PRINTING VALUE OF: " << (*iter).first << "~~~~~~~~~~~~~~~~~" << std::endl;
-			for (coordinate c: (*iter).second)
-			{
-				for (auto i = c.begin(); i != c.end(); ++i) {
-					std::cout << *i << " ";
-				}
-				std::cout << std::endl;
-			}
-
-		}*/
-
-		/************END OF GOR DEBUG************/
 
 		std::vector<std::pair<groupResult, std::vector<group>>> allGroups;
 
