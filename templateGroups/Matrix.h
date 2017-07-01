@@ -77,14 +77,19 @@ static void insertNeighboursToGroup(std::vector<coordinate>& groupy, std::vector
  */
 static std::vector<group> buildNeighbourGroups(std::vector<coordinate>& allCoords, size_t n)
 {
+
 	std::vector<group> allGroups;
+
 	while (allCoords.size() != 0) {
+
 		std::vector<coordinate> currentGroup;
 		currentGroup.push_back(allCoords[0]);
 		allCoords.erase(allCoords.begin());
 
 		size_t c = 0;
+
 		while (c < currentGroup.size()) {
+
 			insertNeighboursToGroup(currentGroup, allCoords, currentGroup[c], n);
 			++c;
 		}
@@ -92,6 +97,7 @@ static std::vector<group> buildNeighbourGroups(std::vector<coordinate>& allCoord
 		allGroups.push_back(currentGroup);
 
 	}
+	
 	return allGroups;
 }
 
@@ -202,21 +208,21 @@ public:
 	 */
 
 
-	//Matrix(Matrix&& m) {
-	//	*this = std::move(m);
-	//}
+	Matrix(Matrix&& m) {
+		*this = std::move(m);
+	}
 
-	//auto& operator=(Matrix&& m) {
-	//	std::swap(_array, m._array);
-	//	std::swap(const_cast<size_t&>(_size), const_cast<size_t&>(m._size));
-	//	std::swap(_dimensions, m._dimensions);
-	//	return *this;
-	//}
+	auto& operator=(Matrix&& m) {
+		std::swap(_array, m._array);
+		std::swap(const_cast<size_t&>(_size), const_cast<size_t&>(m._size));
+		std::swap(_dimensions, m._dimensions);
+		return *this;
+	}
 
-	//friend std::ostream& operator<<(std::ostream& out, const Matrix& m) {
-	//	MatrixPrinter<T, DIMENSIONS>::print(m._array.get(), m._size, m._dimensions, out);
-	//	return out;
-	//}
+	friend std::ostream& operator<<(std::ostream& out, const Matrix& m) {
+		MatrixPrinter<T, DIMENSIONS>::print(m._array.get(), m._size, m._dimensions, out);
+		return out;
+	}
 
 	/*EO AMIR'S FUNCTIONS*/
 
@@ -311,12 +317,20 @@ public:
 		//build allGroups:
 		for (typename std::map<groupResult, std::vector<coordinate>>::iterator iter = mapCoordinateToGroupResult.begin(); iter!= mapCoordinateToGroupResult.end(); ++iter)
 		{
-			allGroups.push_back(std::make_pair(iter->first, buildNeighbourGroups(iter->second, NUM_DIMENSIONS) ));
+
+			std::vector<group > groupOfResult = buildNeighbourGroups(iter->second, NUM_DIMENSIONS);
+
+			// Sorting the coordinates in the group before inserting
+			for (int indexGroup = 0; indexGroup < groupOfResult.size(); indexGroup++) {
+
+				sort(groupOfResult[indexGroup].begin(), groupOfResult[indexGroup].end());
+			}
+
+			allGroups.push_back(std::make_pair(iter->first, groupOfResult));
 		}
 
 		return allGroups;
 	}
-
 };
 
 
