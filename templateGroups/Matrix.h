@@ -242,16 +242,12 @@ public:
 		 *		in our example, the second dimension's ("3") size depends on the sizes of 
 		 *		the 3rd(9), 4th(17) and 5th (5) dimensions: the second dimension size is: 765(=9*17*5).
 		 *		The 4 lines updates dimentionsSizesByDimention to contain (in our example):
-		 *		dimentionsSizesByDimention = (1, 3, 27, 459, 2295)
-		 *		So it contain the sizes - BUT: dimentionsSizesByDimention[i] = size of the dimension number (NUM_DIMENSIONS-i)
-		 *		To fix it, we reverse the vector s.t dimentionsSizesByDimention = (2295, 459, 27, 3, 1)
-		 *		[after the 5th line, dimentionsSizesByDimention[i] = size of the dimension number i :)]
+		 *		dimentionsSizesByDimention = (2295, 459, 27, 3, 1)
 		 */
-		dimensionsSizesByDimension[0] = 1;
-		for (int indexDimention = 1; indexDimention < NUM_DIMENSIONS; indexDimention++) {
-			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention - 1] * _dimensions[indexDimention];
+		dimensionsSizesByDimension[NUM_DIMENSIONS-1] = 1;
+		for (int indexDimention = NUM_DIMENSIONS-2 ; indexDimention >= 0; --indexDimention) {
+			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention+1];
 		}
-		std::reverse(dimensionsSizesByDimension.begin(), dimensionsSizesByDimension.end());
 
 		//FOR DEBUG!!!!!
 		std::cout << "##############PRINTING _dimensions: ";
