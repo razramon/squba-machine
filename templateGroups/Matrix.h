@@ -272,8 +272,8 @@ public:
 		std::map<groupResult, std::vector<coordinate>> mapCoordinateToGroupResult;
 		std::vector<coordinate> coordinatesResult;
 		 
-		for (auto index = 0; index < _size; index++) {
-
+		for (int index = 0; index < _size; index++) {
+			coordinatesResult.clear();
 			if (mapCoordinateToGroupResult.find(groupFunc(_array[index])) == mapCoordinateToGroupResult.end()) {
 				//Case where the function "groupFunc()" on current coordinate(_array[index]) returned a value 
 				//that didn't appear yet

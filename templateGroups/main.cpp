@@ -15,7 +15,7 @@ void print(const Groups& all_groups) {
 				}
 				std::cout << "} ";
 			}
-			std::cout << std::endl;
+			std::cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" <<std::endl;
 		}
 	}
 }
