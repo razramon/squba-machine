@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -246,20 +247,6 @@ public:
 		for (int indexDimention = NUM_DIMENSIONS-2 ; indexDimention >= 0; --indexDimention) {
 			dimensionsSizesByDimension[indexDimention] *= dimensionsSizesByDimension[indexDimention + 1] * _dimensions[indexDimention+1];
 		}
-
-		//FOR DEBUG!!!!!
-		std::cout << "##############PRINTING _dimensions: ";
-		for (auto i : _dimensions) {
-			std::cout << i << " ";
-		}
-		std::cout << " ##############" << std::endl;
-		std::cout << "##############PRINTING dimensionsSizesByDimension: ";
-		for (auto i = dimensionsSizesByDimension.begin(); i != dimensionsSizesByDimension.end(); ++i) {
-			std::cout << *i << " ";
-		}
-		std::cout << " ##############" << std::endl;
-
-
 
 		/*
 		 *	mapCoordinateToGroupResult contains:
